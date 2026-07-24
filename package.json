@@ -1,0 +1,27 @@
+{
+  "name": "fairterms",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Verified human backing plus onchain context earns a rate lock now and a Hedera-scheduled settlement later; anonymous bots prepay per query over x402.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:gateway": "npm run dev -w @fairterms/gateway",
+    "dev:web": "npm run dev -w @fairterms/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint:lexicon": "node scripts/lexicon-check.mjs"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

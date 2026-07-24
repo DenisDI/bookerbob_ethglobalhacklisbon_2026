@@ -1,21 +1,11 @@
 # Pre-event research + local secrets — ignore everything listed below.
 # Scratch app code will live outside these ignores when the build clock opens.
 
-# --- all research / plan files (specs/) ---
-specs/
-specs/**
-
-# explicit list (same tree; kept for clarity)
-specs/ARCHITECTURE-EXEC.md
-specs/BATTLETEST-FINDINGS.md
-specs/CUT-ORDER.md
-specs/DEMO-IMPROVEMENTS.md
-specs/FINAL-PLAN.md
-specs/GOAL-ethglobal-gateway-research.md
-specs/KEYS.md
-specs/PRIZES-lisbon2026.md
-specs/fairterms-infra.html
-specs/hackathon-architecture.md
+# --- archived pre-event research (not part of the submission specs) ---
+# Supersedes the earlier per-file list: those files now live under specs/research/.
+# The submission specs (00-final-plan, 01-03, CUT-ORDER, DEMO-IMPROVEMENTS, KEYS)
+# stay tracked — 00-final-plan §F MUST 12 requires them in the repo.
+specs/research/
 
 # --- secrets & env ---
 .env
