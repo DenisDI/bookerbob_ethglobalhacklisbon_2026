@@ -1,0 +1,43 @@
+# Pre-event research + local secrets — ignore everything listed below.
+# Scratch app code will live outside these ignores when the build clock opens.
+
+# --- all research / plan files (specs/) ---
+specs/
+specs/**
+
+# explicit list (same tree; kept for clarity)
+specs/ARCHITECTURE-EXEC.md
+specs/BATTLETEST-FINDINGS.md
+specs/CUT-ORDER.md
+specs/DEMO-IMPROVEMENTS.md
+specs/FINAL-PLAN.md
+specs/GOAL-ethglobal-gateway-research.md
+specs/KEYS.md
+specs/PRIZES-lisbon2026.md
+specs/fairterms-infra.html
+specs/hackathon-architecture.md
+
+# --- secrets & env ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# --- deps & build ---
+node_modules/
+dist/
+build/
+.turbo/
+.next/
+coverage/
+*.log
+.DS_Store
+
+# --- local tooling ---
+.vscode/
+.idea/
+*.swp
+.cursor/
