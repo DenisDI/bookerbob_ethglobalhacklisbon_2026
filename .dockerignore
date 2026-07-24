@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+**/dist
+.git
+.cursor
+.env
+.env.*
+!.env.example
+specs/research
+*.log
+.DS_Store
+coverage
+.turbo

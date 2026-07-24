@@ -1,6 +1,9 @@
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 // Skeleton only. Route surface per specs/01-gateway.md:
 //   GET  /offers?city=&address=   identity -> context -> terms -> inventory
@@ -22,10 +25,25 @@ app.get("/health", (c) =>
   }),
 );
 
-const port = Number(process.env.GATEWAY_PORT ?? 3000);
+const staticDir = process.env.STATIC_DIR ?? join(process.cwd(), "../web/dist");
+if (existsSync(staticDir)) {
+  app.use(
+    "*",
+    serveStatic({
+      root: staticDir,
+      rewriteRequestPath: (path) => (path === "/" ? "/index.html" : path),
+    }),
+  );
+  app.get("*", serveStatic({ path: "index.html", root: staticDir }));
+} else {
+  console.warn(`STATIC_DIR missing (${staticDir}); API-only mode`);
+}
 
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`gateway listening on http://localhost:${info.port}`);
+const port = Number(process.env.GATEWAY_PORT ?? 3000);
+const hostname = process.env.GATEWAY_HOST ?? "0.0.0.0";
+
+serve({ fetch: app.fetch, port, hostname }, (info) => {
+  console.log(`gateway listening on http://${hostname}:${info.port}`);
 });
 
 export { app };

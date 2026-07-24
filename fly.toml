@@ -1,0 +1,30 @@
+# FairTerms — ETHGlobal Lisbon 2026
+# App: fairterms-lisbon → https://lisbonhack.world
+#
+# Deploy: fly deploy
+# Auto: .github/workflows/deploy.yml on push to main
+
+app = "fairterms-lisbon"
+primary_region = "ams"
+
+[build]
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
