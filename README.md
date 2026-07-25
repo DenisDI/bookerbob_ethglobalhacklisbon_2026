@@ -16,12 +16,14 @@ underwriting.
 
 ## How it works
 
-1. Agent hits `/offers`. No credential: x402 paywall, pay per query (Base Sepolia
-   USDC, gasless). AgentKit credential: verified against the AgentBook on World
-   Chain, paywall waived (per-humanId quota as sybil-resistant rate limiting).
-2. Consented wallet address (`?address=` / Privy) goes to `context-bands-mcp`:
-   Messari standardized subgraphs on The Graph → coarse bands (T1..T4), never raw
-   values.
+1. Agent hits `/offers`. No credential: x402 paywall, pay per query (Hedera
+   testnet HBAR via Blocky402). AgentKit credential: verified against the
+   AgentBook on World Chain, paywall waived (per-humanId quota as sybil-resistant
+   rate limiting).
+2. Consented wallet address (`?address=`) goes to `context-bands-mcp`. Typing is
+   consent; a Privy `Authorization: Bearer` access token makes ownership a
+   verified server fact when it matches a linked wallet. Graph returns coarse
+   bands (T1..T4), never raw values.
 3. Terms engine maps credential + bands to underwriting terms (who carries risk).
 4. Inventory locks a real rate. For pay-later tiers, `@bookerbob/hedera-schedule`
    creates a Hedera testnet Scheduled Transaction; HashScan opens from the finale
@@ -42,6 +44,17 @@ npm run test:scenarios:learn                 # append novel fails to catalog
 
 See `packages/hedera-schedule/README.md`. Routes: `POST /prebook`, `POST /book`.
 Catalog: `scripts/scenarios/catalog.json`.
+
+### x402 bot metering (Hedera testnet)
+
+Anonymous `GET /offers` returns 402 unless a PAYMENT-SIGNATURE clears the wall
+(0.01 HBAR, `hedera:testnet`, facilitator Blocky402). The race UI uses
+`POST /x402/paid-offers` (demo payer = Hedera operator keys). Needs
+`LISBON2026_X402_PAYTO_ACCOUNT` + funded `LISBON2026_HEDERA_*` (see `.env.example`).
+
+```bash
+npm run bot:x402                             # pay + read /offers + /spent
+```
 
 ## How the terms are decided
 

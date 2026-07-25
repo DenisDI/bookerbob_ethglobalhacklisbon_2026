@@ -1,8 +1,10 @@
 // GET /offers — the main path: identity -> context -> terms -> inventory.
 //
 // Product axes (separate):
-//   ?credential=1|0  → hasCredential (World AgentKit/Selfie will own this)
-//   ?address=        → Graph context bands (Privy / typed consent)
+//   ?credential=1|0     → hasCredential (World AgentKit/Selfie will own this)
+//   ?address=           → Graph context bands (typed consent; anyone may type)
+//   Authorization Bearer → Privy access token; binds address to "mine" when it
+//                          matches a linked wallet. Without it, address stays typed.
 // Debug only:
 //   ?tier=bot|human|verified|elite → synthesises SIGNALS; real address overrides context
 
@@ -16,6 +18,11 @@ import {
   narrateSearch,
   narrateTerms,
 } from "../narration.js";
+import {
+  contextAddress,
+  publicWallet,
+  resolveWalletConsent,
+} from "../privy.js";
 import { scheduleForHold } from "../settlement.js";
 import { type Credential, getCredential, publicCredential } from "../world.js";
 import {
@@ -39,7 +46,7 @@ function parseCredential(raw: string | undefined): boolean | null {
 export async function offersHandler(c: Context) {
   const city = c.req.query("city")?.trim() || demo.city;
   const debugTier = c.req.query("tier")?.trim();
-  const address = c.req.query("address")?.trim();
+  const requestedAddress = c.req.query("address")?.trim();
   const credentialFlag = parseCredential(c.req.query("credential") ?? undefined);
 
   // Only a verified AgentKit header may say "world". The browser flag and the
@@ -56,6 +63,13 @@ export async function offersHandler(c: Context) {
       : credentialFlag === true
         ? { status: "stand_in" }
         : presented;
+
+  // Privy Bearer → ownership. Typed ?address= without a matching token stays typed.
+  const wallet = await resolveWalletConsent(
+    c.req.header("authorization"),
+    requestedAddress,
+  );
+  const address = contextAddress(requestedAddress, wallet);
 
   // Debug tier = canned signals for tests. Product path = credential + address.
   // Real address always overrides synthetic context below.
@@ -100,6 +114,11 @@ export async function offersHandler(c: Context) {
     let scheduleId: string | null = null;
     narrateSearch(narrator, city, result);
     narrateTerms(narrator, terms, offers.length, signals.context, lookupFailed);
+    if (wallet.status === "verified") {
+      narrator.say("wallet ownership checked — this address is theirs");
+    } else if (wallet.status === "typed") {
+      narrator.say("address was typed in, not proven owned");
+    }
     narrateHold(narrator, hold);
 
     if (hold && earnsRateLock(terms)) {
@@ -119,6 +138,8 @@ export async function offersHandler(c: Context) {
       // One function owns what a credential looks like on the wire, so no route
       // can leak a humanId or a rejection reason by spreading the object.
       credential: publicCredential(credential),
+      // Same honesty rule for the wallet axis: verified only after Privy check.
+      wallet: publicWallet(wallet),
       city: result.city,
       checkin: result.checkin,
       checkout: result.checkout,

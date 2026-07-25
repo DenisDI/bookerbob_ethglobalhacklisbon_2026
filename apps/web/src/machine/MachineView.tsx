@@ -48,10 +48,16 @@ interface Props {
   onRun(): void;
 }
 
-/** The request line as it actually went out, query and all. */
+/** The request line as it actually went out. Bot race uses the paid proxy. */
 function requestLine(city: string, address: string, credentialed: boolean): string {
+  if (!credentialed) {
+    const body: Record<string, string> = {};
+    if (city.trim()) body.city = city.trim();
+    if (address.trim()) body.address = address.trim();
+    return `POST /x402/paid-offers  ${JSON.stringify(body)}`;
+  }
   const params = new URLSearchParams();
-  params.set("credential", credentialed ? "1" : "0");
+  params.set("credential", "1");
   if (address.trim()) params.set("address", address.trim());
   if (city.trim()) params.set("city", city.trim());
   return `GET /offers?${params}`;
@@ -326,7 +332,7 @@ export function MachineView({
             provenance="live"
             accountable={false}
           >
-            <Wire>{requestLine(city, address, false)}</Wire>
+            <Wire>{requestLine(city, address, accountable)}</Wire>
             <Fields
               rows={[
                 { k: "city", v: city.trim() || "none", d: "forwarded to the supplier" },
@@ -335,8 +341,20 @@ export function MachineView({
                   v: address.trim() || "none",
                   d: "consented, read for context",
                 },
-                { k: "credential", v: "none", d: "nothing presented on first contact" },
-                { k: "payment", v: "none", d: "no payload attached yet" },
+                {
+                  k: "credential",
+                  v: accountable ? "presented" : "none",
+                  d: accountable
+                    ? "stand-in or AgentKit header"
+                    : "nothing presented — metered path",
+                },
+                {
+                  k: "payment",
+                  v: accountable ? "waived" : "x402 via paid-offers",
+                  d: accountable
+                    ? "credential skips the wall"
+                    : "demo Hedera account settles 0.01 HBAR",
+                },
               ]}
             />
           </Frame>
@@ -346,7 +364,7 @@ export function MachineView({
             direction="in"
             title="PAYMENT REQUIRED"
             status="402"
-            provenance="declared"
+            provenance={path === "bot" && lane.status === "done" ? "live" : "declared"}
             partner="x402"
           >
             <p className="frame__note">
@@ -398,11 +416,26 @@ export function MachineView({
               step="03"
               direction="out"
               title="PAYMENT SETTLED"
-              provenance="declared"
+              provenance={lane.status === "done" ? "live" : "declared"}
               partner="x402"
             >
-              <Wire>X-PAYMENT: {"<base64 authorisation>"}</Wire>
-              <Fields rows={X402_PAYMENT} />
+              <Wire>
+                POST /x402/paid-offers → gateway demo wallet + facilitator
+              </Wire>
+              <Fields
+                rows={[
+                  ...X402_PAYMENT,
+                  {
+                    k: "spentUsd",
+                    v:
+                      lane.spentUsd > 0
+                        ? `$${lane.spentUsd.toFixed(2)}`
+                        : "ledger unset / soft local",
+                    d: "x-bookerbob-spent-usd from the gateway",
+                    accent: lane.spentUsd > 0,
+                  },
+                ]}
+              />
               <p className="frame__note">
                 a cent, and then the same cent again on the next question. nobody
                 is answerable, so the money is the only thing standing behind the

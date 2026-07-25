@@ -109,11 +109,17 @@ function contextStep(props: Props): Part {
 
   if (backed.data?.context) {
     const since = backed.data.context.since;
+    const mine = backed.data.wallet?.status === "verified";
+    const whoLabel = named || "this wallet";
     return {
       ...base,
       line: since
-        ? `read ${named || "this wallet"}, active since ${since}`
-        : `read ${named || "this wallet"} as bands`,
+        ? mine
+          ? `their wallet ${whoLabel}, active since ${since}`
+          : `read ${whoLabel}, active since ${since}`
+        : mine
+          ? `their wallet ${whoLabel}, read as bands`
+          : `read ${whoLabel} as bands`,
       state: "done",
     };
   }

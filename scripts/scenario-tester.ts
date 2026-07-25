@@ -250,6 +250,30 @@ async function runOffers(c: Case): Promise<Result> {
   );
   const b = body as OffersBody;
   const errors: string[] = [];
+
+  // Bot path with live x402: bare GET /offers without payment is 402 — that is
+  // the wall working. Credentialed cases must still be 200.
+  const wantsBot =
+    (c.query?.credential === "0" || c.query?.credential === undefined) &&
+    c.expect.credentialStatus === "missing";
+  if (status === 402 && wantsBot) {
+    return {
+      id: c.id,
+      ok: true,
+      errors: [],
+      observed: {
+        http: 402,
+        note: "x402 payment required (paywall live)",
+        tier: "bot",
+        payment: "prepay_100",
+        credentialStatus: "missing",
+        hasContext: false,
+        hold: false,
+        schedulePresent: false,
+      },
+    };
+  }
+
   if (status !== 200) errors.push(`HTTP ${status}`);
   errors.push(...checkOffersExpect(c, b));
   const { hard, soft } = soften(errors);

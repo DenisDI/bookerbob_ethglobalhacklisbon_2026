@@ -1,8 +1,7 @@
 // What this agent paid just to be allowed to ask.
 //
-// The number is derived from the number of metered queries, one cent each,
-// because the x402 paywall is not wired yet. When it lands this reads the
-// gateway's own tally instead of counting locally.
+// Bot lane: gateway x402 ledger (Hedera testnet HBAR) via /x402/paid-offers.
+// Display stays $0.01 units (one query = 0.01 HBAR). Backed lane: $0.
 //
 // The design asks for creeping third and fourth decimals, incrementing every
 // 140ms, and adds "cap the creep so they never roll to $0.15 mid-shot". That is

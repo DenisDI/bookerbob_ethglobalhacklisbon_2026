@@ -5,16 +5,26 @@ import { cors } from "hono/cors";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { env } from "./env.js";
+import { privyConfigured } from "./privy.js";
 import { bookHandler } from "./routes/book.js";
 import { offersHandler } from "./routes/offers.js";
+import { paidOffersHandler } from "./routes/paidOffers.js";
 import { prebookHandler } from "./routes/prebook.js";
+import { spentHandler } from "./routes/spent.js";
 import { publicOrigin } from "./public-url.js";
 import { credentialMiddleware, verifierFromEnv } from "./world.js";
 import { worldChainStatus, worldRpcUrl } from "./world-chain.js";
+import {
+  demoPayerAddress,
+  meteringMiddleware,
+  x402Configured,
+  x402Meta,
+} from "./x402.js";
 
 // Route surface per specs/01-gateway.md:
-//   GET  /offers?city=&address=   identity -> Graph context -> terms -> inventory
-//                                 (+ Hedera schedule when earnsRateLock)
+//   GET  /offers?city=&address=   identity -> (x402 Hedera if bot) -> Graph -> terms
+//                                 (+ Authorization: Bearer Privy access token)
+//   POST /x402/paid-offers        race bot: demo Hedera pays HBAR, then offers
 //   POST /prebook                 Hedera ScheduleCreate for an existing hold
 //   POST /book                    schedule executes (checkout settlement)
 //   GET  /spent                   per-payer x402 totals for the UI counters
@@ -31,8 +41,11 @@ app.use("*", cors());
 // uses rather than a second instance that could disagree with it.
 const verifier = verifierFromEnv();
 app.use("*", credentialMiddleware(verifier));
+app.use("*", meteringMiddleware());
 
 app.get("/offers", offersHandler);
+app.post("/x402/paid-offers", paidOffersHandler);
+app.get("/spent", spentHandler);
 app.post("/prebook", prebookHandler);
 app.post("/book", bookHandler);
 
@@ -49,11 +62,18 @@ app.get("/health", (c) =>
     uptimeSeconds: Math.round(process.uptime()),
     inventorySource: env.inventorySource,
     credentialVerifier: verifier.kind,
+    privyWalletVerify: privyConfigured(),
     resource: `${publicOrigin(c)}/offers`,
     // Cached and refreshed off the request path, so this never delays the check
     // Fly polls. null means the first probe has not answered yet.
     worldChain: worldChainStatus(),
     worldRpc: worldRpcUrl(),
+    x402: {
+      configured: x402Configured(),
+      network: x402Meta.network,
+      price: x402Meta.price,
+      demoPayer: demoPayerAddress(),
+    },
   }),
 );
 

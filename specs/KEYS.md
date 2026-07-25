@@ -177,7 +177,12 @@ Disclose in README as external deployed API.
 | App ID (web) | `VITE_LISBON2026_PRIVY_APP_ID` | https://dashboard.privy.io → App settings |
 | App ID (server) | `LISBON2026_PRIVY_APP_ID` | same value as above |
 | App secret | `LISBON2026_PRIVY_APP_SECRET` | Dashboard → App settings (server only) |
-| JWKS URL | `LISBON2026_PRIVY_JWKS_URL` | `https://auth.privy.io/api/v1/apps/<APP_ID>/jwks.json` |
+| JWKS URL | `LISBON2026_PRIVY_JWKS_URL` | `https://auth.privy.io/api/v1/apps/<APP_ID>/jwks.json` (optional; derived from app ID) |
+| JWT verification key | `LISBON2026_PRIVY_JWT_VERIFICATION_KEY` | optional PEM instead of JWKS fetch |
+
+Flow: web sends `Authorization: Bearer <getAccessToken()>`. Gateway verifies the
+JWT, loads linked wallets via Privy API, and marks `wallet.status: verified`
+only when `?address=` matches. Typing alone stays `typed`.
 
 Allowed origins in Privy Dashboard: `http://localhost:5173`, `https://lisbonhack.world`.
 

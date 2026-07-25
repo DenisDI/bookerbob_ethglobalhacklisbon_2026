@@ -79,6 +79,16 @@ export const env = {
     const v = str("LISBON2026_INVENTORY_SOURCE", "auto");
     return v === "live" || v === "cached" ? v : "auto";
   })() as "auto" | "live" | "cached",
+
+  /**
+   * Privy server verify for "this is my wallet". App ID + secret required to
+   * look up linked wallets after JWT check. JWKS URL defaults from app ID;
+   * optional PEM verification key skips the JWKS fetch.
+   */
+  privyAppId: str("LISBON2026_PRIVY_APP_ID"),
+  privyAppSecret: str("LISBON2026_PRIVY_APP_SECRET"),
+  privyJwksUrl: str("LISBON2026_PRIVY_JWKS_URL"),
+  privyJwtVerificationKey: str("LISBON2026_PRIVY_JWT_VERIFICATION_KEY"),
 };
 
 export const hasBookerCredentials = () => env.bookerToken.length > 0;

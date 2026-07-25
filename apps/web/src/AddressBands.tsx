@@ -1,8 +1,10 @@
 // Where a judge takes over. Type an address or a name, or click a pinned one.
 //
 // A text field rather than a wallet connect, on purpose: connecting a wallet on
-// stage fails often and proves nothing extra, while typing works from any
-// laptop, including the judge's own. Consent is the act of typing.
+// stage fails often, while typing works from any laptop, including the judge's
+// own. Consent is the act of typing. Privy connect strengthens that story: the
+// access token is checked on the gateway, and then "this is my wallet" is a
+// verified fact rather than a typed claim.
 
 import { useState } from "react";
 

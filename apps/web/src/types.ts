@@ -81,6 +81,14 @@ export interface OffersResponse {
     status: "missing" | "stand_in" | "verified";
     source?: CredentialSource;
   };
+  /**
+   * Wallet ownership axis (Privy). `typed` = ?address= alone; `verified` only
+   * after the gateway checked a Bearer access token against linked wallets.
+   */
+  wallet?: {
+    status: "missing" | "typed" | "verified";
+    address?: string;
+  };
   /** Hedera HashScan schedule URL when pay-later / pay-at-checkout. */
   scheduleUrl: string | null;
   scheduleId: string | null;

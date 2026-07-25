@@ -6,7 +6,7 @@
 ## Packages (pin exactly)
 
 ```
-@x402/hono@2.19.0  @x402/evm@2.19.0  @x402/core@2.19.0  @x402/paywall@2.19.0
+@x402/hono@2.19.0  @x402/hedera@2.19.0  @x402/core@2.19.0  @x402/fetch@2.19.0
 @worldcoin/agentkit@0.2.0  @worldcoin/agentkit-core@0.2.0
 @hashgraph/sdk (latest)  hono  viem  zod  tsx
 ```
@@ -70,19 +70,28 @@ Anti-farming framing: per-humanId quota is sybil-resistant rate limiting, not a 
 
 ## x402 paywall (bot metering)
 
-```ts
-import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+Hedera testnet only (`hedera:testnet`), 0.01 HBAR per anonymous query. Pattern from
+`matevszm/x402-hedera-example` — server holds no settle key; Blocky402 is fee-payer.
 
-const facilitator = new HTTPFacilitatorClient({ url: "https://x402.org/facilitator" });
+```ts
+import { paymentMiddleware } from "@x402/hono";
+import { ExactHederaScheme } from "@x402/hedera/exact/server";
+import { HTTPFacilitatorClient, x402ResourceServer } from "@x402/core/server";
+
+const facilitator = new HTTPFacilitatorClient({
+  url: "https://api.testnet.blocky402.com",
+});
 const server = new x402ResourceServer(facilitator)
-  .register("eip155:84532", new ExactEvmScheme());   // Base Sepolia
+  .register("hedera:*", new ExactHederaScheme());
 
 app.use(paymentMiddleware({
   "GET /offers": {
-    accepts: [{ scheme: "exact", price: "$0.01",
-                network: "eip155:84532", payTo: process.env.LISBON2026_PAYTO_ADDRESS }],
+    accepts: {
+      scheme: "exact",
+      price: { amount: "1000000", asset: "0.0.0" }, // 0.01 HBAR
+      network: "hedera:testnet",
+      payTo: process.env.LISBON2026_X402_PAYTO_ACCOUNT,
+    },
     description: "hotel offers", mimeType: "application/json",
   },
 }, server));
@@ -90,11 +99,9 @@ app.use(paymentMiddleware({
 
 - Runs AFTER the AgentKit middleware (human tier skips it).
 - Track per-payer spent totals in memory -> `GET /spent` for the UI counters.
-- Demo payer: script with `@x402/fetch` + viem key funded at faucet.circle.com
-  (Base Sepolia USDC, gasless via EIP-3009).
-- Optional Hedera settle (cuttable, kills 10:00/14:00/16:00 per CUT-ORDER): second
-  accepts entry `network: "hedera:testnet"` + scheme from `@x402/hedera`.
-  payTo 0.0.x must ASSOCIATE testnet USDC first.
+- Demo payer: `LISBON2026_HEDERA_ACCOUNT_ID` + `_PRIVATE_KEY` via `@x402/fetch`
+  + `@x402/hedera` (`npm run bot:x402` / `POST /x402/paid-offers`).
+- `payTo` is a Hedera account id (`0.0.x`), not an EVM address.
 
 ## Terms engine (NO discounts, enums only)
 
@@ -156,12 +163,11 @@ Delivered with the /offers response (and SSE if cheap). Degrades to static capti
 ## .env (never committed; .env.example committed)
 
 ```
-LISBON2026_PAYTO_ADDRESS=            # x402 receiver (fresh EVM)
-LISBON2026_DEMO_PAYER_KEY=           # bot wallet, Circle-faucet funded
+LISBON2026_X402_PAYTO_ACCOUNT=       # x402 receiver (Hedera 0.0.x)
 LISBON2026_AGENT_PRIVATE_KEY=        # AgentBook-registered agent wallet
 LISBON2026_GRAPH_USDC_KEY=           # Base MAINNET wallet, $2-5 USDC (Graph x402)
 LISBON2026_GRAPH_API_KEY=            # Studio backup only
 LISBON2026_BOOKER_TOKEN=
-LISBON2026_HEDERA_ACCOUNT_ID= LISBON2026_HEDERA_PRIVATE_KEY=
+LISBON2026_HEDERA_ACCOUNT_ID= LISBON2026_HEDERA_PRIVATE_KEY=  # schedule + x402 payer
 LISBON2026_WORLD_APP_ID= LISBON2026_WORLD_RP_ID= LISBON2026_WORLD_SIGNING_KEY=
 ```

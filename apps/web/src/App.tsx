@@ -45,9 +45,22 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-/** When Privy connects, fill the Graph context address field. */
-function PrivyAddressBridge({ onAddress }: { onAddress: (a: string) => void }) {
-  const { address, authenticated } = useConsentedWallet();
+/**
+ * Privy session bridge: fill the address field on connect, and expose
+ * getAccessToken so /offers can prove ownership server-side.
+ */
+function PrivySessionBridge({
+  onAddress,
+  accessTokenRef,
+}: {
+  onAddress: (a: string) => void;
+  accessTokenRef: React.MutableRefObject<() => Promise<string | null>>;
+}) {
+  const { address, authenticated, getAccessToken } = useConsentedWallet();
+  accessTokenRef.current = async () => {
+    if (!authenticated) return null;
+    return getAccessToken();
+  };
   useEffect(() => {
     if (authenticated && address) onAddress(address);
   }, [authenticated, address, onAddress]);
@@ -100,6 +113,7 @@ export function App() {
   }, [backed.data, asked]);
   const reducedMotion = usePrefersReducedMotion();
   const running = bot.status === "working" || backed.status === "working";
+  const accessTokenRef = useRef<() => Promise<string | null>>(async () => null);
 
   // The one room both lanes were quoted. Marked in both lists so the comparison
   // is traceable on a single line: same room, same rate, different term.
@@ -111,33 +125,46 @@ export function App() {
   const run = useCallback(
     async (overrideAddress?: string) => {
       const consented = overrideAddress ?? address;
-      const start = (
-        set: React.Dispatch<React.SetStateAction<PaneState>>,
-        charge: boolean,
-      ) =>
+      const start = (set: React.Dispatch<React.SetStateAction<PaneState>>) =>
         set((prev) => ({
           status: "working",
           data: null,
           error: null,
-          spentUsd: charge ? prev.spentUsd + QUERY_PRICE_USD : prev.spentUsd,
+          spentUsd: prev.spentUsd,
         }));
 
-      start(setBot, true);
-      start(setBacked, false);
+      start(setBot);
+      start(setBacked);
 
       const settle = async (
         set: React.Dispatch<React.SetStateAction<PaneState>>,
-        opts: { credential: boolean; address?: string },
+        opts: {
+          credential: boolean;
+          address?: string;
+          accessToken?: string | null;
+        },
       ) => {
         try {
-          // No debugTier — final tier comes only from decide() + live Graph.
-          // Both lanes get the same city: one prompt is the whole premise.
+          // Bot lane settles Hedera x402 via /x402/paid-offers; spentUsd comes
+          // from the gateway ledger header, not a client-side fake increment.
           const data = await fetchOffers({
             credential: opts.credential,
             address: opts.address,
             city: city.trim() || undefined,
+            accessToken: opts.accessToken,
           });
-          set((prev) => ({ ...prev, status: "done", data, error: null }));
+          set((prev) => ({
+            ...prev,
+            status: "done",
+            data,
+            error: null,
+            spentUsd:
+              !opts.credential && typeof data.spentUsd === "number"
+                ? data.spentUsd
+                : !opts.credential
+                  ? prev.spentUsd + QUERY_PRICE_USD
+                  : prev.spentUsd,
+          }));
         } catch (err) {
           set((prev) => ({
             ...prev,
@@ -147,11 +174,15 @@ export function App() {
         }
       };
 
+      // Privy access token on the backed lane only — separate axis from World.
+      const accessToken = await accessTokenRef.current();
+
       await Promise.all([
         settle(setBot, { credential: false }),
         settle(setBacked, {
           credential: hasCredential(credential),
           address: consented || undefined,
+          accessToken,
         }),
       ]);
     },
@@ -173,7 +204,12 @@ export function App() {
 
   return (
     <main className="page">
-      {privyConfigured ? <PrivyAddressBridge onAddress={setAddress} /> : null}
+      {privyConfigured ? (
+        <PrivySessionBridge
+          onAddress={setAddress}
+          accessTokenRef={accessTokenRef}
+        />
+      ) : null}
       <ConnectWalletButton />
 
       {/* Both views hang off this bar, so the switch is in the same place in

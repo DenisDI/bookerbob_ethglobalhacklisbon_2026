@@ -7,12 +7,11 @@
 // `declared` means this is the wire shape, taken from the spec and the code that
 // implements it, on a leg this browser cannot perform.
 //
-// The browser cannot sign. An agent presents a credential by signing a header with
-// its own key, and it pays by signing a payment authorisation; a page cannot do
-// either on the agent's behalf. So the two middle legs of the handshake are
-// declared here and the request and the response around them are live. Marking
-// that difference is cheaper than being caught claiming a round trip that did not
-// happen.
+// The browser cannot sign AgentKit itself; credential presentation stays declared
+// unless a verified header came back. Bot metering is live: the race posts to
+// /x402/paid-offers and the gateway settles Hedera testnet HBAR via x402, then
+// returns /offers. Marking that difference is cheaper than claiming a round trip
+// that did not happen.
 //
 // Field names, step order and error strings are taken from the implementation:
 // x402 requirements from specs/01-gateway.md, credential verification from
@@ -48,15 +47,16 @@ export interface Field {
  * than naming the variable that holds it.
  */
 export const X402_REQUIREMENTS: Field[] = [
-  { k: "x402Version", v: "1" },
+  { k: "x402Version", v: "2" },
   { k: "scheme", v: "exact", d: "exact | upto" },
-  { k: "network", v: "eip155:84532", d: "base sepolia" },
-  { k: "asset", v: "USDC", d: "erc20, 6 decimals" },
-  { k: "amount", v: "1 cent", d: "$0.01, 10000 base units" },
-  { k: "payTo", v: "configured receiver", d: "LISBON2026_PAYTO_ADDRESS" },
+  { k: "network", v: "hedera:testnet", d: "CAIP-2" },
+  { k: "asset", v: "HBAR", d: "0.0.0 native" },
+  { k: "amount", v: "0.01 HBAR", d: "1000000 tinybars" },
+  { k: "payTo", v: "configured receiver", d: "LISBON2026_X402_PAYTO_ACCOUNT" },
   { k: "resource", v: "GET /offers", d: "this path, without the query" },
-  { k: "maxTimeoutSeconds", v: "60" },
+  { k: "maxTimeoutSeconds", v: "180" },
   { k: "mimeType", v: "application/json" },
+  { k: "facilitator", v: "blocky402", d: "api.testnet.blocky402.com" },
 ];
 
 /**
@@ -90,12 +90,12 @@ export const CREDENTIAL_PRESENTED: Field[] = [
 
 /** The payload an agent returns after signing the authorisation. */
 export const X402_PAYMENT: Field[] = [
-  { k: "header", v: "X-PAYMENT", d: "base64 payment payload" },
+  { k: "header", v: "PAYMENT-SIGNATURE", d: "signed payment payload" },
   { k: "scheme", v: "exact" },
-  { k: "network", v: "eip155:84532" },
-  { k: "amount", v: "1 cent", d: "charged per query, every query" },
-  { k: "authorisation", v: "signed", d: "eip-3009 transfer, gasless" },
-  { k: "settled", v: "by facilitator", d: "x402.org/facilitator" },
+  { k: "network", v: "hedera:testnet" },
+  { k: "amount", v: "0.01 HBAR", d: "charged per query, every query" },
+  { k: "authorisation", v: "signed", d: "Hedera transfer, partial-sign" },
+  { k: "settled", v: "by facilitator", d: "blocky402 fee-payer" },
 ];
 
 /**
@@ -153,8 +153,10 @@ export const TOOLS: ToolSpec[] = [
 
 /** The gateway's real route surface, from apps/gateway/src/index.ts. */
 export const ENDPOINTS: Field[] = [
-  { k: "GET /offers", v: "identity, context, terms, inventory", d: "metered or credentialed" },
+  { k: "GET /offers", v: "identity, context, terms, inventory", d: "x402 if anonymous" },
+  { k: "POST /x402/paid-offers", v: "race bot: demo Hedera pays, then offers", d: "hedera:testnet" },
+  { k: "GET /spent", v: "per-payer x402 ledger for race counters" },
   { k: "POST /prebook", v: "schedule a settlement for a hold", d: "deferred terms only" },
   { k: "POST /book", v: "execute the scheduled settlement", d: "at checkout" },
-  { k: "GET /health", v: "liveness and inventory source" },
+  { k: "GET /health", v: "liveness, inventory, x402 config" },
 ];

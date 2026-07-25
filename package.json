@@ -22,7 +22,8 @@
     "capture:fixtures": "tsx scripts/capture-fixtures.ts",
     "test:scenarios": "tsx scripts/scenario-tester.ts",
     "test:scenarios:learn": "tsx scripts/scenario-tester.ts --learn --soft-hedera",
-    "test:scenarios:prod": "LISBON2026_GATEWAY_URL=https://lisbonhack.world tsx scripts/scenario-tester.ts --soft-hedera"
+    "test:scenarios:prod": "LISBON2026_GATEWAY_URL=https://lisbonhack.world tsx scripts/scenario-tester.ts --soft-hedera",
+    "bot:x402": "tsx scripts/bot-with-x402.ts"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
