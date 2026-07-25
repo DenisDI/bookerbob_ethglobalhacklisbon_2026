@@ -18,12 +18,22 @@ export type FetchOffersInput = {
    * ?address= to a linked wallet before calling the address "theirs".
    */
   accessToken?: string | null;
+  /**
+   * Whether an uncredentialed ask should be metered for real.
+   *
+   * Defaults to true, which is the race: an unbacked *agent* pays per query and
+   * that payment is the point of the lane. The overview is a person reading a
+   * page, not an agent being charged, and it starts uncredentialed on purpose, so
+   * metering it would spend real money on every visit by someone who has not
+   * asked for anything yet. That surface passes false and takes the free route.
+   */
+  metered?: boolean;
 };
 
 /**
- * Product path. Bot lane (no credential) goes through POST /x402/paid-offers so
- * the demo Hedera account settles 0.01 HBAR via x402; credentialed lane hits
- * GET /offers free.
+ * Product path. An unbacked ask goes through POST /x402/paid-offers so the demo
+ * Hedera account settles 0.01 HBAR via x402; a credentialed ask, and any ask that
+ * opts out of metering, hits GET /offers free.
  */
 export type PaidOffersResult = OffersResponse & {
   spentUsd?: number;
@@ -36,12 +46,12 @@ export type PaidOffersResult = OffersResponse & {
 export async function fetchOffers(
   input: FetchOffersInput,
 ): Promise<PaidOffersResult> {
-  if (!input.credential) {
+  if (!input.credential && input.metered !== false) {
     return fetchPaidBotOffers(input);
   }
 
   const params = new URLSearchParams();
-  params.set("credential", "1");
+  params.set("credential", input.credential ? "1" : "0");
   if (input.address?.trim()) params.set("address", input.address.trim());
   if (input.city?.trim()) params.set("city", input.city.trim());
   if (input.debugTier) params.set("tier", input.debugTier);

@@ -464,6 +464,241 @@ body {
   color: var(--color-faint);
 }
 
+/* ---------- overview: what this is, and your own booking ----------
+ *
+ * Same tokens, same two meanings. The one structural idea here is that the terms
+ * panel sits beside the steps and never moves, because the argument is that the
+ * terms change as proof is added, and a panel that scrolled away could not show it.
+ */
+
+.ov {
+  display: flex;
+  flex-direction: column;
+}
+
+.ov__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+}
+
+.ov__h2 {
+  margin: 0;
+  font: var(--weight-semi) var(--size-ui-xl) / 1.2 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
+}
+
+/* ---------- how the desk decides ---------- */
+
+.ov__how {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.ov__beats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.ov__beat {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-line);
+}
+
+/* The mark sits with the step it does the work at, and takes the ash of a fact
+ * rather than the accent, which is reserved for a live answerable request. */
+.ov__beatmark {
+  color: var(--color-ash);
+}
+
+.ov__beattitle {
+  margin: 0;
+  font: var(--weight-semi) var(--size-ui-md) / 1.25 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+}
+
+.ov__beattext {
+  margin: 0;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+/* ---------- your booking ---------- */
+
+.ov__flow,
+.ov__rooms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.ov__flowhead {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ov__flowlede {
+  margin: 0;
+  max-width: 74ch;
+  font: var(--weight-reg) var(--size-ui-md) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.ov__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.ov__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The panel is sticky because watching it move is the entire point, and it has
+ * to stay in view while the reader is down among the steps that move it. */
+.ov__panel {
+  position: sticky;
+  top: var(--space-3);
+  min-width: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-3);
+}
+
+.step__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font: var(--weight-semi) var(--size-ui-md) / 1.2 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+}
+
+.step__note {
+  margin: 0;
+  max-width: 62ch;
+}
+
+/* The personhood control is fixed to a corner by worldid/selfie.css, which is
+ * right for the race tabs, where it is a floating affordance. Inside a step it is
+ * part of the flow and has to sit where the step is. Overridden from here rather
+ * than in that file, which says in its own header that the design layer should
+ * move it without untangling anything. */
+.step .selfie {
+  position: static;
+  z-index: auto;
+  max-width: none;
+  align-items: flex-start;
+  text-align: left;
+  margin: 0;
+}
+
+/* A step that cannot run says so and stops. Never styled as a failure: an
+ * unconfigured check and a broken one both leave the reader in the same place,
+ * and neither is their fault. */
+.step__down {
+  margin: 0;
+  max-width: 62ch;
+  padding: var(--space-2) 0 0;
+  color: var(--color-faint);
+}
+
+/* ---------- your terms right now ---------- */
+
+.yourterms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line-strong);
+  border-left: 2px solid var(--color-ash);
+  background: var(--color-surface-2);
+  transition: border-left-color var(--duration-beat1) ease;
+}
+
+/* Colour arrives the moment the money is allowed to wait, which is the moment
+ * somebody became answerable for the request. */
+.yourterms:has(.rail--accent) {
+  border-left-color: var(--color-accent);
+}
+
+.yourterms__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.yourterms__working {
+  animation: bb-pulse 1.4s steps(1) infinite;
+}
+
+.yourterms__term {
+  margin: 0;
+  font: var(--weight-semi) var(--size-ui-lg) / 1.3 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
+}
+
+.yourterms__term--waiting {
+  color: var(--color-faint);
+  font-weight: var(--weight-reg);
+}
+
+.yourterms__why {
+  margin: 0;
+}
+
+/* What would move it, and why it has not moved. The most useful sentence on the
+ * page when a wallet is connected and nothing has happened. */
+.yourterms__move {
+  margin: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-hairline);
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.ov__nohold {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+/* The demo tab is a place someone navigated to, not the front door, so its
+ * headline is a size below the overview's. */
+.thesis--demo {
+  max-width: 26ch;
+  font-size: clamp(30px, 4vw, 52px);
+}
+
 /* ---------- who stands behind the booking ----------
  *
  * People, not plans. The cards are deliberately not a feature grid: each is a
@@ -2349,6 +2584,37 @@ body {
   /* Both ways out of the 402 still read, one under the other. */
   .branch {
     grid-template-columns: 1fr;
+  }
+
+  /* Three beats in three columns at this width leaves each one a couple of words
+   * wide. They stack, and they keep their order, which is the order of the
+   * journey. */
+  .ov__beats {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  /* The terms panel stops being a column beside the steps and becomes the block
+   * above them: it still has to be the first thing seen, and sticky positioning
+   * on a phone would cover the steps that move it. */
+  .ov__cols {
+    grid-template-columns: 1fr;
+  }
+
+  .ov__panel {
+    position: static;
+    order: -1;
+  }
+
+  .leadin__sides {
+    grid-template-columns: 1fr;
+    margin: 0;
+    gap: var(--space-3);
+  }
+
+  .leadin__side {
+    padding: 0 0 0 var(--space-3);
+    border-left: 1px solid var(--color-line-strong);
   }
 
   .frame {

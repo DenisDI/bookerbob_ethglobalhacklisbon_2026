@@ -12,6 +12,7 @@ import {
 } from "./auth";
 import { hasCredential, type CredentialState } from "./credential";
 import { MachineView } from "./machine";
+import { OverviewPage } from "./overview";
 import { ParticipantsBand, ParticipantsBandGuest } from "./ParticipantsBand";
 import { RacePane, type PaneState } from "./RacePane";
 import { RaceLeadIn } from "./RaceLeadIn";
@@ -278,37 +279,36 @@ export function App() {
         />
       ) : null}
       <ConnectWalletButton onAddress={setAddress} />
-      <SelfieCheck />
+      {/* The overview carries its own personhood step inside the flow, where it
+        * has a job and an explanation. Two of these would both mount. */}
+      {view === "overview" ? null : <SelfieCheck />}
 
-      {/* Both views hang off this bar, so the switch is in the same place in
-        * either one and the product is named once. */}
+      {/* Every surface hangs off this bar, so the switch is in the same place in
+        * all of them and the product is named once. */}
       <div className="topbar">
         <span className="wordmark">BookerBob</span>
         <ViewSwitch view={view} onChange={setView} />
-        <span className="topbar__note">the same request, told twice</span>
+        <span className="topbar__note">one desk, people and agents</span>
       </div>
 
+      {view === "overview" ? <OverviewPage /> : (
+        <>
       {/* The ask is shared: the machine view runs the same request, so it needs
-        * the same controls. The human pitch above it is not, because the machine
-        * view carries its own title and does not argue. */}
+        * the same controls. The pitch above it is not, because the overview now
+        * carries the argument and neither of these two surfaces has to repeat it. */}
       <header className={`masthead ${view === "machine" ? "masthead--machine" : ""}`}>
-        {view === "human" ? (
+        {view === "demo" ? (
           <div className="masthead__lede">
-            {/* The recurring line still opens the story, but it is a claim about
-              * the mechanism and a stranger cannot act on it yet. It sits above
-              * the headline rather than being it. */}
-            <p className="kicker">
-              who is behind an agent changes the terms it gets
-            </p>
-            <h1 className="thesis">book a hotel, or let an agent book it for you</h1>
-            {/* What the thing is, before what is clever about it. Someone who
-              * reads only this paragraph should be able to say what BookerBob
-              * sells and what is unusual about it. */}
+            {/* Short, because this is a tab someone navigated to rather than the
+              * front door. The overview makes the case; this one runs it. */}
+            <p className="kicker">demo</p>
+            <h1 className="thesis thesis--demo">
+              the same request, run as two agents at once
+            </h1>
             <p className="thesis__plain">
-              BookerBob is a hotel booking desk that serves people and ai agents
-              from the same inventory. same rooms, same nightly rate for
-              everyone. what changes is when the money leaves your pocket, and
-              that depends on who is standing behind the booking.
+              one of them has nobody behind it. pick who stands behind the other,
+              and watch what changes between them. the rooms and the nightly rate
+              are the same in both.
             </p>
           </div>
         ) : null}
@@ -354,7 +354,7 @@ export function App() {
         </div>
       </header>
 
-      {view === "human" ? (
+      {view === "demo" ? (
         <>
           <WhoIsAsking
             value={address}
@@ -463,6 +463,8 @@ export function App() {
           between booking and the stay.
         </p>
       </footer>
+        </>
+      )}
         </>
       )}
     </main>

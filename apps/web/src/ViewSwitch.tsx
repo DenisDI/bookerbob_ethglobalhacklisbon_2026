@@ -1,32 +1,49 @@
-// One product, two truths about the same request.
+// Three surfaces, one product, and each one does a single job.
 //
-// The human view is the shop window: narration, a timeline, a room with a photo.
-// The machine view is what the service actually is, because BookerBob is a gateway
-// for agents and an agent does not read a screen. It reads a challenge and a typed
-// response. Neither view is a mock of the other; both are the same run, described
-// at the layer their reader lives on.
+//   overview  what this is and why it matters, and your own booking: connect a
+//             wallet, prove you are a person, watch your terms move, hold a price.
+//   demo      the race. two agents answering the same request, on concrete people.
+//   machine   the handshake as an agent reads it: challenge, response, typed data.
 //
-// The switch stays in the URL so a given view can be linked, filmed, or reloaded
-// into without clicking twice.
+// The race used to be the only human surface, which meant the site argued before
+// it explained: a visitor met a comparison between two things nobody had told
+// them about, and the only thing they could do was watch agents transact.
+//
+// The switch stays in the URL so a given surface can be linked, filmed, or
+// reloaded into without clicking twice.
 
-export type View = "human" | "machine";
+export type View = "overview" | "demo" | "machine";
 
 const LABEL: Record<View, string> = {
-  human: "human view",
-  machine: "machine view",
+  overview: "overview",
+  demo: "demo",
+  machine: "machine",
 };
 
-const ORDER: View[] = ["human", "machine"];
+const ORDER: View[] = ["overview", "demo", "machine"];
 
-export function readView(search: string): View {
-  return new URLSearchParams(search).get("view") === "machine" ? "machine" : "human";
+function isView(value: string | null): value is View {
+  return value === "overview" || value === "demo" || value === "machine";
 }
 
-/** Keeps the address bar honest about which view is on screen. */
+export function readView(search: string): View {
+  const params = new URLSearchParams(search);
+  const asked = params.get("view");
+  if (isView(asked)) return asked;
+
+  // The filming and screenshot links are `?autorun=1&address=…` with no view on
+  // them, and they point at the race. They have to keep landing on it now that
+  // the default surface is no longer the race.
+  if (params.has("autorun")) return "demo";
+
+  return "overview";
+}
+
+/** Keeps the address bar honest about which surface is on screen. */
 export function writeView(view: View): void {
   const params = new URLSearchParams(window.location.search);
-  if (view === "machine") params.set("view", "machine");
-  else params.delete("view");
+  if (view === "overview") params.delete("view");
+  else params.set("view", view);
   const query = params.toString();
   window.history.replaceState(
     null,
