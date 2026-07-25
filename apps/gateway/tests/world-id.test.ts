@@ -47,8 +47,8 @@ test("two contexts never reuse a nonce", { skip: !configured }, () => {
   assert.notEqual(worldIdConfig().rpContext.nonce, worldIdConfig().rpContext.nonce);
 });
 
-test("the nullifier comes from the selfie response, not from any response", () => {
-  assert.equal(
+test("the nullifier comes from the asked credential, not from any response", () => {
+  assert.deepEqual(
     credentialNullifier(
       {
         responses: [
@@ -56,27 +56,58 @@ test("the nullifier comes from the selfie response, not from any response", () =
           { identifier: "selfie", nullifier: NULLIFIER, issuer_schema_id: 11 },
         ],
       },
-      "selfie",
+      ["selfie"],
     ),
-    NULLIFIER,
+    { nullifier: NULLIFIER, credential: "selfie" },
   );
   // Schema id alone is enough: the identifier is a label, 11 is the credential.
-  assert.equal(
-    credentialNullifier({ responses: [{ nullifier: NULLIFIER, issuer_schema_id: 11 }] }, "selfie"),
-    NULLIFIER,
+  assert.deepEqual(
+    credentialNullifier({ responses: [{ nullifier: NULLIFIER, issuer_schema_id: 11 }] }, ["selfie"]),
+    { nullifier: NULLIFIER, credential: "selfie" },
+  );
+});
+
+// The product rule behind the list: a real World App answered "Humans Only,
+// visit an Orb" while we asked only for proof_of_human. Selfie comes first so
+// the low barrier is what a person is offered, and the orb credential is still
+// accepted from anyone who already has it.
+test("either credential counts, and the first one asked for wins", () => {
+  const both = ["selfie", "proof_of_human"];
+
+  assert.deepEqual(
+    credentialNullifier({ responses: [{ identifier: "proof_of_human", nullifier: "0xorb", issuer_schema_id: 1 }] }, both),
+    { nullifier: "0xorb", credential: "proof_of_human" },
+    "somebody who already did the orb is not turned away",
+  );
+  assert.deepEqual(
+    credentialNullifier({ responses: [{ identifier: "selfie", nullifier: NULLIFIER, issuer_schema_id: 11 }] }, both),
+    { nullifier: NULLIFIER, credential: "selfie" },
+  );
+  assert.deepEqual(
+    credentialNullifier(
+      {
+        responses: [
+          { identifier: "proof_of_human", nullifier: "0xorb", issuer_schema_id: 1 },
+          { identifier: "selfie", nullifier: NULLIFIER, issuer_schema_id: 11 },
+        ],
+      },
+      both,
+    ),
+    { nullifier: NULLIFIER, credential: "selfie" },
+    "preference order decides, not the order the proof happens to list",
   );
 });
 
 test("a proof without a selfie in it names nobody", () => {
-  assert.equal(credentialNullifier({ responses: [] }, "selfie"), null);
+  assert.equal(credentialNullifier({ responses: [] }, ["selfie"]), null);
   assert.equal(
-    credentialNullifier({ responses: [{ identifier: "passport", nullifier: "0x1", issuer_schema_id: 9303 }] }, "selfie"),
+    credentialNullifier({ responses: [{ identifier: "passport", nullifier: "0x1", issuer_schema_id: 9303 }] }, ["selfie"]),
     null,
   );
-  assert.equal(credentialNullifier({ responses: "not an array" }, "selfie"), null);
-  assert.equal(credentialNullifier(null, "selfie"), null);
+  assert.equal(credentialNullifier({ responses: "not an array" }, ["selfie"]), null);
+  assert.equal(credentialNullifier(null, ["selfie"]), null);
   assert.equal(
-    credentialNullifier({ responses: [{ identifier: "selfie", issuer_schema_id: 11 }] }, "selfie"),
+    credentialNullifier({ responses: [{ identifier: "selfie", issuer_schema_id: 11 }] }, ["selfie"]),
     null,
     "a selfie response with no nullifier proves nothing",
   );
@@ -92,7 +123,7 @@ test("the portal is asked before anything is believed", { skip: !configured }, a
       calls.push({ url: String(url), body: JSON.parse(String(init.body)) });
       return new Response('{"success":true}', { status: 200 });
     }) as unknown as typeof fetch,
-    "selfie",
+    ["selfie"],
   );
 
   assert.equal(result.ok, true);
@@ -105,7 +136,7 @@ test("a portal refusal is a refusal, however plausible the proof looked", { skip
   const result = await verifyWithPortal(
     { responses: [{ identifier: "selfie", nullifier: NULLIFIER, issuer_schema_id: 11 }] },
     (async () => new Response("proof invalid", { status: 400 })) as unknown as typeof fetch,
-    "selfie",
+    ["selfie"],
   );
 
   assert.equal(result.ok, false);

@@ -104,3 +104,29 @@ Four smaller ones, all fixed in the same pass:
 Also parameterised the signing key in tests: half the suite sat behind
 `skip: !configured`, which means a CI without keys would have gone green on a
 broken module.
+
+## The orb wall
+
+A teammate scanned the QR with a real World App and got "Humans Only, visit an
+Orb". The cause was mine: after the staging simulator refused a selfie request
+with `credential_unavailable`, I made staging ask for `proof_of_human`, and that
+is the orb credential. The simulator hid it, because its identity holds that
+credential and passes without a word.
+
+Selfie Check exists so anybody with a World App can prove personhood, so the ask
+is now a list, selfie first:
+
+```ts
+constraints: { any: [{ type: "selfie" }, { type: "proof_of_human" }] }
+```
+
+A person with a World App does the low barrier check. Somebody who already has
+the orb credential is not turned away. The simulator still has something to
+answer, so the phoneless demo path survives. And the response names which check
+actually ran, so the screen says "personhood proved by selfie" or "by proof of
+human" instead of implying whichever one we wished for.
+
+Measured after the change: the simulator run passes end to end in 23.5s and the
+screen reads "personhood proved by proof of human", which is the truth in that
+environment. What a real World App now offers is the one thing only a phone can
+confirm.

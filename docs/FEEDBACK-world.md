@@ -151,6 +151,46 @@ Returning a discriminated result, or letting transport errors throw while keepin
 their caller's. We ended up adding our own `eth_blockNumber` probe to recover the
 distinction.
 
+## 9. The default credential is the orb, and that is a barrier almost nobody clears
+
+This one cost us a working demo path and it is worth stating plainly, because the
+default is doing the opposite of what a low friction credential is for.
+
+Asking IDKit for personhood without naming a credential, or naming
+`proof_of_human`, means the ORB credential. A real World App pointed at our app
+answered:
+
+```
+Humans Only
+visit an Orb
+```
+
+Nobody at a hackathon has been to an Orb. Selfie Check exists precisely so a
+person with an ordinary World App can prove personhood, and getting it requires
+knowing to ask for `constraints: { type: "selfie" }` explicitly. We only found
+this because a teammate scanned the QR with a real phone: the browser simulator
+never shows it, since the simulated identity holds the orb credential and passes
+silently.
+
+The trap has a second edge. The staging simulator refuses a selfie request with
+`credential_unavailable`, so an integrator testing without a phone is pushed
+toward `proof_of_human`, which then quietly becomes an orb wall for every real
+user. Both defaults point the same wrong way.
+
+What we do now: ask for either, selfie first, via
+`constraints: { any: [{ type: "selfie" }, { type: "proof_of_human" }] }`. A person
+with a World App does the low barrier check, somebody who already has the orb
+credential is not turned away, the simulator still has something to answer, and
+the screen names whichever one actually ran.
+
+**Asks:**
+- make Selfie Check the documented default for "prove a person is a person", or
+  at minimum say on the first integration page that the default is orb backed;
+- let the staging simulator hold a selfie credential, so the environment used for
+  testing does not push integrators toward the one that blocks real users;
+- surface the requested credential in the widget's own copy, so an integrator
+  sees "Selfie Check" or "Orb" before a real user does.
+
 ## What we shipped against this
 
 `apps/gateway/src/world.ts`: verification behind a `CredentialVerifier`

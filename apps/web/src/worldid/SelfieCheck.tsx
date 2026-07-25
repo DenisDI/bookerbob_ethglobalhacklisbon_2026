@@ -30,8 +30,13 @@ type WorldIdConfig = {
   appId: `app_${string}`;
   rpId: string;
   action: string;
-  /** The gateway decides what to ask for, so the two cannot disagree. */
-  credential: "selfie" | "proof_of_human" | "passport" | "mnc";
+  /**
+   * What the gateway will accept, in the order it prefers. Selfie comes first
+   * because it is the check anybody with a World App can pass; asking only for
+   * proof_of_human is what made a real World App answer "Humans Only, visit an
+   * Orb", which is a barrier almost nobody clears.
+   */
+  credentials: ("selfie" | "proof_of_human" | "passport" | "mnc")[];
   environment: "production" | "staging" | "sandbox";
   rpContext: RpContext;
 };
@@ -42,12 +47,13 @@ type Phase =
   | { name: "loading" }
   | { name: "ready"; config: WorldIdConfig }
   | { name: "checking"; config: WorldIdConfig }
-  | { name: "verified" }
+  | { name: "verified"; credential: string }
   | { name: "failed"; config: WorldIdConfig | null; reason: string };
 
 export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
   const [phase, setPhase] = useState<Phase>({ name: "loading" });
   const [open, setOpen] = useState(false);
+  const [done, setDone] = useState("");
 
   // A fresh request context every time the step is offered, because the one the
   // gateway signs lives five minutes.
@@ -103,11 +109,14 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
       throw new Error("the check did not verify");
     }
 
-    const { token, expiresInSeconds } = (await res.json()) as {
+    const { token, credential, expiresInSeconds } = (await res.json()) as {
       token: string;
+      credential: string;
       expiresInSeconds: number;
     };
     setWorldIdToken(token, expiresInSeconds);
+    // Which check actually ran, so the screen names it instead of implying one.
+    setDone(credential);
   }, []);
 
   if (phase.name === "unconfigured") {
@@ -125,7 +134,8 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
   if (phase.name === "verified") {
     return (
       <p className="selfie selfie--done reason">
-        personhood proved. this browser now asks as a person, not as a stranger
+        personhood proved by {phase.credential.replace(/_/g, " ")}. this browser now
+        asks as a person, not as a stranger
       </p>
     );
   }
@@ -147,7 +157,9 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
         <p className="selfie__reason reason">{phase.reason}</p>
       ) : (
         <p className="selfie__reason reason">
-          {config ? `world id ${config.credential.replace(/_/g, " ")} (${config.environment})` : "world id"}
+          {config
+            ? `world id ${config.credentials[0]!.replace(/_/g, " ")} (${config.environment})`
+            : "world id"}
         </p>
       )}
 
@@ -158,12 +170,16 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
           rp_context={config.rpContext}
           environment={config.environment}
           allow_legacy_proofs={false}
-          constraints={{ type: config.credential }}
+          constraints={
+            config.credentials.length > 1
+              ? { any: config.credentials.map((type) => ({ type })) }
+              : { type: config.credentials[0]! }
+          }
           open={open}
           onOpenChange={setOpen}
           handleVerify={handleVerify}
           onSuccess={() => {
-            setPhase({ name: "verified" });
+            setPhase({ name: "verified", credential: done || config.credentials[0]! });
             onVerified?.();
           }}
           onError={(code) =>

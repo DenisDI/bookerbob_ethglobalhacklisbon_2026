@@ -75,23 +75,33 @@ export const env = {
   worldAction: str("LISBON2026_WORLD_ACTION", "bookerbob-terms"),
 
   /**
-   * Which credential is asked for.
+   * Which credentials are accepted, in the order they are offered.
    *
-   * Measured on 2026-07-25: the staging simulator refuses a selfie request with
-   * `credential_unavailable`, because its simulated identity does not hold that
-   * credential, and answers proof_of_human happily. So the default follows the
-   * environment rather than the wish, and whichever one runs is named on screen
-   * and in the response. Selfie Check needs sandbox or a real device; see
+   * This is a list because a single value got the product wrong. Measured first:
+   * the staging simulator refuses a selfie request with `credential_unavailable`,
+   * since its simulated identity does not hold one. The fix at the time was to
+   * ask staging for proof_of_human instead, and that was the mistake, because
+   * proof_of_human is the ORB credential: a real World App pointed at us then
+   * said "Humans Only, visit an Orb", which is a barrier almost nobody clears and
+   * the exact opposite of what Selfie Check is for.
+   *
+   * So we ask for either, selfie first. A person with a World App does the low
+   * barrier check, a person who already has the orb credential is not turned
+   * away, and the browser simulator still has something it can answer. Whichever
+   * one actually ran is named on screen and in the response. See
    * docs/FEEDBACK-selfie.md.
    */
-  worldCredential: (() => {
-    const environment = str("LISBON2026_WORLD_ENVIRONMENT", "staging");
-    const fallback = environment === "staging" ? "proof_of_human" : "selfie";
-    const v = str("LISBON2026_WORLD_CREDENTIAL", fallback);
-    return v === "proof_of_human" || v === "passport" || v === "mnc" || v === "selfie"
-      ? v
-      : fallback;
-  })() as "selfie" | "proof_of_human" | "passport" | "mnc",
+  worldCredentials: (() => {
+    const known = ["selfie", "proof_of_human", "passport", "mnc"];
+    const asked = str("LISBON2026_WORLD_CREDENTIAL")
+      .split(",")
+      .map((v) => v.trim())
+      .filter((v) => known.includes(v));
+    // Selfie first, on purpose: it is the one anybody with a World App can do.
+    // proof_of_human stays as an alternative so a person who already has the
+    // orb credential, and the browser simulator, are not turned away.
+    return asked.length > 0 ? asked : ["selfie", "proof_of_human"];
+  })() as ReadonlyArray<"selfie" | "proof_of_human" | "passport" | "mnc">,
 
   /**
    * staging drives the browser simulator, which is Phase A: a check that needs no

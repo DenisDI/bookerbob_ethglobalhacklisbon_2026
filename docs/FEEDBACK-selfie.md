@@ -48,6 +48,22 @@ it work.
 on the Selfie Check page saying which environments can produce one. A matrix of
 credential against environment would settle it permanently.
 
+**What this cost us, added after a real phone was tried.** Being pushed off
+selfie by the simulator, we asked staging for `proof_of_human` instead, and that
+is the ORB credential. A real World App scanning our QR then said "Humans Only,
+visit an Orb", which is a barrier essentially nobody at a hackathon clears: the
+simulator had hidden the problem because its identity holds that credential and
+passes silently. The fix is to ask for either, selfie first:
+
+```ts
+constraints: { any: [{ type: "selfie" }, { type: "proof_of_human" }] }
+```
+
+so a person with an ordinary World App does the low barrier check, somebody who
+already has the orb credential is not turned away, the simulator still has
+something it can answer, and the screen names whichever one actually ran rather
+than implying the one we hoped for.
+
 ## 2. The WASM module breaks under Vite's dependency optimiser, and the error says nothing
 
 `@worldcoin/idkit-core` loads its WASM with the wasm-bindgen idiom:

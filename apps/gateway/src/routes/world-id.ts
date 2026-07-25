@@ -71,9 +71,12 @@ export async function worldIdVerifyHandler(c: Context) {
   }
 
   // The nullifier stays on this side. What the browser gets back says only that
-  // somebody proved personhood, and for how long that stays true.
+  // somebody proved personhood, which check they did it with, and for how long
+  // that stays true. Naming the check matters here: the whole point of the fix
+  // that produced this line is that a person should be doing the low barrier one.
   return c.json({
     token: mintSession(result.nullifier),
+    credential: result.credential,
     expiresInSeconds: SESSION_TTL_SECONDS,
   });
 }

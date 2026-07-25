@@ -53,8 +53,11 @@ export type WorldIdConfig = {
   appId: string;
   rpId: string;
   action: string;
-  /** What the browser must ask for, so the widget and the check cannot disagree. */
-  credential: string;
+  /**
+   * What the browser must ask for, in order of preference, so the widget and the
+   * check cannot disagree about what counts.
+   */
+  credentials: readonly string[];
   environment: "production" | "staging" | "sandbox";
   rpContext: RpContext;
 };
@@ -83,7 +86,7 @@ export function worldIdConfig(now: () => number = Date.now): WorldIdConfig {
     appId: env.worldAppId,
     rpId: env.worldRpId,
     action: env.worldAction,
-    credential: env.worldCredential,
+    credentials: env.worldCredentials,
     environment: env.worldEnvironment,
     rpContext: {
       rp_id: env.worldRpId,
@@ -98,7 +101,7 @@ export function worldIdConfig(now: () => number = Date.now): WorldIdConfig {
 }
 
 export type PortalResult =
-  | { ok: true; nullifier: string }
+  | { ok: true; nullifier: string; credential: string }
   | { ok: false; detail: string };
 
 type IdkitResponseItem = {
@@ -116,21 +119,25 @@ type IdkitResponseItem = {
  */
 export function credentialNullifier(
   payload: unknown,
-  credential: string = env.worldCredential,
-): string | null {
+  credentials: readonly string[] = env.worldCredentials,
+): { nullifier: string; credential: string } | null {
   if (typeof payload !== "object" || payload === null) return null;
   const responses = (payload as { responses?: unknown }).responses;
   if (!Array.isArray(responses)) return null;
 
-  const schemaId = SCHEMA_IDS[credential];
-  for (const item of responses as IdkitResponseItem[]) {
-    if (typeof item !== "object" || item === null) continue;
-    const wanted =
-      (schemaId !== undefined && item.issuer_schema_id === schemaId) ||
-      item.identifier === credential;
-    if (!wanted) continue;
-    if (typeof item.nullifier !== "string" || item.nullifier.length === 0) continue;
-    return item.nullifier;
+  // Preference order, not arrival order: if a proof somehow carries both, the
+  // one we asked for first is the one the decision is made on.
+  for (const credential of credentials) {
+    const schemaId = SCHEMA_IDS[credential];
+    for (const item of responses as IdkitResponseItem[]) {
+      if (typeof item !== "object" || item === null) continue;
+      const wanted =
+        (schemaId !== undefined && item.issuer_schema_id === schemaId) ||
+        item.identifier === credential;
+      if (!wanted) continue;
+      if (typeof item.nullifier !== "string" || item.nullifier.length === 0) continue;
+      return { nullifier: item.nullifier, credential };
+    }
   }
   return null;
 }
@@ -145,7 +152,7 @@ export function credentialNullifier(
  */
 export function parsePortalVerdict(
   text: string,
-  credential: string = env.worldCredential,
+  credential: string,
 ): { accepted: boolean; detail: string } {
   if (!text.trim()) return { accepted: true, detail: "empty body on a success status" };
 
@@ -193,13 +200,13 @@ export function parsePortalVerdict(
 export async function verifyWithPortal(
   payload: unknown,
   fetchImpl: typeof fetch = fetch,
-  credential: string = env.worldCredential,
+  credentials: readonly string[] = env.worldCredentials,
 ): Promise<PortalResult> {
   if (!worldIdReady()) return { ok: false, detail: "world id is not configured" };
 
-  const nullifier = credentialNullifier(payload, credential);
-  if (!nullifier) {
-    return { ok: false, detail: `no ${credential} response in the proof` };
+  const found = credentialNullifier(payload, credentials);
+  if (!found) {
+    return { ok: false, detail: `no ${credentials.join(" or ")} response in the proof` };
   }
 
   // Defence in depth. The action is inside the signature the Portal checks, so a
@@ -232,12 +239,12 @@ export async function verifyWithPortal(
     // verdict of its own and a 200 with success:false must not read as a pass.
     // Per-response too: a request can carry several credentials and only the
     // selfie one decides anything here.
-    const verdict = parsePortalVerdict(text, credential);
+    const verdict = parsePortalVerdict(text, found.credential);
     if (!verdict.accepted) {
       return { ok: false, detail: `portal said no: ${verdict.detail}` };
     }
 
-    return { ok: true, nullifier };
+    return { ok: true, nullifier: found.nullifier, credential: found.credential };
   } catch (err) {
     return { ok: false, detail: (err as Error).message };
   }
