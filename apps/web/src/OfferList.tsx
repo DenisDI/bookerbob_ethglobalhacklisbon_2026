@@ -36,6 +36,21 @@ export function OfferList({
         const anchored = offer.hotelId === anchorHotelId;
         return (
           <div key={offer.hotelId} className="offer">
+            {/* This is a hotel booking screen and it should look like one. The
+              * rows carried no image at all, which read as a ledger of ids and
+              * hid that these are real rooms in real buildings. Small enough not
+              * to fight the density, and a room with no picture gets a plain
+              * tile rather than a broken frame. */}
+            {offer.photoUrl ? (
+              <img
+                className="offer__thumb"
+                src={offer.photoUrl}
+                alt=""
+                loading="lazy"
+              />
+            ) : (
+              <span className="offer__thumb offer__thumb--none" aria-hidden="true" />
+            )}
             <span className="offer__name">
               {anchored ? <i className="offer__anchor" aria-hidden="true" /> : null}
               <span>{displayName(offer)}</span>
@@ -66,6 +81,7 @@ export function OfferSkeleton({ rows = 3 }: { rows?: number }) {
     <div className="rooms" aria-hidden="true">
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="skel">
+          <span className="skel__thumb" />
           <span />
           <span />
           <span />

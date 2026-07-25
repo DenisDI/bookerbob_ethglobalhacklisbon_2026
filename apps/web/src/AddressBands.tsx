@@ -24,15 +24,30 @@ interface Props {
   /** A chip passes its own value, so one click both fills and runs. */
   onSubmit(override?: string): void;
   disabled: boolean;
+  /**
+   * The pinned chips are the same three inputs the scenario cards use, so when
+   * those cards are on screen this repeats them in wallet jargon. Defaults to
+   * showing them, which is how every existing caller behaves.
+   */
+  showChips?: boolean;
+  /** Lets a caller demote this to the secondary way in. */
+  label?: string;
 }
 
-export function AddressBands({ value, onChange, onSubmit, disabled }: Props) {
+export function AddressBands({
+  value,
+  onChange,
+  onSubmit,
+  disabled,
+  showChips = true,
+  label = "whose standing should back the request",
+}: Props) {
   const [touched, setTouched] = useState(false);
 
   return (
     <section className="ask-address">
       <label className="ask-address__label" htmlFor="address">
-        whose standing should back the request
+        {label}
       </label>
 
       <div className="ask-address__row">
@@ -61,23 +76,25 @@ export function AddressBands({ value, onChange, onSubmit, disabled }: Props) {
         </button>
       </div>
 
-      <div className="chips">
-        {SHOWCASE.map((chip) => (
-          <button
-            key={chip.input}
-            type="button"
-            className={`chip ${value === chip.input ? "chip--on" : ""}`}
-            disabled={disabled}
-            onClick={() => {
-              setTouched(true);
-              onChange(chip.input);
-              onSubmit(chip.input);
-            }}
-          >
-            {chip.label}
-          </button>
-        ))}
-      </div>
+      {showChips ? (
+        <div className="chips">
+          {SHOWCASE.map((chip) => (
+            <button
+              key={chip.input}
+              type="button"
+              className={`chip ${value === chip.input ? "chip--on" : ""}`}
+              disabled={disabled}
+              onClick={() => {
+                setTouched(true);
+                onChange(chip.input);
+                onSubmit(chip.input);
+              }}
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {touched && value.trim() === "" ? (
         <p className="ask-address__hint">

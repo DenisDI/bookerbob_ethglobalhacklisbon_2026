@@ -423,6 +423,113 @@ body {
   color: var(--color-faint);
 }
 
+/* ---------- who stands behind the booking ----------
+ *
+ * People, not plans. The cards are deliberately not a feature grid: each is a
+ * short sketch with one consequence, the copy differs line by line rather than
+ * lining up into comparable rows, and nothing here is for sale, since the rate
+ * sheet is identical down every path.
+ */
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.who__cap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.who__title {
+  margin: 0;
+  font: var(--weight-semi) var(--size-ui-xl) / 1.2 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
+}
+
+.who__lede {
+  margin: 0;
+  max-width: 72ch;
+  font: var(--weight-reg) var(--size-ui-md) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.who__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.who__card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-surface-3);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-tap) ease,
+    background var(--duration-tap) ease;
+}
+
+.who__card:hover:not(:disabled) {
+  border-color: var(--color-ash);
+  background: var(--color-surface-2);
+}
+
+.who__card:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+/* Colour arrives on the picked card because picking one is the moment a real
+ * person is put behind the request. */
+.who__card.is-picked {
+  border-color: var(--color-accent);
+  background: var(--color-accent-wash);
+}
+
+.who__name {
+  font: var(--weight-semi) var(--size-ui-lg) / 1.2 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
+}
+
+.who__sketch {
+  font: var(--weight-reg) var(--size-ui-sm) / 1.45 var(--font-ui);
+  color: var(--color-muted);
+}
+
+/* The promise. It is made before the button is pressed, and the lanes below are
+ * what keeps it, which is the only reason the demo proves anything. */
+.who__expect {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-hairline);
+  font: var(--weight-med) var(--size-ui-sm) / 1.4 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.who__card.is-picked .who__expect-tag {
+  color: var(--color-accent);
+}
+
 /* ---------- race chrome ---------- */
 
 .racehead {
@@ -913,11 +1020,29 @@ body {
 
 .offer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 84px 134px;
+  grid-template-columns: 44px minmax(0, 1fr) 84px 134px;
   align-items: center;
   gap: 9px;
   padding: 10px 0;
   border-top: 1px solid var(--color-hairline);
+}
+
+/* Small on purpose. Enough to say "this is a building you could sleep in",
+ * not enough to turn a dense comparison into a gallery. */
+.offer__thumb {
+  width: 44px;
+  height: 34px;
+  object-fit: cover;
+  background: rgba(233, 229, 220, 0.06);
+  border: 1px solid var(--color-hairline);
+}
+
+.offer__thumb--none {
+  display: block;
+  background:
+    var(--texture-hatch-ghost),
+    rgba(233, 229, 220, 0.04);
+  opacity: 0.5;
 }
 
 .offer__name {
@@ -969,11 +1094,15 @@ body {
 
 .skel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 84px 134px;
+  grid-template-columns: 44px minmax(0, 1fr) 84px 134px;
   align-items: center;
   gap: 9px;
   padding: 13px 0;
   border-top: 1px solid var(--color-hairline);
+}
+
+.skel .skel__thumb {
+  height: 34px;
 }
 
 .skel span {

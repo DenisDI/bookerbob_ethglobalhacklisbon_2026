@@ -17,6 +17,7 @@ import { RacePane, type PaneState } from "./RacePane";
 import { SaidOnce } from "./SaidOnce";
 import { PANE_LABEL } from "./terms-copy";
 import { readView, ViewSwitch, writeView, type View } from "./ViewSwitch";
+import { WhoIsAsking } from "./WhoIsAsking";
 
 /**
  * Where the demo starts, not where it is stuck. The field is editable and the
@@ -270,14 +271,34 @@ export function App() {
               size={Math.max(6, city.length + 1)}
             />
           </form>
+          {/* Demoted to the way in for anyone who wants to try their own wallet.
+            * Its pinned chips are the same three inputs the cards above use, so
+            * showing both would say it twice, once in wallet jargon. */}
           <AddressBands
             value={address}
             onChange={setAddress}
             onSubmit={(override) => void run(override)}
             disabled={running}
+            showChips={view === "machine"}
+            label={
+              view === "machine"
+                ? "whose standing should back the request"
+                : "or try any wallet of your own"
+            }
           />
         </div>
       </header>
+
+      {view === "human" ? (
+        <WhoIsAsking
+          value={address}
+          onPick={(input) => {
+            setAddress(input);
+            void run(input);
+          }}
+          disabled={running}
+        />
+      ) : null}
 
       {view === "machine" ? (
         <MachineView
