@@ -21,13 +21,17 @@ primary_region = "ams"
   force_https = true
   auto_stop_machines = "stop"
   auto_start_machines = true
-  min_machines_running = 0
+  # Keep one machine warm: npm start takes ~13s, so a cold start would make a
+  # judge's first request hang. One always-on machine avoids that on stage.
+  min_machines_running = 1
   processes = ["app"]
 
   [[http_service.checks]]
     interval = "15s"
     timeout = "2s"
-    grace_period = "10s"
+    # npm run start needs ~13s to bind; a 10s grace made Fly declare the new
+    # image unhealthy and roll every deploy back to the previous image.
+    grace_period = "30s"
     method = "GET"
     path = "/health"
 
