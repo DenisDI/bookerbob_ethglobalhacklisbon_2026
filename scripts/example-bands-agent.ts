@@ -24,7 +24,7 @@ const { bands, activeCategories } = JSON.parse(
   (res.content as Array<{ text: string }>)[0]!.text,
 ) as { bands: Record<string, string>; activeCategories: string[] };
 
-const band = bands.defi_activity ?? "unavailable";
+const band = bands.activity ?? "unavailable";
 if (band === "unavailable") {
   // The gate refuses to guess when the data is stale, rather than admitting or
   // rejecting on a fiction.

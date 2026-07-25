@@ -47,6 +47,7 @@ GRAPH_API_KEY=... npx context-bands-mcp --http   # :3001, curl-able
   "schemaType": "messari-lending",
   "subgraphId": "<deployment id>",
   "network": "optimism",
+  "role": "activity",
   "category": "lending",
   "countStrategy": "entities"
 }
