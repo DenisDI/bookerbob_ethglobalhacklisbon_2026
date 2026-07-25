@@ -13,9 +13,18 @@
 // Never a tier ladder and never a table. The tier is felt through the term and
 // the exposure glyph, which is the same rule the race lanes follow.
 
+import { TheGraphMark, WorldMark } from "../PartnerMarks";
 import { SettlementRail } from "../SettlementRail";
 import { yourExposureLine, yourTermsLine } from "../terms-copy";
-import type { OffersResponse } from "../types";
+import type { OffersResponse, Payment } from "../types";
+
+/** The four answers the engine has, in the order they get better. */
+const STEPS: Payment[] = [
+  "prepay_100",
+  "deposit",
+  "rate_lock_pay_later",
+  "pay_at_checkout",
+];
 
 /**
  * What is worth doing next, in the ladder's words.
@@ -60,8 +69,67 @@ interface Props {
   wallet: boolean;
 }
 
+/**
+ * What is plugged in, and what each one is still waiting for.
+ *
+ * The panel was a paragraph of prose about a state, and the state itself was the
+ * thing nobody could see. These are the three inputs the engine actually reads,
+ * each either in or not, so "what have I connected and what did it get me" is
+ * answered by looking rather than by reading.
+ */
+function Inputs({
+  personhood,
+  wallet,
+  contextRead,
+}: {
+  personhood: boolean;
+  wallet: boolean;
+  contextRead: boolean;
+}) {
+  const rows = [
+    {
+      key: "person",
+      mark: <WorldMark size={15} />,
+      name: "a person",
+      on: personhood,
+      state: personhood ? "proved" : "not yet",
+    },
+    {
+      // No mark. The wallet is Privy's step and Privy has no mark in the
+      // package, and borrowing another partner's logo for it would credit the
+      // wrong company for the work.
+      key: "wallet",
+      mark: null,
+      name: "a wallet",
+      on: wallet,
+      state: wallet ? "connected" : "not yet",
+    },
+    {
+      key: "standing",
+      mark: <TheGraphMark size={14} />,
+      name: "their history",
+      on: contextRead,
+      state: contextRead ? "read as bands" : wallet ? "nothing to read" : "needs a wallet",
+    },
+  ];
+
+  return (
+    <ul className="yt-in">
+      {rows.map((row) => (
+        <li key={row.key} className={`yt-in__row ${row.on ? "is-on" : ""}`}>
+          <span className="yt-in__mark partner">{row.mark}</span>
+          <span className="yt-in__name">{row.name}</span>
+          <span className="yt-in__state">{row.state}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function YourTerms({ data, refreshing, error, personhood, wallet }: Props) {
   const move = nextMove(data, personhood, wallet);
+  const contextRead = Boolean(data?.context);
+  const at = data ? STEPS.indexOf(data.terms.payment) : -1;
 
   return (
     <aside className={`yourterms ${refreshing ? "is-refreshing" : ""}`}>
@@ -94,13 +162,27 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
         </p>
       ) : data ? (
         <>
+          {/* The level, as a shape rather than as a sentence. Four segments for
+            * the engine's four answers, filled to the one you are on, so a step
+            * that moves the terms is visible from across the room. */}
+          <div className="yt-level" aria-hidden="true">
+            {STEPS.map((_, idx) => (
+              <i key={idx} className={idx <= at ? "is-on" : undefined} />
+            ))}
+          </div>
+
           <p className="yourterms__term">{yourTermsLine(data.terms.payment)}</p>
           <p className="yourterms__why reason">{data.reason}</p>
 
+          <Inputs
+            personhood={personhood}
+            wallet={wallet}
+            contextRead={contextRead}
+          />
+
           {/* The rail is the signature glyph and it is not self-explanatory. A
             * hatched bar over a timeline says nothing on its own about whose
-            * money it is, how much of it, or when: those are three questions the
-            * caption above and the line below now answer outright. */}
+            * money it is, how much of it, or when. */}
           <div className="yourterms__rail">
             <p className="yourterms__railcap label">
               your money, from today to checkout

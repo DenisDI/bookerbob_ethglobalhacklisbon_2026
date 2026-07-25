@@ -1154,6 +1154,89 @@ body {
   margin: 0;
 }
 
+/* ---------- the level, as a shape ----------
+ *
+ * Four segments for the engine's four answers, filled to the one you are on.
+ * The panel used to state the level only in a sentence, which meant the thing
+ * that moves when you connect something was the thing hardest to see.
+ */
+.yt-level {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.yt-level i {
+  height: 5px;
+  background: rgba(233, 229, 220, 0.1);
+  transition: background var(--duration-beat2) ease;
+}
+
+.yt-level i.is-on {
+  background: var(--color-accent);
+}
+
+/* ---------- what is plugged in ---------- */
+
+.yt-in {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.yt-in__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--weight-reg) var(--size-ui-sm) / 1.3 var(--font-ui);
+  color: var(--color-faint);
+}
+
+/* Fixed width whether or not there is a mark, so the three names still line up
+ * when one of the steps has no partner to credit. */
+.yt-in__mark {
+  flex: none;
+  display: inline-flex;
+  justify-content: center;
+  width: 16px;
+  color: var(--color-faint);
+}
+
+.yt-in__name {
+  flex: 1;
+}
+
+.yt-in__state {
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* Plugged in. The row lights, and its partner mark lights with it, so adding a
+ * proof is visible in the panel at the same instant the terms move. */
+.yt-in__row.is-on {
+  color: var(--color-ink);
+}
+
+.yt-in__row.is-on .yt-in__mark {
+  color: var(--color-accent);
+}
+
+.yt-in__row.is-on .yt-in__state {
+  color: var(--color-accent);
+}
+
+/* The rail already says how much waits, in its own words, inside the component
+ * the race shares. Saying it again underneath was the same sentence twice. */
+.yourterms .rail > .reason {
+  display: none;
+}
+
 /* The rail says when money is tied up. It cannot say whose or how much on its
  * own, so it is captioned above and read out below. */
 .yourterms__rail {
