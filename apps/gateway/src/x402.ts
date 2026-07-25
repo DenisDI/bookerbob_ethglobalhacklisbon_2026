@@ -73,12 +73,28 @@ function demoPayer(): { accountId: string; privateKey: string } | null {
   return { accountId, privateKey };
 }
 
-/** True when this request must clear the paywall before /offers. */
+const OFF = new Set(["0", "false", "no"]);
+const ON = new Set(["1", "true", "yes"]);
+
+/**
+ * True when this request must clear the paywall before /offers.
+ *
+ * `?metered=0` says "a person is reading a page, not an agent asking". That
+ * distinction is the whole reason the wall exists: an unbacked AGENT paying a
+ * cent a query is the point of the race, while charging somebody who opened the
+ * overview to read it would spend real money on a visit nobody asked for, and
+ * would greet them with a paywall instead of the terms.
+ *
+ * The opt-out is public, and that is fine to say out loud: the race does not use
+ * it, the bot lane pays through POST /x402/paid-offers where the payment is the
+ * demonstration. The response carries `metered` so no screen can imply a payment
+ * that did not happen.
+ */
 export function shouldMeter(c: Context): boolean {
   const cred = getCredential(c);
   if (cred.status !== "missing") return false;
-  const flag = c.req.query("credential")?.trim().toLowerCase();
-  if (flag === "1" || flag === "true" || flag === "yes") return false;
+  if (ON.has(c.req.query("credential")?.trim().toLowerCase() ?? "")) return false;
+  if (OFF.has(c.req.query("metered")?.trim().toLowerCase() ?? "")) return false;
   return true;
 }
 

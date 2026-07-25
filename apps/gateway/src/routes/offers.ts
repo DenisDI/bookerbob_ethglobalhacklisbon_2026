@@ -24,6 +24,7 @@ import {
   resolveWalletConsent,
 } from "../privy.js";
 import { scheduleForHold } from "../settlement.js";
+import { shouldMeter } from "../x402.js";
 import { type Credential, getCredential, publicCredential } from "../world.js";
 import {
   debugSignals,
@@ -140,6 +141,10 @@ export async function offersHandler(c: Context) {
       credential: publicCredential(credential),
       // Same honesty rule for the wallet axis: verified only after Privy check.
       wallet: publicWallet(wallet),
+      // Whether this ask went through the paywall. A person reading the overview
+      // is not metered, and saying so keeps any surface from implying a payment
+      // that never happened.
+      metered: shouldMeter(c),
       city: result.city,
       checkin: result.checkin,
       checkout: result.checkout,

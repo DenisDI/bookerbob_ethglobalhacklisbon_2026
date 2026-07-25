@@ -52,6 +52,9 @@ export async function fetchOffers(
 
   const params = new URLSearchParams();
   params.set("credential", input.credential ? "1" : "0");
+  // Said out loud, because the gateway cannot tell a person reading a page from
+  // an agent asking. Without this the overview's first visitor met a paywall.
+  if (input.metered === false) params.set("metered", "false");
   if (input.address?.trim()) params.set("address", input.address.trim());
   if (input.city?.trim()) params.set("city", input.city.trim());
   if (input.debugTier) params.set("tier", input.debugTier);
