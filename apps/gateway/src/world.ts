@@ -80,12 +80,21 @@ async function withinQuota(endpoint: string, humanId: string): Promise<boolean> 
 }
 
 /**
+ * MILLISECONDS. The SDK types it as a bare `maxAge?: number` with no unit in the
+ * name, and internally compares it against `DEFAULT_MAX_AGE_MS = 5 * 60 * 1e3`.
+ * Passing 300 meant a freshness window of 0.3 seconds, which every local run
+ * passed, because agent and server were the same machine, and every request over
+ * a network failed. Production said it plainly once the log was readable:
+ * `Message too old: 0s exceeds 0.3s limit`. Same as the SDK default, in the unit
+ * the SDK actually uses.
+ */
+export const MAX_AGE_MS = 5 * 60 * 1000;
+
+/**
  * Replay protection, handed to the SDK rather than bolted on after it: a nonce
  * may be spent once, and validateAgentkitMessage takes the check as an option so
  * a reused header fails validation instead of passing it and being caught later.
  */
-const MAX_AGE_SECONDS = 300;
-
 async function checkNonce(nonce: string): Promise<boolean> {
   if (!storage.hasUsedNonce || !storage.recordNonce) return true;
   try {
@@ -113,7 +122,7 @@ export function createWorldVerifier(): CredentialVerifier {
         // some other endpoint is not a credential here. Freshness and replay are
         // checked in the same call.
         const validation = await validateAgentkitMessage(payload, resourceUri, {
-          maxAge: MAX_AGE_SECONDS,
+          maxAge: MAX_AGE_MS,
           checkNonce,
         });
         if (!validation.valid) {

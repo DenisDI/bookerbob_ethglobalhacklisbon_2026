@@ -117,6 +117,40 @@ disagree.
   and the field-level `nonce: Required` both pointed straight at the problem,
   which is more than most betas manage.
 
+## 7. `maxAge` has no unit in its name, and it cost us an afternoon
+
+`AgentkitValidationOptions.maxAge?: number` is compared against
+`DEFAULT_MAX_AGE_MS = 5 * 60 * 1e3`, so the unit is milliseconds. Nothing in the
+name, the type or the docstring says so, and seconds is the natural guess for a
+field called "max age" in an auth context: SIWE, JWT `exp` and OAuth token
+lifetimes are all seconds.
+
+We passed `300` meaning five minutes and got a freshness window of 0.3 seconds.
+Every local run passed, because the agent and the gateway were the same machine
+and the age was 0ms. Every request that crossed a network failed, and the
+production symptom was a correctly signed credential silently becoming no
+credential, which reads exactly like an unregistered wallet.
+
+The error string was excellent once we could see it, `Message too old: 0s
+exceeds 0.3s limit`, and it is the only reason this was a one-line fix.
+
+Two suggestions, either of which removes the class:
+- rename to `maxAgeMs`, matching the internal constant;
+- or reject a `maxAge` below, say, 1000 as almost certainly a unit mistake,
+  because a sub-second freshness window has no legitimate use over a network.
+
+## 8. `lookupHuman` hides which problem you have
+
+`createAgentBookVerifier().lookupHuman` catches every error and returns `null`,
+so a rate-limited RPC, a blocked egress and a genuinely unregistered wallet are
+one answer. The default endpoint is viem's chain default for World Chain, a
+shared public one, which behaves differently from a laptop and from a datacentre.
+
+Returning a discriminated result, or letting transport errors throw while keeping
+`null` for "not in the book", would let an integrator tell their own problem from
+their caller's. We ended up adding our own `eth_blockNumber` probe to recover the
+distinction.
+
 ## What we shipped against this
 
 `apps/gateway/src/world.ts`: verification behind a `CredentialVerifier`
@@ -129,3 +163,6 @@ World before a real header has verified once.
 `scripts/agent-with-credential.ts`: an agent that signs and presents the header
 for real, which is what makes the demo a comparison between an accountable agent
 and an anonymous one rather than a checkbox in a browser.
+
+`apps/gateway/src/world-chain.ts`: a raw `eth_blockNumber` probe, reported in
+`/health`, so an unreachable RPC stops reading as an unregistered wallet.

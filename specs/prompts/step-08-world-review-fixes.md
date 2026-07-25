@@ -90,3 +90,16 @@ being questioned. `LISBON2026_WORLD_RPC_URL` overrides the endpoint.
 
 This also decides who owns the problem: `world chain unreachable from this
 machine` is ours, `agent wallet is not registered` is the caller's.
+
+## The actual cause: a unit, not a network
+
+The log settled it: `credential rejected (world): Message too old: 0s exceeds
+0.3s limit`. `maxAge` is milliseconds, and we passed `300` meaning five minutes,
+so the freshness window was a third of a second. Local runs passed because the
+agent and the gateway shared a machine and the age was 0ms; anything with a
+network in between failed. One line, plus a test that fails if the number is ever
+small enough to be seconds again.
+
+The chain probe from the previous step stays. It did not find this bug, but it
+removes the ambiguity that made the bug look like an unregistered wallet, and it
+is now in `docs/FEEDBACK-world.md` as feedback to the partner.

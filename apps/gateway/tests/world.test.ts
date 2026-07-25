@@ -10,6 +10,7 @@ import {
   credentialLabel,
   credentialMiddleware,
   getCredential,
+  MAX_AGE_MS,
   mayDeferSettlement,
   NO_CREDENTIAL,
   pickVerifier,
@@ -17,6 +18,18 @@ import {
 } from "../src/world.js";
 
 const RESOURCE = "http://localhost:3000/offers";
+
+// The unit trap that cost an afternoon. The SDK takes `maxAge` as a bare number
+// and compares it in milliseconds, so 300 is not five minutes, it is a third of
+// a second: long enough for a local run where agent and server share a machine,
+// far too short for anything with a network in between. A number small enough to
+// be seconds is the bug, so it fails here instead of on stage.
+test("the freshness window is milliseconds, not seconds", () => {
+  assert.ok(
+    MAX_AGE_MS >= 60_000,
+    `maxAge is passed to the SDK in ms; ${MAX_AGE_MS} would be ${MAX_AGE_MS / 1000}s`,
+  );
+});
 
 test("the mock verifier cannot produce a verified credential", async () => {
   const mock = createMockVerifier();
