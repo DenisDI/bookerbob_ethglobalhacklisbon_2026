@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddressBands } from "./AddressBands";
-import { fetchOffers, fetchSpent } from "./api";
+import { fetchAgentVerifiedOffers, fetchOffers, fetchSpent } from "./api";
 import {
   CITIES,
   DEFAULT_CITY,
@@ -227,17 +227,40 @@ export function App() {
           credential: boolean;
           address?: string;
           accessToken?: string | null;
+          /** Ask as the registered agent, so the credential is checked not claimed. */
+          agent?: boolean;
         },
       ) => {
         try {
           // Bot lane: only trust spentUsd when the gateway also returns a
           // HashScan tx from the x402 settle receipt — never invent +$0.01.
-          const data = await fetchOffers({
-            credential: opts.credential,
-            address: opts.address,
-            city: city.trim() || undefined,
-            accessToken: opts.accessToken,
-          });
+          // The backed lane asks as the registered agent, so its credential is
+          // checked against the AgentBook instead of asserted here. The unbacked
+          // lane is untouched: it has nobody behind it and that is its point.
+          // The agent lane needs a signing key the gateway may not have, and a
+          // race that dies because one lane could not sign is worse than a race
+          // that runs with the stand-in and says so: the chip reads the answer,
+          // so a fallback shows STAND-IN CREDENTIAL rather than claiming World.
+          const data = opts.agent
+            ? await fetchAgentVerifiedOffers({
+                credential: true,
+                address: opts.address,
+                city: city.trim() || undefined,
+                accessToken: opts.accessToken,
+              }).catch(() =>
+                fetchOffers({
+                  credential: true,
+                  address: opts.address,
+                  city: city.trim() || undefined,
+                  accessToken: opts.accessToken,
+                }),
+              )
+            : await fetchOffers({
+                credential: opts.credential,
+                address: opts.address,
+                city: city.trim() || undefined,
+                accessToken: opts.accessToken,
+              });
           const limit = data.terms.inventory === "basic" ? 3 : 5;
           const merged = {
             ...data,
@@ -282,6 +305,7 @@ export function App() {
           credential: hasCredential(credential),
           address: consented || undefined,
           accessToken,
+          agent: true,
         }),
       ]);
     },

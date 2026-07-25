@@ -79,11 +79,30 @@ export function RacePane({
             * the lead-in above already names the two sides by position. The role
             * is the label now, in plain words. */}
           <h2 className="pane__title">{label}</h2>
+          {/* The chip used to say CREDENTIAL PRESENT whether or not anything had
+            * been checked, which made a real AgentBook verification look exactly
+            * like a browser asserting one. It reads the answer now: only a header
+            * this gateway signed and World Chain confirmed can say verified. */}
           {accent ? (
-            <span className="chip chip--accent partner">
-              <WorldMark />
-              CREDENTIAL PRESENT
-            </span>
+            data?.credential?.status === "verified" &&
+            data.credential.source === "agentkit" ? (
+              <span className="chip chip--accent partner" title="verified in AgentBook on World Chain">
+                <WorldMark />
+                AGENTKIT VERIFIED
+              </span>
+            ) : (
+              <span className="chip partner">
+                <WorldMark />
+                STAND-IN CREDENTIAL
+              </span>
+            )
+          ) : null}
+          {/* Where the answer came from, in the words a judge needs: not our
+            * claim, a lookup on World Chain. Only shown when it actually ran. */}
+          {accent &&
+          data?.credential?.status === "verified" &&
+          data.credential.source === "agentkit" ? (
+            <span className="pane__proof reason">verified in AgentBook · World Chain</span>
           ) : null}
           <span className="pane__spacer" />
           <span className="pane__status">

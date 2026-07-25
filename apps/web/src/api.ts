@@ -141,6 +141,39 @@ async function fetchPaidBotOffers(
   return { ...data, spentUsd, paymentTxId, paymentTxUrl };
 }
 
+/**
+ * The backed lane, asked by our registered agent rather than asserted here.
+ *
+ * The browser cannot sign an AgentKit header, so every other surface can only
+ * say "treat me as credentialed" and be answered `stand_in`, which is honest and
+ * invisible. This route has the gateway sign as the agent and verify against the
+ * AgentBook on World Chain, so what comes back is a credential somebody checked.
+ */
+export async function fetchAgentVerifiedOffers(
+  input: FetchOffersInput,
+): Promise<PaidOffersResult> {
+  const params = new URLSearchParams();
+  if (input.address?.trim()) params.set("address", input.address.trim());
+  if (input.city?.trim()) params.set("city", input.city.trim());
+
+  const res = await fetch(`${GATEWAY}/agent/offers?${params}`, {
+    headers: input.accessToken?.trim()
+      ? { Authorization: `Bearer ${input.accessToken.trim()}` }
+      : {},
+  });
+
+  if (!res.ok) {
+    // A lane that could not prove anything must not quietly become the stand-in
+    // lane: the difference is the whole point of showing it.
+    const err = (await res.json().catch(() => ({}))) as { message?: string; error?: string };
+    throw new OffersError(
+      err.message || err.error || `the agent lane answered ${res.status}`,
+    );
+  }
+
+  return (await res.json()) as PaidOffersResult;
+}
+
 /** Gateway ledger for the race counters. */
 export async function fetchSpent(payer?: string): Promise<{
   totalUsd: number;

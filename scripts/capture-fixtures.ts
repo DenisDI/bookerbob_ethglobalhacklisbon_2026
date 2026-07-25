@@ -1,10 +1,14 @@
 #!/usr/bin/env -S npx tsx
 // Captures the in-event second inventory source: one real booker response plus
-// the hotel metadata behind it, written verbatim to fixtures/lisbon.json.
+// the hotel metadata behind it, written verbatim to fixtures/<city>.json.
 // Required by specs/00-final-plan.md A.3 — the snapshot is real supplier data,
 // never hand-authored.
 //
-//   npm run capture:fixtures
+//   npm run capture:fixtures            # the pinned demo city
+//   npx tsx scripts/capture-fixtures.ts munich
+//
+// A city per file, because the city selector offers four and a demo that shows
+// hotels for a city nobody quoted is a demo showing invented hotels.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
@@ -12,10 +16,14 @@ import { fileURLToPath } from "node:url";
 import { captureRaw } from "../apps/gateway/src/inventory/booker.js";
 import { demo } from "../apps/gateway/src/demo.config.js";
 
-const OUT = fileURLToPath(new URL("../fixtures/lisbon.json", import.meta.url));
+const city = process.argv[2]?.trim() || demo.city;
+/** One file per city, named the way the gateway will look for it. */
+const OUT = fileURLToPath(
+  new URL(`../fixtures/${city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.json`, import.meta.url),
+);
 
 const query = {
-  city: demo.city,
+  city,
   checkin: demo.checkin,
   checkout: demo.checkout,
   adults: demo.adults,

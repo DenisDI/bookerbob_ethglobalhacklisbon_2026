@@ -72,6 +72,18 @@ export const env = {
   worldSigningKey: str("LISBON2026_WORLD_SIGNING_KEY"),
 
   /**
+   * The agent's own signing key, read by GET /agent/offers and by nothing else.
+   *
+   * Everything else here says a server has no business holding this, and that
+   * stays true for verification: checking a credential needs no secret, and
+   * keying the verifier off this key's presence was a real bug we fixed. The
+   * race lane is the one deliberate exception, because an agent that lives only
+   * in a terminal cannot be shown to anybody watching the race. See
+   * src/routes/agentOffers.ts.
+   */
+  agentPrivateKey: str("LISBON2026_AGENT_PRIVATE_KEY"),
+
+  /**
    * What the person is proving uniqueness for. One action, so one nullifier.
    * Matches the action registered in the Developer Portal: a name the Portal has
    * not seen is created on the fly, which works but leaves the settings for it

@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { env } from "./env.js";
 import { privyConfigured } from "./privy.js";
 import { bookHandler } from "./routes/book.js";
+import { agentOffersHandler } from "./routes/agentOffers.js";
 import { offersHandler } from "./routes/offers.js";
 import { paidOffersHandler } from "./routes/paidOffers.js";
 import { prebookHandler } from "./routes/prebook.js";
@@ -30,6 +31,7 @@ import {
 //   GET  /offers?city=&address=   identity -> (x402 Hedera if bot) -> Graph -> terms
 //                                 (+ Authorization: Bearer Privy access token)
 //   POST /x402/paid-offers        race bot: demo Hedera pays HBAR, then offers
+//   GET  /agent/offers            same as /offers, signed by our registered agent
 //   GET  /world-id/context        signed request context for the Selfie widget
 //   POST /world-id/verify         finished proof -> Portal -> session token
 //   POST /prebook                 Hedera ScheduleCreate for an existing hold
@@ -65,6 +67,10 @@ app.use("*", credentialMiddleware(verifier));
 app.use("*", meteringMiddleware());
 
 app.get("/offers", offersHandler);
+// The same request as /offers, asked by our registered agent instead of asserted
+// by a browser. It signs, then calls the line above, so the credential comes from
+// the AgentBook and not from this route.
+app.get("/agent/offers", agentOffersHandler);
 app.post("/x402/paid-offers", paidOffersHandler);
 app.get("/spent", spentHandler);
 app.get("/world-id/context", worldIdContextHandler);
