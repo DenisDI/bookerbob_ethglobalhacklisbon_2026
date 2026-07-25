@@ -1,9 +1,9 @@
 {
-  "name": "@fairterms/web",
+  "name": "@bookerbob/web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "FairTerms demo: the race, not a tour.",
+  "description": "BookerBob demo: the race, not a tour.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,8 +11,10 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@privy-io/react-auth": "^3.35.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "viem": "^2.55.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.17",

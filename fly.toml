@@ -1,5 +1,5 @@
-# FairTerms — ETHGlobal Lisbon 2026
-# App: fairterms-lisbon → https://lisbonhack.world
+# BookerBob — ETHGlobal Lisbon 2026
+# Fly app id stays fairterms-lisbon (already live) → https://lisbonhack.world
 #
 # Deploy: fly deploy
 # Auto: .github/workflows/deploy.yml on push to main

@@ -45,7 +45,7 @@ async function withClient<T>(fn: (client: Client) => Promise<T>): Promise<T> {
   const transport = new StreamableHTTPClientTransport(new URL(env.bookerUrl), {
     requestInit: { headers: { Authorization: `Bearer ${env.bookerToken}` } },
   });
-  const client = new Client({ name: "fairterms-gateway", version: "0.1.0" });
+  const client = new Client({ name: "bookerbob-gateway", version: "0.1.0" });
   try {
     await client.connect(transport);
     return await fn(client);

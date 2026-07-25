@@ -48,6 +48,6 @@ a naive `utcnow()`. Reported to the team; static hotel metadata is served from
 the captured snapshot until it is fixed.
 
 Verified before commit: `npm run typecheck` clean across three workspaces and
-scripts, `npm test -w @fairterms/gateway` 9/9 offline, `npm run lint:lexicon`
+scripts, `npm test -w @bookerbob/gateway` 9/9 offline, `npm run lint:lexicon`
 clean, live `/offers` 200 with real prices in 6.8s, and the fallback path
 serving the snapshot with HTTP 200 when the supplier is unreachable.

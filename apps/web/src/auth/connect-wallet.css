@@ -1,0 +1,49 @@
+/* Self-contained — safe to import from any page/layout. */
+
+.cw-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid #3b5bff;
+  border-radius: 0;
+  background: #3b5bff;
+  color: #fff;
+  font: 600 0.85rem/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+.cw-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.cw-btn--ghost {
+  background: #101017;
+  border-color: #23232f;
+  color: #f2f3f7;
+}
+
+.cw-btn--ghost:hover {
+  border-color: #f2f3f7;
+}
+
+.cw-btn--missing {
+  background: #101017;
+  border-color: #23232f;
+  color: #767c90;
+  cursor: not-allowed;
+  font-weight: 500;
+}
+
+.cw-btn__addr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}

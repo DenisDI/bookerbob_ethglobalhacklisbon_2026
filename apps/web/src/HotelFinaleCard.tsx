@@ -1,5 +1,5 @@
 // The finale is a booking, shown like a booking. Real photo, real name, real
-// nightly rate, then the two facts that make it a FairTerms booking: the price
+// nightly rate, then the two facts that make it a BookerBob booking: the price
 // is held, and the settlement is scheduled.
 //
 // The scheduled-settlement line is deliberately present before Hedera is wired,

@@ -6,6 +6,7 @@ import { fetchOffers } from "./api";
 import { RacePane, type PaneState } from "./RacePane";
 import { PANE_LABEL } from "./terms-copy";
 import type { Tier } from "./types";
+import { ConnectWalletButton } from "./auth";
 
 const PROMPT = "book me a hotel in lisbon";
 
@@ -80,6 +81,7 @@ export function App() {
 
   return (
     <main className="page">
+      <ConnectWalletButton />
       <header className="masthead">
         <h1 className="thesis">who is behind an agent changes the terms it gets</h1>
         <div className="ask">

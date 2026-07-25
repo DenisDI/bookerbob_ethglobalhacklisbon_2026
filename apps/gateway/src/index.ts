@@ -23,7 +23,7 @@ app.get("/offers", offersHandler);
 app.get("/health", (c) =>
   c.json({
     ok: true,
-    service: "fairterms-gateway",
+    service: "bookerbob-gateway",
     version: "0.1.0",
     uptimeSeconds: Math.round(process.uptime()),
     inventorySource: env.inventorySource,

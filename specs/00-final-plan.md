@@ -1,4 +1,4 @@
-# FINAL PLAN — FairTerms gateway (ETHGlobal Lisbon 2026)
+# FINAL PLAN — BookerBob gateway (ETHGlobal Lisbon 2026)
 
 > **Pre-event research / executable architecture spec.**  
 > Public-docs excerpts + battle-test + demo WOW pass. **No project application code
@@ -7,7 +7,7 @@
 > `DEMO-IMPROVEMENTS.md`. Archived research in `specs/research/` (untracked).
 
 Deadline: Sun Jul 26 **04:00 WEST freeze**. Draft + placeholder video **Sat evening**.
-Scratch. Names OK: **FairTerms** / Vouched / RealRate. Do not brand "REP".
+Scratch. Product name: **BookerBob**. Do not brand "REP".
 
 **Open + close sentence (video):**
 > Who is behind an agent changes the terms it gets.
@@ -361,7 +361,7 @@ WalletConnect encore.
 # H. Repo skeleton
 
 ```
-fairterms/
+bookerbob/
   README.md                 §A one-liner; ownership disclosure; Reused/Referenced; Hedera schedule
   specs/
     00-final-plan.md

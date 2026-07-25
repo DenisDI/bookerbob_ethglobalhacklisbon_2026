@@ -1,5 +1,5 @@
 {
-  "name": "fairterms",
+  "name": "bookerbob",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -13,8 +13,8 @@
   },
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
-    "dev:gateway": "npm run dev -w @fairterms/gateway",
-    "dev:web": "npm run dev -w @fairterms/web",
+    "dev:gateway": "npm run dev -w @bookerbob/gateway",
+    "dev:web": "npm run dev -w @bookerbob/web",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present && tsc -p scripts/tsconfig.json",

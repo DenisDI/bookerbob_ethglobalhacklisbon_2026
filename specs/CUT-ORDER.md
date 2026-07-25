@@ -1,4 +1,4 @@
-# CUT-ORDER — FairTerms (commit Fri night; follow under time pressure)
+# CUT-ORDER — BookerBob (commit Fri night; follow under time pressure)
 
 Sources: battle-test + `DEMO-IMPROVEMENTS.md`. Critical path is one stack
 (`apps/gateway`); parallelism there is fake. Cut in this order only.

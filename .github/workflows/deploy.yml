@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy to fairterms-lisbon
+    name: Deploy BookerBob (fairterms-lisbon)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +19,10 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy
-        run: flyctl deploy --remote-only
+        # Privy App ID is public; Vite needs it at image build time.
+        # Set repo Variable (or Secret) VITE_LISBON2026_PRIVY_APP_ID.
+        run: >
+          flyctl deploy --remote-only
+          --build-arg VITE_LISBON2026_PRIVY_APP_ID=${{ vars.VITE_LISBON2026_PRIVY_APP_ID }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

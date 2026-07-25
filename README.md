@@ -1,4 +1,4 @@
-# FairTerms
+# BookerBob
 
 Who is behind an agent changes the terms it gets.
 

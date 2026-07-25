@@ -1,4 +1,4 @@
-# KEYS & ACCOUNTS — FairTerms (ETHGlobal Lisbon 2026)
+# KEYS & ACCOUNTS — BookerBob (ETHGlobal Lisbon 2026)
 
 What you need, where to get it, when. Put secrets only in `.env` (never commit).
 **Canonical rules:** `FINAL-PLAN.md` (supersedes older Graph-testnet / x402-Hedera notes).
@@ -170,6 +170,19 @@ Disclose in README as external deployed API.
 
 ---
 
+## Privy (wallet connect → consented address)
+
+| Item | Env | Where |
+|---|---|---|
+| App ID (web) | `VITE_LISBON2026_PRIVY_APP_ID` | https://dashboard.privy.io → App settings |
+| App ID (server) | `LISBON2026_PRIVY_APP_ID` | same value as above |
+| App secret | `LISBON2026_PRIVY_APP_SECRET` | Dashboard → App settings (server only) |
+| JWKS URL | `LISBON2026_PRIVY_JWKS_URL` | `https://auth.privy.io/api/v1/apps/<APP_ID>/jwks.json` |
+
+Allowed origins in Privy Dashboard: `http://localhost:5173`, `https://lisbonhack.world`.
+
+---
+
 ## Suggested `.env` template (do not commit values)
 
 ```bash
@@ -195,6 +208,12 @@ LISBON2026_BOOKER_TOKEN=
 # Optional disclosed context bands API
 LISBON2026_CONTEXT_API_URL=
 LISBON2026_CONTEXT_API_KEY=
+
+# Privy wallet auth
+VITE_LISBON2026_PRIVY_APP_ID=
+LISBON2026_PRIVY_APP_ID=
+LISBON2026_PRIVY_APP_SECRET=
+LISBON2026_PRIVY_JWKS_URL=
 ```
 
 Add `.env` to `.gitignore` on repo init (step 1).

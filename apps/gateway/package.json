@@ -1,9 +1,9 @@
 {
-  "name": "@fairterms/gateway",
+  "name": "@bookerbob/gateway",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "FairTerms gateway: identity -> context -> underwriting terms -> inventory.",
+  "description": "BookerBob gateway: identity -> context -> underwriting terms -> inventory.",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",

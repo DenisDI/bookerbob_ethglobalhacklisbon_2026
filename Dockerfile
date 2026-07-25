@@ -1,4 +1,4 @@
-# FairTerms monorepo → single Fly process: gateway + built web
+# BookerBob monorepo → single Fly process: gateway + built web
 FROM node:20-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -9,7 +9,10 @@ RUN npm ci
 
 FROM deps AS build
 COPY . .
-RUN npm run build -w @fairterms/web
+# Vite inlines this at build time (not a Fly runtime secret).
+ARG VITE_LISBON2026_PRIVY_APP_ID=
+ENV VITE_LISBON2026_PRIVY_APP_ID=$VITE_LISBON2026_PRIVY_APP_ID
+RUN npm run build -w @bookerbob/web
 
 FROM node:20-slim AS runner
 WORKDIR /app
@@ -18,4 +21,4 @@ ENV GATEWAY_PORT=3000
 ENV STATIC_DIR=/app/apps/web/dist
 COPY --from=build /app /app
 EXPOSE 3000
-CMD ["npm", "run", "start", "-w", "@fairterms/gateway"]
+CMD ["npm", "run", "start", "-w", "@bookerbob/gateway"]
