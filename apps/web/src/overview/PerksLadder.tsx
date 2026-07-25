@@ -224,24 +224,54 @@ function buildRungs(props: Props): Rung[] {
   );
 }
 
+/**
+ * How far through the pinned run we are, as a rung index.
+ *
+ * The section holds the viewport for a few screens of scrolling and spends one
+ * of them on each partner: the rung opens, you read what that partner does, and
+ * the next scroll closes it and opens the one below. The last stretch closes
+ * everything and the ladder settles into the compact stack you keep.
+ *
+ * Only the three partner rungs get a turn. The floor rung is where you already
+ * are and has nobody to introduce.
+ */
+const TOURED = [1, 2, 3];
+
+function phaseFromScroll(track: HTMLElement): number {
+  const rect = track.getBoundingClientRect();
+  const travel = rect.height - window.innerHeight;
+  if (travel <= 0) return -1;
+  const p = Math.min(Math.max(-rect.top / travel, 0), 1);
+  // One slot per partner, plus a final slot where the ladder folds back up.
+  const slot = Math.floor(p * (TOURED.length + 1));
+  return TOURED[slot] ?? -1;
+}
+
 export function PerksLadder(props: Props) {
   const steps = buildRungs(props);
-  const [open, setOpen] = useState<string | null>(null);
+  /** Which rung is open. Scroll drives it; a click can take it over. */
+  const [open, setOpen] = useState<number | null>(null);
   const [shown, setShown] = useState(false);
-  const boxRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLElement>(null);
 
-  // Everything is on screen immediately when motion is not wanted. No observer,
-  // no transitions, no waiting for a scroll that may never come.
-  const reduced =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Pinning a section takes the scroll away from the reader for a moment, which
+  // is worth it on a laptop and hostile on a phone, and wrong for anyone who has
+  // asked for less motion. Both fall back to the plain stack, still openable.
+  const [pinned, setPinned] = useState(false);
+  useEffect(() => {
+    const decide = () => {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      setPinned(!reduced && window.innerWidth > 860);
+      if (reduced) setShown(true);
+    };
+    decide();
+    window.addEventListener("resize", decide);
+    return () => window.removeEventListener("resize", decide);
+  }, []);
 
   useEffect(() => {
-    if (reduced) {
-      setShown(true);
-      return;
-    }
-    const node = boxRef.current;
+    const node = stageRef.current;
     if (!node) return;
     const io = new IntersectionObserver(
       (entries) => {
@@ -254,67 +284,98 @@ export function PerksLadder(props: Props) {
     );
     io.observe(node);
     return () => io.disconnect();
-  }, [reduced]);
+  }, []);
+
+  useEffect(() => {
+    if (!pinned) return;
+    const track = trackRef.current;
+    if (!track) return;
+
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const next = phaseFromScroll(track);
+        setOpen((prev) => (prev === next ? prev : next));
+      });
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [pinned]);
 
   return (
-    <section
-      ref={boxRef}
-      className={`ladder ${shown ? "is-in" : ""} ${reduced ? "is-still" : ""}`}
-      aria-label="what you get"
+    <div
+      ref={trackRef}
+      className={`ladder-track ${pinned ? "is-pinned" : ""}`}
+      // One screen of scrolling per partner, plus one to fold it back up. Set
+      // here rather than in the sheet because it is only true while pinned.
+      style={pinned ? { height: `${(TOURED.length + 2) * 100}vh` } : undefined}
     >
-      <ol className="ladder__rows">
-        {steps.map((rung, idx) => {
-          const isOpen = open === rung.key;
-          return (
-            <li
-              key={rung.key}
-              className={`rung rung--${rung.state} ${isOpen ? "is-open" : ""}`}
-              style={{ ["--i" as string]: String(idx) }}
-            >
-              <button
-                type="button"
-                className="rung__head"
-                aria-expanded={isOpen}
-                onClick={() => setOpen(isOpen ? null : rung.key)}
+      <section
+        ref={stageRef}
+        className={`ladder ${shown ? "is-in" : ""}`}
+        aria-label="what you get"
+      >
+        <ol className="ladder__rows">
+          {steps.map((rung, idx) => {
+            const isOpen = open === idx;
+            return (
+              <li
+                key={rung.key}
+                className={`rung rung--${rung.state} ${isOpen ? "is-open" : ""}`}
+                style={{ ["--i" as string]: String(idx) }}
               >
-                {rung.mark ? (
-                  <span
-                    className={`rung__mark rung__mark--${rung.key}`}
-                    aria-hidden="true"
-                  >
-                    {rung.mark}
+                <button
+                  type="button"
+                  className="rung__head"
+                  aria-expanded={isOpen}
+                  onClick={() => setOpen(isOpen ? null : idx)}
+                >
+                  {rung.mark ? (
+                    <span
+                      className={`rung__mark rung__mark--${rung.key}`}
+                      aria-hidden="true"
+                    >
+                      {rung.mark}
+                    </span>
+                  ) : null}
+
+                  <span className="rung__body">
+                    <span className="rung__perk">{rung.perk}</span>
+                    <span className="rung__ask">{rung.ask}</span>
+
+                    {rung.state === "here" ? (
+                      <span className="rung__flag label">you are here</span>
+                    ) : null}
+                    {rung.opens ? (
+                      <span className="rung__opens">{rung.opens}</span>
+                    ) : null}
                   </span>
+
+                  <span className="rung__more" aria-hidden="true">
+                    {isOpen ? "less" : "more"}
+                  </span>
+                </button>
+
+                {isOpen ? (
+                  <div className="rung__details">
+                    {rung.partner ? (
+                      <p className="rung__partner label">{rung.partner}</p>
+                    ) : null}
+                    {rung.details}
+                  </div>
                 ) : null}
-
-                <span className="rung__body">
-                  <span className="rung__perk">{rung.perk}</span>
-                  <span className="rung__ask">{rung.ask}</span>
-
-                  {rung.state === "here" ? (
-                    <span className="rung__flag label">you are here</span>
-                  ) : null}
-                  {rung.opens ? (
-                    <span className="rung__opens">{rung.opens}</span>
-                  ) : null}
-                </span>
-
-                <span className="rung__more" aria-hidden="true">
-                  {isOpen ? "less" : "more"}
-                </span>
-              </button>
-
-              {isOpen ? (
-                <div className="rung__details">
-                  {rung.partner ? (
-                    <p className="rung__partner label">{rung.partner}</p>
-                  ) : null}
-                  {rung.details}
-                </div>
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
-    </section>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+    </div>
   );
 }

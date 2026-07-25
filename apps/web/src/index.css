@@ -597,9 +597,33 @@ body {
  * the stack. The animation is an introduction, not a state: once in, they stay.
  */
 
+/* The track is only tall while the run is pinned; its height is set inline by
+ * the component, because it is a lie about the document at every other width. */
+.ladder-track {
+  position: relative;
+}
+
+/* Held at the top for the length of the track, so each partner gets the screen
+ * to itself for a moment before the next one takes it. */
+.ladder-track.is-pinned .ladder {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--color-canvas);
+}
+
 .ladder {
   padding: var(--space-4);
   border-top: 1px solid var(--color-line);
+}
+
+/* The rows do not jump as a rung opens and closes under the reader: the stage is
+ * centred, so growth is shared between the top and the bottom. */
+.ladder__rows {
+  transition: none;
 }
 
 .ladder__rows {
@@ -755,7 +779,19 @@ body {
 
 /* ---------- an opened rung ---------- */
 
+@keyframes rung-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .rung__details {
+  animation: rung-open var(--duration-beat1) ease both;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
