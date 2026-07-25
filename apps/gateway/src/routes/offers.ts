@@ -1,9 +1,9 @@
 // GET /offers — the main path: identity -> context -> terms -> inventory.
 //
-// This step wires the inventory leg only. Identity (AgentKit), context bands,
-// and the real terms engine land in later steps, so every request is treated as
-// an unbacked agent: bot tier, short list, pay in full. The response shape is
-// already the final one so the web demo and later steps do not have to reshape it.
+// Identity (AgentKit) and context bands land in later steps. Until then the
+// only way to reach a non-bot tier is the ?tier= debug parameter, which
+// synthesises SIGNALS and lets the real engine decide, so what a reviewer sees
+// is the actual matrix rather than a canned answer.
 
 import type { Context } from "hono";
 import { demo } from "../demo.config.js";
@@ -14,19 +14,27 @@ import {
   narrateSearch,
   narrateTerms,
 } from "../narration.js";
-import type { Terms } from "../types.js";
+import {
+  debugSignals,
+  decideTerms,
+  earnsRateLock,
+  offerLimit,
+  type TermsSignals,
+} from "../terms.js";
 
 const inventory = createInventory();
 
-/** Step 3 replaces this with the real underwriting matrix. */
-const BOT_TERMS: Terms = {
-  tier: "bot",
-  inventory: "basic",
-  payment: "prepay_100",
-};
+/** No credential source is wired yet, so every real request is unbacked. */
+const UNBACKED: TermsSignals = { hasCredential: false, context: null };
 
 export async function offersHandler(c: Context) {
   const city = c.req.query("city")?.trim() || demo.city;
+  const debugTier = c.req.query("tier")?.trim();
+
+  const signals = debugSignals(debugTier) ?? UNBACKED;
+  const terms = decideTerms(signals);
+  const limit = offerLimit(terms.inventory);
+
   const narrator = new Narrator();
 
   try {
@@ -35,32 +43,32 @@ export async function offersHandler(c: Context) {
       checkin: demo.checkin,
       checkout: demo.checkout,
       adults: demo.adults,
-      topN: demo.botOfferCount,
+      topN: limit,
     });
 
-    const offers = result.offers.slice(0, demo.botOfferCount);
-    // A bot prepays in full, so it is shown no rate lock — and is not told
-    // about one either. The supplier's one-shot call holds a rate anyway;
-    // later steps use the granular search path for this tier so no hold is
-    // created needlessly.
-    const surfacedHold = BOT_TERMS.tier === "bot" ? null : result.hold;
+    const offers = result.offers.slice(0, limit);
+    // The lock is shown only to tiers whose payment term is a held price. A bot
+    // prepays and a human leaves a deposit, so neither is told about a hold,
+    // even though the supplier's one-shot call creates one.
+    const hold = earnsRateLock(terms) ? result.hold : null;
 
     narrateSearch(narrator, city, result);
-    narrateTerms(narrator, BOT_TERMS, offers.length);
-    narrateHold(narrator, surfacedHold);
+    narrateTerms(narrator, terms, offers.length, signals.context);
+    narrateHold(narrator, hold);
 
     return c.json({
-      terms: BOT_TERMS,
+      terms,
       city: result.city,
       checkin: result.checkin,
       checkout: result.checkout,
       nights: result.nights,
       matchingCount: result.matchingCount,
       offers,
-      hold: surfacedHold,
+      hold,
       source: result.source,
       capturedAt: result.capturedAt,
       narration: narrator.all(),
+      debugTier: debugTier && debugSignals(debugTier) ? debugTier : undefined,
     });
   } catch (err) {
     if (err instanceof InventoryUnavailableError) {

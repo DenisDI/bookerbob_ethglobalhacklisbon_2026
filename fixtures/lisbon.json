@@ -1,13 +1,13 @@
 {
-  "capturedAt": "2026-07-25T10:52:22.083Z",
+  "capturedAt": "2026-07-25T11:16:54.270Z",
   "capturedFrom": "flexrep booker MCP find_and_prebook_hotel + get_hotel_info",
-  "note": "Real supplier response captured during ETHGlobal Lisbon 2026. Prices and the prebook hold were valid at capture time; the hold itself expires in minutes upstream. Hotel metadata (get_hotel_info) captured at 10:45 UTC before that tool started failing server-side.",
+  "note": "Real supplier response captured during ETHGlobal Lisbon 2026. Prices and the prebook hold were valid at capture time; the hold itself expires in minutes upstream.",
   "query": {
     "city": "Lisbon",
     "checkin": "2026-08-14",
     "checkout": "2026-08-17",
     "adults": 2,
-    "topN": 3
+    "topN": 10
   },
   "response": {
     "status": "ok",
@@ -31,8 +31,16 @@
       "name": "Lisbon"
     },
     "search_hotels": {
-      "count_matching": 10,
+      "count_matching": 11,
       "top": [
+        {
+          "hotel_id": "the_delight_hostel_lisbon",
+          "lead_price_usd": 210.28,
+          "per_night_usd": 70.09,
+          "free_cancellation_before": "2026-08-06T23:00:00",
+          "refundable_rate_count": 3,
+          "rate_count": 3
+        },
         {
           "hotel_id": "hotel_dom_sancho_i",
           "lead_price_usd": 284.97,
@@ -56,48 +64,134 @@
           "free_cancellation_before": "2026-08-10T16:00:00",
           "refundable_rate_count": 6,
           "rate_count": 12
+        },
+        {
+          "hotel_id": "turim_marques_hotel",
+          "lead_price_usd": 469.97,
+          "per_night_usd": 156.66,
+          "free_cancellation_before": "2026-08-09T16:00:00",
+          "refundable_rate_count": 8,
+          "rate_count": 12
+        },
+        {
+          "hotel_id": "rodamon_lisboa_hostel",
+          "lead_price_usd": 530.87,
+          "per_night_usd": 176.96,
+          "free_cancellation_before": "2026-08-12T11:00:00",
+          "refundable_rate_count": 5,
+          "rate_count": 11
+        },
+        {
+          "hotel_id": "hotel_americano_8",
+          "lead_price_usd": 563.05,
+          "per_night_usd": 187.68,
+          "free_cancellation_before": "2026-08-11T23:00:00",
+          "refundable_rate_count": 6,
+          "rate_count": 8
+        },
+        {
+          "hotel_id": "residencial_florescente",
+          "lead_price_usd": 645.78,
+          "per_night_usd": 215.26,
+          "free_cancellation_before": "2026-08-07T16:00:00",
+          "refundable_rate_count": 3,
+          "rate_count": 3
+        },
+        {
+          "hotel_id": "lux_lisboa_park",
+          "lead_price_usd": 672.21,
+          "per_night_usd": 224.07,
+          "free_cancellation_before": "2026-08-11T23:00:00",
+          "refundable_rate_count": 9,
+          "rate_count": 18
+        },
+        {
+          "hotel_id": "eurostars_lisboa_baixa",
+          "lead_price_usd": 699.79,
+          "per_night_usd": 233.26,
+          "free_cancellation_before": "2026-08-11T19:57:00",
+          "refundable_rate_count": 2,
+          "rate_count": 2
         }
       ]
     },
     "hotel": {
-      "hotel_id": "hotel_dom_sancho_i",
-      "name": "Hotel Dom Sancho I",
-      "address": "Avenida Liberdade 202, 2nd Floor, Lisbon",
-      "star_rating": 2
+      "hotel_id": "the_delight_hostel_lisbon",
+      "name": "The Delight Hostel Lisbon",
+      "address": "R. Tomás Ribeiro 95, Lisbon",
+      "star_rating": 1
     },
     "rates": {
-      "matching_count": 1,
+      "matching_count": 3,
       "options": [
         {
-          "book_hash": "h-ef3cf7fc-d0bf-5271-9302-f812d848a3f3",
-          "room_name": "Double room (full double bed) (bed type is subject to availability)",
-          "meal": "breakfast",
-          "amount_usd": 284.97,
-          "per_night_usd": 94.99,
-          "amount_native": 248,
+          "book_hash": "h-f17783f3-ff0b-5d3a-9289-2e0225ff7f93",
+          "room_name": "Double room (full double bed)",
+          "meal": "nomeal",
+          "amount_usd": 210.28,
+          "per_night_usd": 70.09,
+          "amount_native": 183,
           "native_currency": "EUR",
-          "free_cancellation_before": "2026-07-28T16:00:00"
+          "free_cancellation_before": "2026-08-06T23:00:00"
+        },
+        {
+          "book_hash": "h-c9635a13-1856-5faa-b41c-b7d5038c7ed7",
+          "room_name": "Basic Triple room",
+          "meal": "nomeal",
+          "amount_usd": 253.95,
+          "per_night_usd": 84.65,
+          "amount_native": 221,
+          "native_currency": "EUR",
+          "free_cancellation_before": "2026-08-06T23:00:00"
+        },
+        {
+          "book_hash": "h-30659595-95c7-59f4-8806-7d33ce728f2a",
+          "room_name": "Deluxe Quadruple room",
+          "meal": "nomeal",
+          "amount_usd": 451.59,
+          "per_night_usd": 150.53,
+          "amount_native": 393,
+          "native_currency": "EUR",
+          "free_cancellation_before": "2026-08-06T23:00:00"
         }
       ]
     },
     "prebook": {
-      "partner_order_id": "mcp_booking_bcf043ea-1619-4c41-83a7-9e1920594078",
-      "room_name": "Double room (full double bed) (bed type is subject to availability)",
-      "meal": "breakfast",
-      "amount_usd": 284.97,
-      "per_night_usd": 94.99,
-      "supplier_amount": 218,
+      "partner_order_id": "mcp_booking_bb31b15d-9df4-43a9-8cd4-c809347c6a2d",
+      "room_name": "Double room (full double bed)",
+      "meal": "nomeal",
+      "amount_usd": 210.28,
+      "per_night_usd": 70.09,
+      "supplier_amount": 160,
       "supplier_currency": "EUR",
-      "free_cancellation_before": "2026-07-28T16:00:00",
+      "free_cancellation_before": "2026-08-06T23:00:00",
       "hold_expires_hint": "Prebook hold is short-lived (minutes). Re-run if expired."
     },
     "book_hotel": {
       "status": "not_called",
       "reason": "prebook-only flow"
     },
-    "summary": "Prebooked Hotel Dom Sancho I (Double room (full double bed) (bed type is subject to availability)) $284.97 total ($94.99/night), refundable until 2026-07-28T16:00:00. Prebook hold only — book_hotel disabled on this server."
+    "summary": "Prebooked The Delight Hostel Lisbon (Double room (full double bed)) $210.28 total ($70.09/night), refundable until 2026-08-06T23:00:00. Prebook hold only — book_hotel disabled on this server."
   },
   "hotelInfo": {
+    "the_delight_hostel_lisbon": {
+      "id": "the_delight_hostel_lisbon",
+      "name": "The Delight Hostel Lisbon",
+      "address": "R. Tomás Ribeiro 95, Lisbon",
+      "star_rating": 1,
+      "rating": null,
+      "latitude": 38.731552,
+      "longitude": -9.149104,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/be/c7/bec7e982dc0089b6518f586af8df30bddd928849.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/0b/5d/0b5ddc51afb50104bfe57c2d806bfbc18a1d0b5b.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/2d/93/2d9339e56401829888cfc92d519f9f9d56fdcfd0.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/7d/50/7d503503ef42e3bc2f5863502314b48fcc9cc73f.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/a9/9e/a99efe9c0e9d772a8aee9b77131d4e23d29ac016.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/cd/05/cd059c93d0c3142e961e79bd4a7cdc02e6b5458d.jpeg"
+      ],
+      "description": "«The Delight Hostel Lisbon» is located in Lisbon. This hostel is located in walking distance from the city center. You can take a walk and explore the neighbourhood area of the hostel — Parque, Dolce Vita Shopping Monumental Mall and El Corte Ingles Mall."
+    },
     "hotel_dom_sancho_i": {
       "id": "hotel_dom_sancho_i",
       "name": "Hotel Dom Sancho I",
@@ -134,6 +228,114 @@
       ],
       "description": "Want to take a rest and explore the city? Hotel «Neya Lisboa Hotel» is located in Lisbon. This hotel is located nearby from the city center. You can take a walk and explore the neighbourhood area of the hotel — Picoas, Dolce Vita Shopping Monumental Mall and Sagrado Coração de Jesus."
     },
-    "lisbon_serviced_apartments_madalena": {}
+    "lisbon_serviced_apartments_madalena": {},
+    "turim_marques_hotel": {
+      "id": "turim_marques_hotel",
+      "name": "TURIM Marques Hotel",
+      "address": "Rua Mouzinho da Silveira 26, Lisbon",
+      "star_rating": 4,
+      "rating": null,
+      "latitude": 38.72295,
+      "longitude": -9.150378,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/46/70/467004011ee5c9270bf17a8448d8496f81fc27f4.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/6f/c1/6fc1d4e924fc13c98be7a6ce6219747fce38b542.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/2c/3d/2c3d5e13c5ecdab1e85d5bec4663f9f2c4ace940.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/1e/30/1e3018f52623454771542cd5ca1fd5cca56461e5.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/7e/50/7e50c7b486e7af8fc012fc1e8e52c6dcca8f60ed.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/4a/c4/4ac464ee61a11574491465b9c7e92f02d9da5499.JPEG"
+      ],
+      "description": "Good choice if you’re looking forward to taking some rest at the hotel as much as to walking around the city. Hotel «TURIM Marques Hotel» is located in Lisbon. This hotel is located in walking distance from the city center. You can take a walk and explore the neighbourhood area of the hotel. Places nearby: Medeiros e Almeida Museum, Cinemateca Portuguesa Museum and Marquês de Pombal."
+    },
+    "rodamon_lisboa_hostel": {
+      "id": "rodamon_lisboa_hostel",
+      "name": "The Central House Lisbon Baixa - Hostel",
+      "address": "300 Rua dos Fanqueiros, Lisbon",
+      "star_rating": 2,
+      "rating": null,
+      "latitude": 38.713104,
+      "longitude": -9.136801,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/87/44/8744400a4d9dabbf8451189f347c17fd08890b81.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/91/3f/913fc75b4448e14e80339a0e348d59ace7630d33.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/86/a4/86a4a70a3624861433c0f9d2467875d22b90de77.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/fc/c0/fcc068e91e9880cb422352f29ab442d6d031aa29.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/30/2f/302ff1b0367409b06c3a466712fff1d418cdb61f.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/06/d5/06d5a6730566d3e357de146e25197e6ec0d3e1da.JPEG"
+      ],
+      "description": "«The Central House Lisbon Baixa - Hostel» is located in Lisbon. This hostel is located in the center of the city. In the morning, have a cup of coffee while looking at the city from the window. You can take a walk and explore the neighbourhood area of the hostel — Rossio, Rossio Square and São Domingos Church."
+    },
+    "hotel_americano_8": {
+      "id": "hotel_americano_8",
+      "name": "Hotel Inn Rossio",
+      "address": "Rua 1 de Dezembro N 73, Lisbon",
+      "star_rating": 3,
+      "rating": null,
+      "latitude": 38.713737,
+      "longitude": -9.140314,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/5a/42/5a4202d490f18526e1948437f25f1fd9784b303b.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/5c/55/5c55db750530f5f670f30b8c3b7a8047eebead49.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/4c/a7/4ca712fda930fb41b7f3dcd86c8759b575d592b7.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/16/98/16986e4046ac7ede4879fc025d470c32fcf8d477.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/8b/f2/8bf22b779a948b131ac6d743bba1c1f25286f29c.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/6d/ca/6dca84c09d08c58dad4336eb4371d93165cd9048.JPEG"
+      ],
+      "description": "A very nice option for those who like to be on the move! Hotel «Hotel Inn Rossio» is located in Lisbon. This hotel is located in the city center. Before going to bed, you can take a walk and enjoy the main landmarks of the city. You can take a walk and explore the neighbourhood area of the hotel. Places nearby: Rossio Square, São Domingos Church and Carmo Convent."
+    },
+    "residencial_florescente": {
+      "id": "residencial_florescente",
+      "name": "Hotel Florescente",
+      "address": "Rua Portas de Santo Antão 99, Lisbon",
+      "star_rating": 3,
+      "rating": null,
+      "latitude": 38.71638,
+      "longitude": -9.140731,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/0c/05/0c051133d25f3069eb7e6b98a69d73986b79cc36.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/0e/90/0e90566dc49569df2f1082b08f72176234365ae3.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/4a/ae/4aaec546a45011d94d038a8f5e1374d94cc7037c.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/e3/94/e394570b62ad8c489817184f6b9122861912877c.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/a1/34/a1340d791b27f54e2a0a35297309b3f3ef110aa2.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/32/b5/32b54bece9e8d4ae16806ca227963a07ee6b7fd1.JPEG"
+      ],
+      "description": "It’s nice to come back to a place where you can have a rest after an eventful day in the city Hotel «Hotel Florescente» is located in Lisbon. This hotel is located in the center of the city. In the morning, have a cup of coffee while looking at the city from the window. You can take a walk and explore the neighbourhood area of the hotel. Places nearby: Lisbon Geographic Society, Rua das Portas de Santo Antão and Foz Palace."
+    },
+    "lux_lisboa_park": {
+      "id": "lux_lisboa_park",
+      "name": "Lux Lisboa Park",
+      "address": "Rua Padre Antonio Vieira, 32, Lisbon",
+      "star_rating": 4,
+      "rating": null,
+      "latitude": 38.727497,
+      "longitude": -9.158573,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/9e/57/9e5796914da056f4ce6136d8e1297469998dc36a.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/a4/4f/a44ff0633164d374eb8194864ac2774b2332ff87.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/f5/zz/f5ad34939be18baed3e17239f905415c09fb9217.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/c8/17/c8171cbdc0a1f64a8f765d01676cf0c147e7c157.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/e1/73/e1733ad5f307fd048f5fa0cebb67715b20fc9164.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/6d/1f/6d1ff0774d8e6b14c2610b92e5d0271ccffa57f7.JPEG"
+      ],
+      "description": "Want to take a rest and explore the city? Hotel «Lux Lisboa Park» is located in Lisbon. This hotel is located nearby from the city center. You can take a walk and explore the neighbourhood area of the hotel — Estufas, Estufa Fria and Eduardo VII Park."
+    },
+    "eurostars_lisboa_baixa": {
+      "id": "eurostars_lisboa_baixa",
+      "name": "Eurostars Lisboa Baixa",
+      "address": "Rua da Prata 88-114, Lisbon",
+      "star_rating": 4,
+      "rating": null,
+      "latitude": 38.710155,
+      "longitude": -9.136499,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/fe/e9/fee93e35b0076345dfe2d6fac27b627fb430923b.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/05/34/0534e5983925a73893b9d38b3e09bd836baed742.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/e0/97/e097d5779cbc5767c3edf7528c288fce94ceb1c5.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/79/70/79704baa8ac78cdf4b6a8474a7e9c4e04c7d1082.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/55/65/5565dde1a6fd5d0cc263fa6fb82732d8da9bff5a.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/df/45/df451e1a07ed8ca7cefc3610500289ce7a042f29.JPEG"
+      ],
+      "description": "Good choice if you’re looking forward to taking some rest at the hotel as much as to walking around the city. Hotel «Eurostars Lisboa Baixa» is located in Lisbon. This hotel is located in the city center. Before going to bed, you can take a walk and enjoy the main landmarks of the city. You can take a walk and explore the neighbourhood area of the hotel. Places nearby: Núcleo Arqueológico, Mude Design Moda Museum and Rua Augusta."
+    }
   }
 }

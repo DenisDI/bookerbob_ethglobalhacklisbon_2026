@@ -19,7 +19,7 @@ const query = {
   checkin: demo.checkin,
   checkout: demo.checkout,
   adults: demo.adults,
-  topN: demo.botOfferCount,
+  topN: demo.captureTopN,
 };
 
 const started = Date.now();

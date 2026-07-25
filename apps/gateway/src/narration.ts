@@ -6,6 +6,7 @@
 // describe what actually happened, so they stay true when a step fails.
 
 import type {
+  ContextSnapshot,
   InventoryResult,
   NarrationLine,
   PrebookHold,
@@ -49,14 +50,41 @@ export function narrateSearch(n: Narrator, city: string, result: InventoryResult
   }
 }
 
-export function narrateTerms(n: Narrator, terms: Terms, shown: number): void {
+export function narrateTerms(
+  n: Narrator,
+  terms: Terms,
+  shown: number,
+  context: ContextSnapshot | null = null,
+): void {
   if (terms.tier === "bot") {
     n.say(`nobody is standing behind this request, so i only get to see ${shown}`);
     n.say("and whatever i take here has to be paid for in full, up front");
     return;
   }
 
-  n.say("a verified human is backing this request");
+  n.say("a real person is standing behind this request");
+  n.say(`that opens the full list: ${shown} places`);
+
+  const categories = context?.activeCategories ?? [];
+
+  if (terms.tier === "human") {
+    // Scripted, not an apology: the credential alone still carries the guest.
+    n.say("no onchain history yet. human terms via the credential alone");
+    n.say("so i can leave a deposit instead of handing over the whole amount");
+    return;
+  }
+
+  if (categories.length > 0) {
+    n.say(`and they have a track record here: ${categories.join(", ")}`);
+  } else {
+    n.say("and they have a track record worth counting");
+  }
+
+  n.say(
+    terms.tier === "elite"
+      ? "asking to settle nothing until they actually arrive"
+      : "asking to hold this price now and settle it later",
+  );
 }
 
 /** Only for tiers that are actually given the lock — a bot prepays instead. */

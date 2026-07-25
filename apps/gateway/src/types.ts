@@ -17,6 +17,21 @@ export interface Terms {
   payment: Payment;
 }
 
+/**
+ * Coarse activity band for one dimension. "unavailable" means the source was
+ * stale: it must never be read as low activity, and never as high.
+ */
+export type Band = "T0" | "T1" | "T2" | "T3" | "T4" | "unavailable";
+
+/** What the context-bands MCP tells us about a consented address. */
+export interface ContextSnapshot {
+  address: string | null;
+  /** dimension -> band, e.g. { defiActivity: "T3" } */
+  bands: Record<string, Band>;
+  /** e.g. ["lending", "dex"]. Categories, never raw counts. */
+  activeCategories: string[];
+}
+
 /** One hotel as shown to an agent. Prices are real supplier prices. */
 export interface Offer {
   hotelId: string;

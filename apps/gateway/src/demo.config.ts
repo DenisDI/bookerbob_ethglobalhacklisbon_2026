@@ -9,8 +9,12 @@ export const demo = {
   checkout: "2026-08-17",
   adults: 2,
 
-  /** Bot tier sees exactly this many; matches the supplier's own top_n. */
-  botOfferCount: 3,
+  /**
+   * Depth to capture into the snapshot. Must be at least the largest
+   * offerLimit() in terms.ts, otherwise the cached source cannot serve the
+   * full-inventory tiers and every tier looks identical offline.
+   */
+  captureTopN: 10,
 
   /**
    * Preferred hotel for the finale card: 4 stars and 6 photos, which reads far
