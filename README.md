@@ -96,8 +96,11 @@ committed in `specs/`; file-level attribution in `docs/AI-ATTRIBUTION.md`, updat
 in the same commit as each file it covers. Architecture, product decisions,
 integration debugging, and verification are the team's.
 
-**In-window proof.** AgentKit agent-wallet registration tx hash and World Portal
-app creation happened after hacking start (Fri 21:00 WEST): [tx hash here].
+**In-window proof.** The AgentKit agent wallet was registered in AgentBook on World
+Chain after hacking start (Sat 2026-07-25). Agent
+`0x1597866E3F9870241EebC1153136fDbf71C3CBF3`, tx
+`0xfc2fe4d9ddbd26db6005e5328358afb57cc4d8f922c240bcd6b281159f02eeb1`. Details in
+`docs/AGENT-REGISTRATION.md`.
 
 ## Run
 
