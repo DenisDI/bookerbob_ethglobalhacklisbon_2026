@@ -1,7 +1,11 @@
 /** HashScan links — UI opens these; never show a bare id as the product surface. */
 
+/**
+ * HashScan dropped hash-router URLs (`/#/testnet/...`). Path form is what the
+ * explorer serves now; the old `#/` links open a blank shell.
+ */
 export function scheduleUrl(scheduleId: string): string {
-  return `https://hashscan.io/#/testnet/schedule/${scheduleId}`;
+  return `https://hashscan.io/testnet/schedule/${scheduleId}`;
 }
 
 /**
@@ -16,5 +20,5 @@ export function toHashScanTxId(transactionId: string): string {
 }
 
 export function transactionUrl(transactionId: string): string {
-  return `https://hashscan.io/#/testnet/transaction/${toHashScanTxId(transactionId)}`;
+  return `https://hashscan.io/testnet/transaction/${toHashScanTxId(transactionId)}`;
 }
