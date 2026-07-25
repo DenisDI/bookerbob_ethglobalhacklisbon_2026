@@ -269,12 +269,17 @@ body {
 }
 
 /* The claim, kept as the line that opens and closes the story, but no longer
- * carrying the job of telling a stranger what is for sale. */
+ * carrying the job of telling a stranger what is for sale.
+ *
+ * Not accented. The accent means one thing on this page, that a real person is
+ * answerable for a request, and spending it on a headline teaches the eye that it
+ * means nothing in particular. Everything the accent touches after this has to
+ * survive that lesson. */
 .kicker {
   margin: 0;
   font: var(--weight-med) var(--size-mono-micro) / 1.4 var(--font-mono);
   letter-spacing: var(--tracking-micro);
-  color: var(--color-accent);
+  color: var(--color-faint);
   text-transform: uppercase;
 }
 
@@ -532,72 +537,110 @@ body {
 
 /* ---------- race chrome ---------- */
 
-.racehead {
+.pane__spacer {
+  flex: 1;
+}
+
+/* The handoff into the race.
+ *
+ * Replaces a chrome strip and a display-size repeat of the request. The request
+ * is the setup, not the argument, so it is stated once here as a fact in mono.
+ * What gets the size is the thing a first-time reader actually needs: what the
+ * two columns below are. */
+.leadin {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-3);
-  height: 44px;
-  padding: 0 var(--space-4);
+  padding: var(--space-4);
   border-top: 1px solid var(--color-line);
   border-bottom: 1px solid var(--color-line);
   background: var(--color-surface-3);
 }
 
-.racehead__rec {
-  color: var(--color-signal);
-}
-
-.pane__spacer {
-  flex: 1;
-}
-
-/* The prompt, said once, identically to both agents.
- *
- * Deliberately not a hero. The two answers below are the argument; the request is
- * the setup, and at hero size it took the emphasis and shouted a city nobody
- * chose. Lowercase, one confident size, no fringing. */
-.saidonce {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-line);
-  background: var(--color-surface-3);
-}
-
-.saidonce__cap {
+.leadin__cap {
   margin: 0;
 }
 
-/* Lowercased in the styling, not in the data: the supplier's "Lisbon" is what we
- * keep and send on, and this is only the voice the sentence is said in. */
-.saidonce__text {
+.leadin__title {
   margin: 0;
-  font: var(--weight-semi) clamp(22px, 3.2vw, 34px) / 1.1 var(--font-ui);
+  max-width: 30ch;
+  font: var(--weight-semi) clamp(22px, 2.9vw, 32px) / 1.15 var(--font-ui);
   letter-spacing: var(--tracking-hero);
   color: var(--color-ink-bright);
-  text-transform: lowercase;
 }
 
-/* The city is the part that answers to a field, so it is the part that is lit. */
-.saidonce__city {
+/* Two sides, laid out the way they sit below, so the mapping is positional and
+ * needs no legend.
+ *
+ * Full bleed with no gap, so the split lands on exactly the same 50% as the
+ * divider between the lanes. An approximate alignment would be worse than none:
+ * the whole point of this row is that the reader can drop their eye straight down
+ * from a description onto the column it describes. */
+.leadin__sides {
+  list-style: none;
+  margin: 0 calc(var(--space-4) * -1);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.leadin__side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 var(--space-4);
+}
+
+/* Only the right side carries a rule, and it sits where the lane divider does.
+ * The accent, spent where it is earned: that lane is the one somebody is
+ * answerable for. */
+.leadin__side--accent {
+  border-left: 1px solid var(--color-accent);
+}
+
+.leadin__where {
+  margin: 0;
+}
+
+.leadin__who {
+  font: var(--weight-semi) var(--size-ui-lg) / 1.25 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+}
+
+.leadin__side--accent .leadin__who {
   color: var(--color-accent);
 }
 
-.saidonce__facts {
+.leadin__what {
+  font: var(--weight-reg) var(--size-ui-sm) / 1.45 var(--font-ui);
+  color: var(--color-muted);
+}
+
+/* Said once, as a machine fact. It is the setup, and it stops competing. */
+.leadin__ask {
   margin: 0;
   font-size: var(--size-mono-fact);
   color: var(--color-muted);
 }
 
 /* Asked one city, quoted another. A real state, said plainly, never an error. */
-.saidonce__swap {
+.leadin__swap {
   max-width: 74ch;
   color: var(--color-faint);
 }
 
-.saidonce__hint {
-  max-width: 74ch;
+/* The escape hatch, after the cards it is an alternative to. Held to a field's
+ * width: stretched across the page it read as the main event, which is exactly
+ * backwards for the secondary way in. */
+.anywallet {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.anywallet .ask-address {
+  max-width: 46ch;
 }
 
 .race {
@@ -650,12 +693,17 @@ body {
   min-width: 0;
 }
 
-.pane__label {
-  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
-  letter-spacing: var(--tracking-micro);
-  color: var(--color-muted);
-  text-transform: uppercase;
+/* The lane's role, and now the first thing read in the header. Proportional and
+ * at reading size, because it is the answer to "which column is this". */
+.pane__title {
   margin: 0;
+  font: var(--weight-semi) var(--size-ui-md) / 1.2 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+}
+
+.pane--accent .pane__title {
+  color: var(--color-accent);
 }
 
 .pane__status {

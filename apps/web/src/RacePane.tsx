@@ -72,10 +72,11 @@ export function RacePane({
     <section className={`pane ${accent ? "pane--accent" : ""}`}>
       <header className="pane__head">
         <div className="pane__tags">
-          <span className={`chip ${accent ? "chip--solid" : "chip--ash"}`}>
-            {accent ? "LANE B" : "LANE A"}
-          </span>
-          <h2 className="pane__label label">{label}</h2>
+          {/* "LANE A" and "LANE B" were the loudest chips in the header and they
+            * carried nothing: the reader has to hold a legend to use them, and
+            * the lead-in above already names the two sides by position. The role
+            * is the label now, in plain words. */}
+          <h2 className="pane__title">{label}</h2>
           {accent ? (
             <span className="chip chip--accent partner">
               <WorldMark />

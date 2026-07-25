@@ -14,10 +14,10 @@ import { hasCredential, type CredentialState } from "./credential";
 import { MachineView } from "./machine";
 import { ParticipantsBand, ParticipantsBandGuest } from "./ParticipantsBand";
 import { RacePane, type PaneState } from "./RacePane";
-import { SaidOnce } from "./SaidOnce";
+import { RaceLeadIn } from "./RaceLeadIn";
 import { PANE_LABEL } from "./terms-copy";
 import { readView, ViewSwitch, writeView, type View } from "./ViewSwitch";
-import { WhoIsAsking } from "./WhoIsAsking";
+import { SCENARIOS, WhoIsAsking } from "./WhoIsAsking";
 
 /**
  * Where the demo starts, not where it is stuck. The field is editable and the
@@ -114,6 +114,14 @@ export function App() {
     if (said?.status === "missing") return { status: "missing" };
     return asked;
   }, [backed.data, asked]);
+  // The lead-in names the right lane by the card that was picked, so the two
+  // columns are labelled with the choice the reader just made rather than with
+  // an address they would have to recognise.
+  const backedWho = useMemo(() => {
+    const at = address.trim().toLowerCase();
+    return SCENARIOS.find((s) => s.input.toLowerCase() === at)?.who ?? null;
+  }, [address]);
+
   const reducedMotion = usePrefersReducedMotion();
   const running = bot.status === "working" || backed.status === "working";
   const accessTokenRef = useRef<() => Promise<string | null>>(async () => null);
@@ -271,33 +279,41 @@ export function App() {
               size={Math.max(6, city.length + 1)}
             />
           </form>
-          {/* Demoted to the way in for anyone who wants to try their own wallet.
-            * Its pinned chips are the same three inputs the cards above use, so
-            * showing both would say it twice, once in wallet jargon. */}
-          <AddressBands
-            value={address}
-            onChange={setAddress}
-            onSubmit={(override) => void run(override)}
-            disabled={running}
-            showChips={view === "machine"}
-            label={
-              view === "machine"
-                ? "whose standing should back the request"
-                : "or try any wallet of your own"
-            }
-          />
+          {/* In the human view this is the escape hatch, so it belongs after the
+            * cards it is an alternative to, not before them. In the machine view
+            * there are no cards, so it stays here as the only way in. */}
+          {view === "machine" ? (
+            <AddressBands
+              value={address}
+              onChange={setAddress}
+              onSubmit={(override) => void run(override)}
+              disabled={running}
+            />
+          ) : null}
         </div>
       </header>
 
       {view === "human" ? (
-        <WhoIsAsking
-          value={address}
-          onPick={(input) => {
-            setAddress(input);
-            void run(input);
-          }}
-          disabled={running}
-        />
+        <>
+          <WhoIsAsking
+            value={address}
+            onPick={(input) => {
+              setAddress(input);
+              void run(input);
+            }}
+            disabled={running}
+          />
+          <div className="anywallet">
+            <AddressBands
+              value={address}
+              onChange={setAddress}
+              onSubmit={(override) => void run(override)}
+              disabled={running}
+              showChips={false}
+              label="or put any wallet behind it"
+            />
+          </div>
+        </>
       ) : null}
 
       {view === "machine" ? (
@@ -312,29 +328,11 @@ export function App() {
         />
       ) : (
         <>
-      {privyConfigured ? (
-        <ParticipantsWithWallet
-          credential={credential}
-          addressField={address}
-          backed={backed}
-        />
-      ) : (
-        <ParticipantsBandGuest
-          credential={credential}
-          addressField={address}
-          backed={backed}
-        />
-      )}
-
-      <div className="racehead">
-        <span className="label">the race</span>
-        <span className="pane__spacer" />
-        <span className="label">one prompt · two agents</span>
-        <span className="dot dot--signal pulse" aria-hidden="true" />
-        <span className="racehead__rec label">rec</span>
-      </div>
-
-      <SaidOnce asked={city} answered={backed.data ?? bot.data} />
+      <RaceLeadIn
+        asked={city}
+        answered={backed.data ?? bot.data}
+        backedWho={backedWho}
+      />
 
       <div className="race">
         <RacePane
@@ -353,6 +351,23 @@ export function App() {
         />
         <div className="pane__divider" aria-hidden="true" />
       </div>
+
+      {/* Moved below the race. It reads as a footnote on what just took part,
+        * which is what it is, and above the lanes it was a strip of partner
+        * logos standing between choosing a person and seeing the result. */}
+      {privyConfigured ? (
+        <ParticipantsWithWallet
+          credential={credential}
+          addressField={address}
+          backed={backed}
+        />
+      ) : (
+        <ParticipantsBandGuest
+          credential={credential}
+          addressField={address}
+          backed={backed}
+        />
+      )}
 
       {/* The finale is its own beat. Inside a lane it would compete with the
         * room list and bury the anchored comparison; here it is the money shot,
