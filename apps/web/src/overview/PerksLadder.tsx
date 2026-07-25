@@ -242,9 +242,11 @@ function phaseFromScroll(track: HTMLElement): number {
   const travel = rect.height - window.innerHeight;
   if (travel <= 0) return -1;
   const p = Math.min(Math.max(-rect.top / travel, 0), 1);
-  // One slot per partner, plus a final slot where the ladder folds back up.
-  const slot = Math.floor(p * (TOURED.length + 1));
-  return TOURED[slot] ?? -1;
+  // One slot per partner and no more. A slot for "everything closed" would be a
+  // screen of scrolling where nothing happens and the section is still holding
+  // the wheel, which is exactly what reads as stuck.
+  const slot = Math.floor(p * TOURED.length);
+  return TOURED[Math.min(slot, TOURED.length - 1)] ?? -1;
 }
 
 export function PerksLadder(props: Props) {
@@ -307,11 +309,17 @@ export function PerksLadder(props: Props) {
         const next = phaseFromScroll(track);
         if (next === TOURED[TOURED.length - 1]) sawLast.current = true;
 
-        // Seen all three and scrolled past the last one: the run is spent. It
-        // folds up, and from here the ladder is just the stack.
-        if (next === -1 && sawLast.current) {
+        // Past the bottom of the track with all three seen: the run is spent.
+        // The track stops being tall at the same moment, so scrolling back up
+        // does not drag the reader through several screens of a pinned ladder
+        // that has nothing left to say. Losing that height moves the document
+        // under them, so the scroll position is put back where their eyes are.
+        const rect = track.getBoundingClientRect();
+        if (sawLast.current && rect.bottom <= window.innerHeight) {
+          const topDoc = window.scrollY + rect.top;
           setToured(true);
           setOpen(null);
+          window.requestAnimationFrame(() => window.scrollTo(0, topDoc));
           return;
         }
         setOpen((prev) => (prev === next ? prev : next));
@@ -329,17 +337,22 @@ export function PerksLadder(props: Props) {
   return (
     <div
       ref={trackRef}
-      className={`ladder-track ${pinned ? "is-pinned" : ""}`}
-      // One screen of scrolling per partner, plus one to fold it back up. Set
-      // here rather than in the sheet because it is only true while pinned.
-      style={pinned ? { height: `${(TOURED.length + 2) * 100}vh` } : undefined}
+      className={`ladder-track ${pinned && !toured ? "is-pinned" : ""}`}
+      // One screen of scrolling per partner, and only until the run has been
+      // watched. Set here rather than in the sheet because it is true for a
+      // while and then it is not.
+      style={
+        pinned && !toured
+          ? { height: `${(TOURED.length + 1) * 100}vh` }
+          : undefined
+      }
     >
       <section
         ref={stageRef}
         // While one rung is being introduced the others step back, so the
         // spotlight is a change the eye reads without being told.
         className={`ladder ${shown ? "is-in" : ""} ${
-          pinned && open !== null ? "is-touring" : ""
+          pinned && !toured && open !== null ? "is-touring" : ""
         }`}
         aria-label="what you get"
       >
