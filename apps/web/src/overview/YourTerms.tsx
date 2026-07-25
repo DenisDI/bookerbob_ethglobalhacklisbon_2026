@@ -17,7 +17,14 @@ import { SettlementRail } from "../SettlementRail";
 import { paymentLine } from "../terms-copy";
 import type { OffersResponse } from "../types";
 
-/** What the reader could still do, given what the desk just said. */
+/**
+ * What is worth doing next, in the ladder's words.
+ *
+ * The reward leads and the step follows, the same way every rung reads, so the
+ * panel and the ladder can never describe one state two different ways. A wallet
+ * that has been read and has not paid off yet is a nudge with one step left in
+ * it, not a lecture about how the engine works.
+ */
 function nextMove(
   data: OffersResponse | null,
   personhood: boolean,
@@ -25,22 +32,20 @@ function nextMove(
 ): string | null {
   if (!data) return null;
 
-  // Nothing is extended on trust without someone answerable, however rich the
-  // history behind the address. That is the engine's first branch, and it is the
-  // most useful thing this panel can say to someone who has connected a wallet
-  // and watched nothing happen.
   if (data.terms.payment === "prepay_100") {
-    return personhood
-      ? "these are the terms for a request nobody is answerable for"
-      : wallet
-        ? "your history is read and it is not being counted yet, because nobody is answerable for this request. prove you are a person and it starts to count."
-        : "prove you are a person and the whole stay stops having to be paid up front";
+    if (personhood) return null;
+    return wallet
+      ? "keep the rest of the stay: your history is read, and proving a person is the one step that cashes it in"
+      : "leave a deposit instead of the whole stay: prove a person is behind the booking";
   }
 
   if (data.terms.payment === "deposit") {
+    // Connected and read, and it did not reach a held price. The gateway's own
+    // reason is already on screen above this line, so this does not repeat it and
+    // it does not ask for a step that has been taken.
     return wallet
-      ? "your wallet is connected. what is there is not yet enough to hold a price against."
-      : "connect a wallet and whatever it has done can be read, which is what moves a deposit to a held price";
+      ? null
+      : "hold the price instead of leaving a deposit: connect a wallet and let your history be read";
   }
 
   return null;

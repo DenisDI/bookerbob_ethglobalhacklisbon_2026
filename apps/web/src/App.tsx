@@ -315,7 +315,9 @@ export function App() {
         <span className="topbar__note">one desk, people and agents</span>
       </div>
 
-      {view === "overview" ? <OverviewPage /> : (
+      {view === "overview" ? (
+        <OverviewPage onOpenDemo={() => setView("demo")} />
+      ) : (
         <>
       {/* The ask is shared: the machine view runs the same request, so it needs
         * the same controls. The pitch above it is not, because the overview now

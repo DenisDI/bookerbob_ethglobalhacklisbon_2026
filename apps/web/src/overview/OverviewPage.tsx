@@ -1,23 +1,29 @@
-// The overview: what this is, and your own booking.
+// The overview: what you get, and how to get it.
 //
-// The race argues, and it argues well, but it argued before it explained. This
-// surface explains, and then lets the reader do the thing themselves rather than
-// watch two agents do it.
+// This page used to open by describing its own mechanism. "Nothing below is
+// required and the order does not matter" is true, and it offers the reader
+// nothing: it explains how the engine is built instead of what the next step is
+// worth. The ladder replaces it, and every step is named by its reward first and
+// its cost second.
 //
-// THE MECHANIC. Every step here is optional and they can be added in either
-// order, because the engine genuinely works that way and a forced wizard would be
-// a lie about it. What holds the page together is one panel that never unmounts
-// and always names the binding constraint, taken from the gateway's own words.
+// GUIDED, NOT GATED. The engine really does take these steps in any order, so
+// nothing here blocks anything. It guides instead: exactly one step is primary at
+// a time, recomputed from what has actually been proved, and the other stays quiet
+// and fully usable.
 //
-// The state worth building the page around is the awkward one: a wallet connected
-// with no personhood proved comes back with the bands fully read and the terms
-// completely unmoved, because decide() refuses to extend anything on trust before
-// somebody is answerable. "We can see everything you have done and it buys you
-// nothing yet" is the product's whole thesis, said by the engine rather than by us.
+// The state worth building around is the awkward one. A wallet connected with no
+// personhood proved comes back with the bands fully read and the terms completely
+// unmoved, because decide() refuses to extend anything on trust before somebody is
+// answerable. That is not a dead end and it is not a lecture: it is one step from
+// paying off, and the ladder and the panel both say so in those words.
 //
-// One request drives all of it. GET /offers already returns the standing, the
-// terms, the rooms, the hold and the Hedera schedule together, so nothing here
-// needed a new endpoint.
+// TWO DOORS, both first class. A person books here. An agent books through the
+// same desk with an AgentKit credential and earns the same thing for the same
+// proof. One engine, and the race tab is where the agent side is visible.
+//
+// One request drives the terms: GET /offers returns the standing, the terms, the
+// hold and the Hedera schedule together. The room strip beside it is the local
+// city catalog, which is a separate thing and says so.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchOffers } from "../api";
@@ -37,10 +43,11 @@ import {
 import { ContextFile } from "../ContextFile";
 import { HotelFinaleCard } from "../HotelFinaleCard";
 import { OfferList, OfferSkeleton } from "../OfferList";
-import { HederaMark, TheGraphMark, WorldMark } from "../PartnerMarks";
+import { WorldMark } from "../PartnerMarks";
 import type { OffersResponse } from "../types";
 import { SelfieCheck } from "../worldid";
 import { FlowBoundary } from "./FlowBoundary";
+import { PerksLadder } from "./PerksLadder";
 import { YourTerms } from "./YourTerms";
 
 interface WalletSnap {
@@ -71,7 +78,7 @@ function WalletBridge({ onChange }: { onChange: (snap: WalletSnap) => void }) {
   return null;
 }
 
-export function OverviewPage() {
+export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
   const [city, setCity] = useState<CityId>(DEFAULT_CITY);
   // What was actually sent to /offers. The room strip flips on `city` immediately.
   const [askedCity, setAskedCity] = useState<string>(DEFAULT_CITY);
@@ -140,6 +147,16 @@ export function OverviewPage() {
 
   // Fresh shuffle whenever the city changes — five from a pool of fifteen ★★★★★.
   const cityHotels = useMemo(() => pickHotels(city, 5), [city]);
+  const contextRead = Boolean(data?.context);
+
+  // One recommendation at a time, following the biggest jump still available.
+  // Proving a person takes the whole stay off the counter, so it leads until it
+  // is done, even when a wallet is already connected and read.
+  const primary: "person" | "wallet" | null = !personhood
+    ? "person"
+    : address
+      ? null
+      : "wallet";
 
   return (
     <div className="ov">
@@ -176,13 +193,13 @@ export function OverviewPage() {
             </select>
           </form>
         </div>
-        <p className="kicker">who is behind an agent changes the terms it gets</p>
-        <h1 className="thesis">book a hotel, or let an agent book it for you</h1>
+        <p className="kicker">who is behind a booking changes the terms it gets</p>
+        <h1 className="thesis">
+          book a hotel in seconds, for yourself or for your agent
+        </h1>
         <p className="thesis__plain">
-          BookerBob is a hotel booking desk that serves people and ai agents from
-          the same inventory. same rooms, same nightly rate for everyone. what
-          changes is when the money leaves your pocket, and that depends on who is
-          standing behind the booking.
+          one desk, the same rooms at the same nightly rate for people and ai
+          agents. what changes is when you pay.
         </p>
         <p className="step__note reason">
           {data
@@ -191,104 +208,88 @@ export function OverviewPage() {
         </p>
       </header>
 
-      {/* Three beats, each carrying the mark of whoever does that piece of work.
-        * Placed at the step rather than banded across the top. */}
-      <section className="ov__how">
-        <h2 className="ov__h2">how the desk decides</h2>
-        <ol className="ov__beats">
-          <li className="ov__beat">
-            <span className="ov__beatmark partner">
-              <WorldMark size={14} />
-              <span className="label">world</span>
-            </span>
-            <p className="ov__beattitle">is a real person asking</p>
-            <p className="ov__beattext">
-              an anonymous request pays for the whole stay before anyone holds a
-              room. a request a person stands behind leaves a deposit instead.
-            </p>
-          </li>
-          <li className="ov__beat">
-            <span className="ov__beatmark partner">
-              <TheGraphMark size={13} />
-              <span className="label">the graph</span>
-            </span>
-            <p className="ov__beattitle">what have they done before</p>
-            <p className="ov__beattext">
-              a connected wallet is read as coarse bands, never as numbers. time
-              cannot be bought back, and that is most of what this is measuring.
-            </p>
-          </li>
-          <li className="ov__beat">
-            <span className="ov__beatmark partner">
-              <HederaMark size={14} />
-              <span className="label">hedera</span>
-            </span>
-            <p className="ov__beattitle">when does the money move</p>
-            <p className="ov__beattext">
-              a long clean record means nothing moves until checkout, and the
-              payment is scheduled up front so the desk is not taking your word.
-            </p>
-          </li>
-        </ol>
-      </section>
-
-      <section className="ov__flow">
-        <div className="ov__flowhead">
-          <h2 className="ov__h2">your booking</h2>
-          <p className="ov__flowlede">
-            nothing below is required and the order does not matter. add what you
-            like and watch the terms on the right move, or add nothing and book on
-            the terms a stranger gets.
+      {/* Two doors, and neither is a footnote. The product is a gateway for
+        * agents that a person can also walk up to. */}
+      <section className="doors">
+        <div className="door door--here">
+          <p className="door__who label">you are here</p>
+          <p className="door__title">book it yourself</p>
+          <p className="door__note">
+            prove who is behind the booking below, and the terms move as you go.
           </p>
         </div>
+        <div className="door">
+          <p className="door__who label">the other door</p>
+          <p className="door__title">hand it to an agent</p>
+          <p className="door__note">
+            an agent proves the same thing with an AgentKit credential, and earns
+            the same terms for it.
+          </p>
+          <button type="button" className="door__go" onClick={onOpenDemo}>
+            watch two agents book
+          </button>
+        </div>
+        <p className="doors__one">
+          one engine behind both doors. a booking a real person stands behind gets
+          the same terms whether that person is you, or the human behind an agent.
+        </p>
+      </section>
 
+      {/* The main element, and it is up before any answer lands. The three beats
+        * that used to sit here said the same mechanism as a lecture; the ladder
+        * says it as rewards, which is what a reader can act on. */}
+      <PerksLadder
+        payment={data?.terms.payment ?? null}
+        personhood={personhood}
+        wallet={Boolean(address)}
+        contextRead={contextRead}
+        reason={data?.reason ?? null}
+      />
+
+      <section className="ov__flow">
         <div className="ov__cols">
           <div className="ov__steps">
-            <section className="step">
-              <h3 className="step__title partner">
+            {/* Headed by the reward, not the chore, and the recommended one is
+              * primary. Guidance only: the other stays fully usable, because the
+              * engine takes these in any order. */}
+            <section className={`step ${primary === "person" ? "step--primary" : ""}`}>
+              <h3 className="step__perk partner">
                 <WorldMark size={13} />
-                prove you are a person
+                stop paying the whole stay up front
               </h3>
               <p className="step__note reason">
-                this is the step that stops the whole stay having to be paid up
-                front. it proves a person, and nothing about which person.
+                {address && !personhood
+                  ? "your history is read. one step to cash it in."
+                  : "proves a person, not which person."}
               </p>
               {/* Guarded: this widget has thrown on mount and taken the page with
-                * it, and five working steps beat a blank screen. */}
-              <FlowBoundary fallback="the personhood check is not available right now, so the rest of this stays on a stranger's terms">
+                * it, and a booking with one step down beats a blank screen. */}
+              <FlowBoundary fallback="the personhood check is not available right now, so this stays on a stranger's terms">
                 <SelfieCheck onVerified={onVerified} />
               </FlowBoundary>
             </section>
 
-            <section className="step">
-              <h3 className="step__title">connect your wallet</h3>
+            <section className={`step ${primary === "wallet" ? "step--primary" : ""}`}>
+              <h3 className="step__perk">see what your history opens</h3>
               <p className="step__note reason">
-                it is read for what it has done, and nothing is taken from it
-                here.
+                read as coarse bands, and nothing is taken from it.
               </p>
               {privyConfigured ? (
                 <>
                   <ConnectWalletButton />
-                  {wallet.address ? (
-                    <p className="step__note mono">
-                      reading {shortAddress(wallet.address)}
-                    </p>
+                  {address ? (
+                    <p className="step__note mono">reading {shortAddress(address)}</p>
                   ) : null}
                 </>
               ) : (
                 <p className="step__down reason">
-                  wallet connect is not configured on this build, so standing
+                  wallet connect is not configured on this build, so a history
                   cannot be read here
                 </p>
               )}
             </section>
 
-            {data?.context ? (
-              <section className="step">
-                <h3 className="step__title">what you have done</h3>
-                <ContextFile context={data.context} />
-              </section>
-            ) : null}
+            {data?.context ? <ContextFile context={data.context} /> : null}
           </div>
 
           <div className="ov__panel">
