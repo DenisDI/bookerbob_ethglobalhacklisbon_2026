@@ -15,7 +15,7 @@
 
 import { TheGraphMark, WorldMark } from "../PartnerMarks";
 import { SettlementRail } from "../SettlementRail";
-import { yourExposureLine, yourTermsLine } from "../terms-copy";
+import { TIER_CHIP, yourExposureLine, yourTermsLine } from "../terms-copy";
 import type { OffersResponse, Payment } from "../types";
 
 /** The four answers the engine has, in the order they get better. */
@@ -130,6 +130,9 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
   const move = nextMove(data, personhood, wallet);
   const contextRead = Boolean(data?.context);
   const at = data ? STEPS.indexOf(data.terms.payment) : -1;
+  // Somebody is answerable. This is the one condition the accent is allowed to
+  // follow, and every coloured thing in the panel follows it together.
+  const backed = Boolean(data) && data!.terms.payment !== "prepay_100";
 
   return (
     <aside className={`yourterms ${refreshing ? "is-refreshing" : ""}`}>
@@ -161,7 +164,13 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
           i cannot reach the desk and i have nothing written down
         </p>
       ) : data ? (
-        <>
+        // Keyed on the term: when it changes, this whole block is a new element
+        // rather than an edited one, so the entrance plays instead of the text
+        // quietly swapping under the reader.
+        <div
+          className={`yourterms__body ${backed ? "is-backed" : "is-bot"}`}
+          key={data.terms.payment}
+        >
           {/* The level, as a shape rather than as a sentence. Four segments for
             * the engine's four answers, filled to the one you are on, so a step
             * that moves the terms is visible from across the room. */}
@@ -170,6 +179,16 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
               <i key={idx} className={idx <= at ? "is-on" : undefined} />
             ))}
           </div>
+
+          {/* The same standing chip the race lanes use, so one label means one
+            * thing across the product. Filled either way, because a stranger's
+            * standing is a real answer and not an empty slot: ash for nobody
+            * behind the booking, accent the moment somebody is. */}
+          <p className="yt-tierrow">
+            <span className={`chip ${backed ? "chip--solid" : "chip--ash"}`}>
+              {TIER_CHIP[data.terms.tier]}
+            </span>
+          </p>
 
           <p className="yourterms__term">{yourTermsLine(data.terms.payment)}</p>
           <p className="yourterms__why reason">{data.reason}</p>
@@ -209,8 +228,13 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
               <span className="yourterms__next label">next</span>
               {move}
             </p>
-          ) : null}
-        </>
+          ) : (
+            <p className="yourterms__move yourterms__move--top">
+              <span className="yourterms__next label">top of the ladder</span>
+              nothing else to prove: this is the best the desk offers anyone.
+            </p>
+          )}
+        </div>
       ) : (
         <p className="yourterms__term yourterms__term--waiting">
           reading the desk for the first time

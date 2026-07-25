@@ -23,8 +23,27 @@
 // and no more. It guides by saying what is worth the most next; it never blocks.
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ContextFile } from "../ContextFile";
 import { HederaMark, TheGraphMark, WorldMark } from "../PartnerMarks";
-import type { Payment } from "../types";
+import type { ContextBands, Payment } from "../types";
+
+/**
+ * A real reading, recorded, shown before anyone has connected anything.
+ *
+ * The Graph's rung used to describe its output in prose, which meant the one
+ * partner whose contribution is a picture was the only one that never showed it.
+ * This is what the gateway actually returned for vitalik.eth on 2026-07-25,
+ * copied rather than composed, and it is labelled as an example wherever it
+ * appears so it can never be mistaken for the reader's own history.
+ */
+const EXAMPLE_BANDS: ContextBands = {
+  address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  ens: { name: "vitalik.eth", createdAt: 1497775154 },
+  since: 2017,
+  bands: { activity: "T4", tenure: "T4", breadth: "T4", scale: "T4" },
+  signals: { repayment: "no_credit_history" },
+  activeCategories: ["dex"],
+};
 
 /**
  * here    you are standing on it
@@ -72,10 +91,13 @@ interface Props extends LadderInput {
   reason: string | null;
   /** A real scheduled settlement, when there is one to open. */
   scheduleUrl?: string | null;
+  /** The reader's own bands, once a wallet has been read. */
+  context?: ContextBands | null;
 }
 
 function buildRungs(props: Props): Rung[] {
-  const { payment, personhood, wallet, contextRead, reason, scheduleUrl } = props;
+  const { payment, personhood, wallet, contextRead, reason, scheduleUrl, context } =
+    props;
   const at = level(payment);
   const proofsIn = personhood && wallet && contextRead;
 
@@ -151,25 +173,22 @@ function buildRungs(props: Props): Rung[] {
       details: (
         <>
           <p className="rung__text">
-            a connected wallet is read as coarse bands and never as numbers. no
-            balances, no counts, nothing anyone could shop for. it is an
-            underwriting signal, in the way a landlord asks how long you have been
-            at your last address.
+            coarse bands and never numbers: no balances, no counts, nothing
+            anyone could shop for. an underwriting signal, and the reading is the
+            same one the agents get in the demo.
           </p>
-          <dl className="rung__bands">
-            <div>
-              <dt>been around, with some depth and breadth</dt>
-              <dd>the price can be held for you</dd>
-            </div>
-            <div>
-              <dt>a long record, clean, and real size behind it</dt>
-              <dd>nothing moves until you arrive</dd>
-            </div>
-          </dl>
-          <p className="rung__text">
-            time is the part that cannot be bought back later, which is most of
-            what this is measuring.
-          </p>
+          {/* The same component the race lane uses, on purpose. The Graph's
+            * output should look identical wherever it appears, and a partner
+            * whose contribution is a picture deserves to show the picture rather
+            * than have it paraphrased. */}
+          <div className="rung__card">
+            {context ? null : (
+              <p className="rung__example label">
+                an example reading, until a wallet of your own is connected
+              </p>
+            )}
+            <ContextFile context={context ?? EXAMPLE_BANDS} />
+          </div>
         </>
       ),
     },

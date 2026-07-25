@@ -926,6 +926,23 @@ body {
   border-left-color: var(--color-accent-soft);
 }
 
+/* The Graph's actual output, shown rather than described. Set on the canvas so
+ * the card reads as a thing the protocol produced and handed over, not as more
+ * of the panel's prose. */
+.rung__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 62rem;
+}
+
+/* Said plainly, because a reading of somebody else's wallet presented without a
+ * word would be a claim about the reader's own. */
+.rung__example {
+  margin: 0;
+  color: var(--color-faint);
+}
+
 /* Bands and what each one buys. Never a plan chooser: these are readings of a
  * history, not products, and there is no number and no price anywhere in them. */
 .rung__bands {
@@ -1152,6 +1169,98 @@ body {
 
 .yourterms__why {
   margin: 0;
+}
+
+/* The whole block is keyed on the term, so a change in terms replays this. Four
+ * things move at once, which is what makes the difference readable on camera:
+ * the standing, the sentence, the fill of the rail and the step after it. */
+@keyframes yt-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.yourterms__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: yt-arrive var(--duration-beat2) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.yt-tierrow {
+  margin: 0;
+}
+
+/* ---------- the panel's two tones ----------
+ *
+ * The accent rule is untouched: it arrives only when a real person is answerable
+ * for the request, and everything coloured in here follows that one condition
+ * together. What changes is how loudly each state is said.
+ *
+ * A stranger's panel used to read as switched off. Grey meant dead when it
+ * should mean exposed: these are the worst terms on the board and there is
+ * nobody behind you. So the bot state is a cold, present grey with a weighted
+ * edge, not a disabled one.
+ */
+.yourterms__body.is-bot {
+  border-left: 3px solid var(--color-ash);
+  padding-left: var(--space-3);
+}
+
+.yourterms__body.is-backed {
+  border-left: 3px solid var(--color-accent);
+  padding-left: var(--space-3);
+}
+
+/* The heading carries the tone too, so the jump from grey to blue reads across
+ * a room without a word of it being read. */
+.yourterms__body.is-backed .yourterms__term {
+  color: var(--color-accent);
+}
+
+/* Contrast, because on near-black a muted grey reason line disappeared and took
+ * the gateway's own explanation with it. */
+.yourterms__why {
+  color: var(--color-ink);
+}
+
+/* ---------- the rail carries the risk ----------
+ *
+ * Density does the talking. Everything up front is a heavy, tight hatch: a lot
+ * of money tied up for a long time. A deposit is the same hatch at the standard
+ * pitch over a shorter stretch. Held and pay-at-checkout are nearly bare, which
+ * is the point: the money has been let go of.
+ *
+ * Scoped to this panel. The race lanes keep the pitch they were drawn with.
+ */
+.yourterms__body.is-bot .rail__held {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(233, 229, 220, 0.75) 0 2px,
+    rgba(233, 229, 220, 0) 2px 4px
+  );
+  border-top-color: var(--color-ink);
+}
+
+.yourterms__body.is-bot .rail__track {
+  border-color: var(--color-ash);
+}
+
+.yourterms__body.is-backed .rail__track {
+  border-color: var(--color-accent-soft);
+}
+
+.yourterms__move--top {
+  color: var(--color-muted);
+}
+
+.yourterms__move--top .yourterms__next {
+  color: var(--color-accent);
 }
 
 /* ---------- the level, as a shape ----------

@@ -40,7 +40,6 @@ import {
   pickHotels,
   type CityId,
 } from "../cityCatalog";
-import { ContextFile } from "../ContextFile";
 import { HotelFinaleCard } from "../HotelFinaleCard";
 import { OfferList } from "../OfferList";
 import { WorldMark } from "../PartnerMarks";
@@ -89,7 +88,16 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const address = wallet.address ?? "";
+  // A connected wallet always wins. `?address=` is the same affordance the race
+  // screen has had all along: a judge may type any address, and this is typing it
+  // in advance. It stays honest by itself, because without a Privy token the
+  // gateway marks the address `typed` rather than owned, and the file below says
+  // so on screen. Pairs with `?personhood=stand-in` so the whole ladder is one
+  // link on camera.
+  const [urlAddress] = useState(
+    () => new URLSearchParams(window.location.search).get("address")?.trim() ?? "",
+  );
+  const address = wallet.address ?? urlAddress;
   // Bumped when a step finishes, so the effect re-runs on proof being added even
   // though the token itself lives outside React.
   const run = useRef(0);
@@ -264,6 +272,7 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
         contextRead={contextRead}
         reason={data?.reason ?? null}
         scheduleUrl={data?.scheduleUrl ?? null}
+        context={data?.context ?? null}
       />
 
       <section className="ov__flow">
@@ -309,7 +318,10 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
               )}
             </section>
 
-            {data?.context ? <ContextFile context={data.context} /> : null}
+            {/* The bands moved into The Graph's rung, where the sentence that
+              * explains them lives. Two copies of the same card on one page is
+              * one too many, and the rung is where a reader goes to find out
+              * what a history is worth. */}
           </div>
 
           <div className="ov__panel">
