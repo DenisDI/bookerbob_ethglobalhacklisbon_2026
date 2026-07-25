@@ -30,13 +30,14 @@ underwriting.
 
 ## Disclosures
 
-**External inventory service.** Hotel inventory is served by an MCP API at
-flexrep.xyz (RateHawk-backed). **Ownership: REP, our own team's product, built and
-deployed before this event.** No code from
-that service is in this repository. It is used only as an interchangeable data
-source behind an inventory adapter; the repo ships a second in-event source
-(`fixtures/lisbon.json`) and the demo runs on either. The gateway, terms engine,
-context-bands MCP, and web app were all written during the hackathon.
+**Hotel inventory.** Rooms, rates and prebook holds come from **RateHawk**, a
+third-party B2B hotel API. We reach it through a thin MCP wrapper at flexrep.xyz
+that our team deployed before this event; that wrapper is ours, and none of its
+code is in this repository. It sits behind an inventory adapter as one
+interchangeable source among two: the repo also ships a snapshot captured live
+during the event (`fixtures/lisbon.json`), and the demo runs on either. The
+gateway, terms engine, context-bands MCP, and web app were all written during the
+hackathon.
 
 **Team background.** We are the team behind REP and have worked on verified-context
 and achievement-band products. This Scratch project is a new, from-scratch build
