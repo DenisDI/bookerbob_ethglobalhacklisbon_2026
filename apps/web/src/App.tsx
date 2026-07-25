@@ -228,14 +228,21 @@ export function App() {
       <header className={`masthead ${view === "machine" ? "masthead--machine" : ""}`}>
         {view === "human" ? (
           <div className="masthead__lede">
-            <h1 className="thesis">who is behind an agent changes the terms it gets</h1>
-            {/* The thesis is the claim. This is the same claim in the words a
-              * guest would use, so a stranger who reads only these two blocks
-              * knows what the product does. */}
+            {/* The recurring line still opens the story, but it is a claim about
+              * the mechanism and a stranger cannot act on it yet. It sits above
+              * the headline rather than being it. */}
+            <p className="kicker">
+              who is behind an agent changes the terms it gets
+            </p>
+            <h1 className="thesis">book a hotel, or let an agent book it for you</h1>
+            {/* What the thing is, before what is clever about it. Someone who
+              * reads only this paragraph should be able to say what BookerBob
+              * sells and what is unusual about it. */}
             <p className="thesis__plain">
-              an ai agent books the hotel room for you. same room, same nightly
-              rate for everyone. what changes is when the money leaves your
-              pocket, and that depends on who is standing behind the agent.
+              BookerBob is a hotel booking desk that serves people and ai agents
+              from the same inventory. same rooms, same nightly rate for
+              everyone. what changes is when the money leaves your pocket, and
+              that depends on who is standing behind the booking.
             </p>
           </div>
         ) : null}

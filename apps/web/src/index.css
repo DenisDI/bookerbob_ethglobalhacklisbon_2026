@@ -268,10 +268,20 @@ body {
   min-width: 0;
 }
 
+/* The claim, kept as the line that opens and closes the story, but no longer
+ * carrying the job of telling a stranger what is for sale. */
+.kicker {
+  margin: 0;
+  font: var(--weight-med) var(--size-mono-micro) / 1.4 var(--font-mono);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-accent);
+  text-transform: uppercase;
+}
+
 .thesis {
   margin: 0;
-  max-width: 20ch;
-  font: var(--weight-black) clamp(40px, 7vw, var(--size-ui-hero)) / 0.98 var(--font-ui);
+  max-width: 24ch;
+  font: var(--weight-black) clamp(38px, 5.6vw, 76px) / 1 var(--font-ui);
   letter-spacing: -0.03em;
 }
 
