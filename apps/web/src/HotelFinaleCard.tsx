@@ -1,24 +1,62 @@
-// The finale is a booking, shown like a booking. Real photo, real name, real
-// nightly rate, then the two facts that make it a BookerBob booking: the price
-// is held, and the settlement is scheduled.
+// The finale is a booking, shown like a booking. A bone card on a near-black
+// page, the only inversion in the product, which is why it lands.
 //
-// scheduleUrl comes from /offers when earnsRateLock → Hedera ScheduleCreate.
+// Order of loudness: name, seal, price, terms. On a screen whose whole argument is
+// that the price did not change, a giant price would be a lie, so the rate sits
+// third.
+//
+// scheduleUrl comes from /offers when earnsRateLock triggers a Hedera
+// ScheduleCreate. Without it the settlement row says so and keeps its layout;
+// never a bare tx id, either the open HashScan page or the honest gap.
+//
+// Two honest departures from the drawing. The seal shows the hold reference we
+// actually have (partnerOrderId); the package sketched a supplier book_hash,
+// which the gateway does not send to the browser. And check-in / check-out show
+// dates without clock times, because dates are what the supplier gives us.
 
+import { HederaMark } from "./PartnerMarks";
 import { displayName, starsLabel } from "./offer-display";
 import type { Offer, PrebookHold } from "./types";
 
 interface Props {
   offer: Offer;
   hold: PrebookHold;
+  checkin: string;
   checkout: string;
+  nights: number | null;
+  matchingCount: number | null;
+  city: string;
+  /** ENS name or address of the consented wallet, when there is one. */
+  bookedFor: string | null;
   cached: boolean;
-  scheduleUrl?: string;
+  scheduleUrl?: string | null;
+}
+
+function shortRef(reference: string): string {
+  return reference.length > 18
+    ? `${reference.slice(0, 12)}…${reference.slice(-4)}`
+    : reference;
+}
+
+const MONTHS = [
+  "jan", "feb", "mar", "apr", "may", "jun",
+  "jul", "aug", "sep", "oct", "nov", "dec",
+];
+
+function humanDate(iso: string): string {
+  const [year, month, day] = iso.slice(0, 10).split("-");
+  return `${Number(day)} ${MONTHS[Number(month) - 1] ?? month} ${year}`;
 }
 
 export function HotelFinaleCard({
   offer,
   hold,
+  checkin,
   checkout,
+  nights,
+  matchingCount,
+  city,
+  bookedFor,
   cached,
   scheduleUrl,
 }: Props) {
@@ -31,43 +69,111 @@ export function HotelFinaleCard({
       )}
 
       <div className="finale__body">
-        <header className="finale__head">
-          <h3 className="finale__name">{displayName(offer)}</h3>
-          <span className="finale__stars">{starsLabel(offer.stars)}</span>
-        </header>
+        <div className="finale__top">
+          <div className="finale__ident">
+            {offer.address ? <p className="finale__address">{offer.address}</p> : null}
+            <h3 className="finale__name">{displayName(offer)}</h3>
+            <p className="finale__sub">
+              {[
+                offer.stars ? starsLabel(offer.stars) : null,
+                hold.roomName,
+                `${humanDate(checkin)} to ${humanDate(checkout)}`,
+                nights ? `${nights} nights` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
 
-        {offer.address ? <p className="finale__address">{offer.address}</p> : null}
+          <div className="finale__seal">
+            <b>
+              RATE
+              <br />
+              LOCKED
+            </b>
+            <span className="finale__seal-ref mono">{shortRef(hold.partnerOrderId)}</span>
+          </div>
+        </div>
 
-        <p className="finale__rate">
+        <div className="finale__rate">
           <span className="finale__amount">${hold.perNightUsd.toFixed(2)}</span>
-          <span className="finale__per">a night</span>
-          {cached ? <span className="badge">cached inventory</span> : null}
-        </p>
+          <span className="finale__per">
+            / night · the same room, the same rate the unbacked lane was quoted
+          </span>
+          {cached ? <span className="badge">CACHED INVENTORY</span> : null}
+        </div>
 
-        <dl className="finale__facts">
+        <div className="finale__facts">
           <div>
-            <dt>price held</dt>
-            <dd className="mono">{hold.partnerOrderId}</dd>
+            <span className="k">CHECK-IN</span>
+            <span className="v">{humanDate(checkin)}</span>
           </div>
           <div>
-            <dt>settlement scheduled</dt>
-            <dd className="mono">
-              {scheduleUrl ? (
-                <a href={scheduleUrl} target="_blank" rel="noreferrer">
-                  {checkout}
-                </a>
-              ) : (
-                <span className="pending">{checkout}, not scheduled yet</span>
-              )}
-            </dd>
+            <span className="k">CHECK-OUT</span>
+            <span className="v">{humanDate(checkout)}</span>
           </div>
-          {hold.freeCancellationBefore ? (
-            <div>
-              <dt>free to cancel until</dt>
-              <dd className="mono">{hold.freeCancellationBefore.slice(0, 10)}</dd>
-            </div>
-          ) : null}
-        </dl>
+          <div>
+            <span className="k">BOOKED BY</span>
+            <span className="v">{bookedFor ? `agent for ${bookedFor}` : "an agent"}</span>
+          </div>
+          <div>
+            <span className="k">CARD ON FILE</span>
+            <span className="v">not required</span>
+          </div>
+          <div>
+            <span className="k">TOTAL, STAY</span>
+            <span className="v mono">${hold.totalUsd.toFixed(2)}</span>
+          </div>
+          <div>
+            <span className="k">ROOMS MATCHING</span>
+            <span className="v">
+              {matchingCount ?? "several"} in {city}
+            </span>
+          </div>
+        </div>
+
+        <div className="finale__terms">
+          <div>
+            <span className="k">PRICE HELD</span>
+            <span className="v mono">{shortRef(hold.partnerOrderId)}</span>
+          </div>
+          <div>
+            <span className="k">FREE TO CANCEL UNTIL</span>
+            <span className="v">
+              {hold.freeCancellationBefore
+                ? humanDate(hold.freeCancellationBefore)
+                : "not cancellable"}
+            </span>
+          </div>
+          <div>
+            <span className="partner">
+              <HederaMark />
+              <span className="k">SETTLEMENT SCHEDULED</span>
+            </span>
+            {scheduleUrl ? (
+              <a
+                className="v finale__link"
+                href={scheduleUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {humanDate(checkout)} ↗ hashscan
+              </a>
+            ) : (
+              <span className="v finale__pending">
+                {humanDate(checkout)}, not scheduled yet
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="finale__quote">
+          <span className="finale__quote-num mono">01</span>
+          <span>
+            an ai agent just locked a real hotel room on its own. no card on file, no
+            money moved yet.
+          </span>
+        </div>
       </div>
     </article>
   );

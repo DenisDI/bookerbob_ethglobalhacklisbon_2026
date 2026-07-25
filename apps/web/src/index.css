@@ -2,10 +2,10 @@
  *
  * Two rules carry the whole look:
  *
- * 1. Colour means accountability. The unbacked pane is drawn in greys only.
+ * 1. Colour means accountability. The unbacked lane is drawn in greys only.
  *    The accent appears only where a real person stands behind the request, so
  *    the palette states the thesis before a word is read. Red is for system
- *    marks (the recording dot, the seal, a failed payment) and never a lane.
+ *    marks (the recording dot, the seal, a failure) and never a lane identity.
  * 2. Monospace is for machine facts, proportional is for the agent's sentences.
  *    Prices, dates and hold ids are ledger entries; narration is speech.
  *
@@ -69,11 +69,11 @@ body {
 
 /* Micro-label: a machine fact, so mono, uppercase, wide tracking. */
 .label {
-  font:
-    var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
   letter-spacing: var(--tracking-micro);
   color: var(--color-faint);
   text-transform: uppercase;
+  margin: 0;
 }
 
 /* The agent talking. Never mono: this is speech, not a record. */
@@ -100,6 +100,7 @@ body {
   color: var(--color-muted);
   font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
   letter-spacing: var(--tracking-label);
+  white-space: nowrap;
 }
 
 .chip--accent {
@@ -145,6 +146,7 @@ body {
   font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
   letter-spacing: var(--tracking-label);
   color: var(--color-faint);
+  white-space: nowrap;
 }
 
 .partner {
@@ -156,6 +158,17 @@ body {
 .partner svg {
   display: block;
   flex: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line-strong);
+  border-left: 2px solid var(--color-signal);
+  box-shadow: var(--shadow-toast);
 }
 
 @keyframes bb-pulse {
@@ -199,6 +212,23 @@ body {
   }
 }
 
+@keyframes bb-card {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bb-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Links stay on the accent. The package stylesheet paints them
  * --color-signal, which contradicts its own rule that red is for system marks
  * only, so the rule wins over the sheet. */
@@ -218,10 +248,8 @@ body {
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
   max-width: 1440px;
   margin: 0 auto;
-  padding: clamp(1.25rem, 3vw, 2.75rem);
 }
 
 .masthead {
@@ -229,59 +257,32 @@ body {
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--gap);
-  padding-bottom: var(--gap);
-  border-bottom: 1px solid var(--line);
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4) var(--space-4);
 }
 
 .thesis {
   margin: 0;
-  max-width: 18ch;
-  font-size: clamp(1.65rem, 4.4vw, 3.1rem);
-  font-weight: 600;
-  line-height: 1.03;
-  letter-spacing: -0.035em;
+  max-width: 20ch;
+  font: var(--weight-black) clamp(40px, 7vw, var(--size-ui-hero)) / 0.98 var(--font-ui);
+  letter-spacing: -0.03em;
 }
 
 .ask {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: flex-start;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
 .ask__prompt {
   margin: 0;
   padding: 0.55rem 0.85rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-line);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.ask__run {
-  padding: 0.6rem 1.15rem;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--canvas);
-  font: inherit;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
-}
-
-.ask__run:hover:not(:disabled) {
-  background: var(--blue);
-  border-color: var(--blue);
-  color: var(--ink);
-}
-
-.ask__run:disabled {
-  background: transparent;
-  border-color: var(--line);
-  color: var(--muted);
-  cursor: progress;
+  font-size: var(--size-ui-sm);
+  color: var(--color-faint);
+  white-space: nowrap;
 }
 
 /* ---------- who is backing this ---------- */
@@ -289,390 +290,334 @@ body {
 .ask-address {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-width: 0;
-}
-
-.ask-address__label {
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: var(--muted);
 }
 
 .ask-address__row {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .ask-address__input {
-  flex: 1 1 18ch;
+  flex: 1 1 22ch;
   min-width: 0;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--line);
-  background: #0d0d14;
-  color: var(--ink);
+  padding: 9px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--color-accent-soft);
+  background: transparent;
+  color: var(--color-ink);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: var(--size-ui-md);
 }
 
 .ask-address__input:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 1px;
+  outline: 0;
+  border-bottom-color: var(--color-accent);
 }
 
 .ask-address__go {
-  padding: 0.55rem 1.1rem;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--canvas);
-  font: inherit;
-  font-weight: 600;
-  font-size: 0.88rem;
+  padding: 13px 16px;
+  border: 0;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  font: var(--weight-bold) 11px / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background var(--duration-tap) ease;
 }
 
 .ask-address__go:hover:not(:disabled) {
-  background: var(--blue);
-  border-color: var(--blue);
-  color: var(--ink);
+  background: var(--color-accent);
 }
 
 .ask-address__go:disabled {
   background: transparent;
-  border-color: var(--line);
-  color: var(--muted);
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-muted);
   cursor: progress;
 }
 
 .chips {
   display: flex;
-  gap: 0.4rem;
+  gap: var(--space-1);
   flex-wrap: wrap;
 }
 
-.chip {
-  padding: 0.3rem 0.6rem;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  cursor: pointer;
-}
-
-.chip:hover:not(:disabled),
+/* Active chip carries a dot, never a filled background: a filled chip reads as
+ * a selected plan, and this is not a plan chooser. */
 .chip--on {
-  border-color: var(--blue);
-  color: var(--ink);
+  color: var(--color-ink);
+  border-color: var(--color-accent-soft);
 }
 
-.chip:disabled {
-  cursor: progress;
+.chip--on::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-dot);
+  background: var(--color-accent);
 }
 
 .ask-address__hint {
   margin: 0;
-  max-width: 42ch;
-  font-size: 0.8rem;
-  color: var(--muted);
+  max-width: 46ch;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.4 var(--font-ui);
+  color: var(--color-faint);
 }
 
-/* ---------- the underwriting file ---------- */
+/* ---------- race chrome ---------- */
 
-.file {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--line);
-  border-left: 2px solid var(--blue);
-  background: #0d0d14;
-}
-
-.file__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-.file__name {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-
-.file__since {
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.file__axes {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem 1rem;
-  margin: 0;
-}
-
-.axis {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.axis__label {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.axis__value {
+.racehead {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--space-3);
+  height: 44px;
+  padding: 0 var(--space-4);
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface-3);
+}
+
+.racehead__rec {
+  color: var(--color-signal);
+}
+
+.pane__spacer {
+  flex: 1;
+}
+
+/* The prompt, said once, identically to both agents. */
+.prompt-band {
+  position: relative;
+  height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface-3);
+}
+
+.prompt-band__text {
   margin: 0;
+  font: var(--weight-black) clamp(28px, 6.4vw, var(--size-ui-hero)) / 1 var(--font-ui);
+  letter-spacing: var(--tracking-hero);
+  text-transform: uppercase;
+  color: var(--color-ink-bright);
+  white-space: nowrap;
+  text-shadow:
+    -2px 0 rgba(232, 17, 45, 0.6),
+    2px 0 rgba(154, 166, 255, 0.55);
 }
-
-/* Four segments, filled to the band. Legible without knowing what T3 means. */
-.axis__meter {
-  display: inline-flex;
-  gap: 2px;
-}
-
-.axis__meter i {
-  width: 0.85rem;
-  height: 0.4rem;
-  background: #24242f;
-}
-
-.axis__meter i.on {
-  background: var(--blue);
-}
-
-.axis__band {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--muted);
-}
-
-.file__repayment {
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-.file__where {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-/* ---------- race ---------- */
 
 .race {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  display: flex;
+  position: relative;
+  min-height: 0;
 }
 
 .pane {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
-  /* Grid and flex children default to min-width auto, which lets a long hotel
-   * name push the whole page wider than the viewport. */
-  min-width: 0;
-  padding: clamp(1rem, 2vw, 1.75rem);
-  background: var(--canvas);
+  position: relative;
+  overflow: hidden;
+  background: var(--color-canvas);
 }
 
 .pane--accent {
-  background: var(--surface);
+  background:
+    radial-gradient(130% 95% at 50% 0%, var(--color-accent-wash), transparent 62%),
+    var(--color-canvas);
+}
+
+.pane__divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(232, 17, 45, 0.55);
+  z-index: 9;
+  pointer-events: none;
 }
 
 .pane__head {
+  flex: none;
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--space-3) var(--space-4) 13px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.pane__tags {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
   min-width: 0;
 }
 
 .pane__label {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-muted);
   text-transform: uppercase;
-  color: var(--muted);
+  margin: 0;
 }
 
-.pane--accent .pane__label {
-  color: var(--blue);
+.pane__status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-ash);
+}
+
+.pane--accent .pane__status {
+  color: var(--color-accent);
+}
+
+.pane__source {
+  opacity: 0.62;
 }
 
 .pane__term {
   margin: 0;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
+  font: var(--weight-semi) var(--size-ui-md) / 1.25 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
 }
 
-/* Sits directly under the term, quiet, so the outcome reads first and the
- * reason reads second. Never a threshold, always a fact. */
-.pane__because {
-  margin: -0.9rem 0 0;
-  padding-left: 0.75rem;
-  border-left: 1px solid var(--line);
-  font-size: 0.85rem;
-  color: var(--muted);
-}
+/* ---------- spent counter ---------- */
 
-.pane--accent .pane__because {
-  border-left-color: rgb(59 91 255 / 0.45);
-}
-
-.pane__count {
-  margin: 0 0 0.7rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.pane__feed {
-  min-height: 8.5rem;
-}
-
-.pane__error {
+.spent {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
   margin: 0;
-  padding: 0.6rem 0.8rem;
-  border-left: 2px solid var(--muted);
-  font-size: 0.9rem;
-  color: var(--muted);
+  white-space: nowrap;
 }
 
-/* Content packs to the top. The shorter pane simply ends, which reads as a
- * smaller result rather than a hole punched in the middle of a column. */
-.pane__rooms {
-  margin-top: 0;
+.spent__label {
+  font: var(--weight-reg) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--color-faint);
+  padding-bottom: 9px;
 }
 
-/* ---------- settlement rail (the signature) ---------- */
+.spent__value {
+  font: var(--weight-bold) var(--size-mono-hero) / 0.82 var(--font-mono);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ash);
+}
+
+.spent__tail {
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-ash);
+  padding-bottom: 10px;
+}
+
+/* Lane B's zero is the win, never a disabled state, so it is never greyed. */
+.pane--accent .spent__value {
+  color: var(--color-accent);
+  text-shadow: 0 0 32px rgba(154, 166, 255, 0.4);
+}
+
+.pane--accent .spent__tail {
+  color: var(--color-accent);
+}
+
+/* ---------- settlement rail: the signature glyph ---------- */
 
 .rail {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 6px;
 }
 
 .rail__track {
   position: relative;
-  height: 3.5rem;
-  border: 1px solid var(--line);
-  background: #0d0d14;
-  overflow: hidden;
+  height: 18px;
+  border: 1px solid var(--color-line-strong);
+  background: rgba(233, 229, 220, 0.06);
 }
 
-/* Hatching reads as encumbered, the way a struck-through column does on paper. */
+/* Hatching reads as encumbered, the struck-through column in a paper ledger.
+ * A solid fill would read as a progress meter, and more would look better. */
 .rail__held {
   position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  background-image: repeating-linear-gradient(
-    -45deg,
-    #3a3a49 0 1px,
-    transparent 1px 7px
-  );
-  border-top: 1px solid #4a4a5c;
+  inset: 0;
+  background: var(--texture-hatch-ash);
+  border-top: 1px solid var(--color-ash);
   transform-origin: left center;
-  animation: rail-fill 620ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+  animation: rail-fill var(--duration-collapse) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rail__held--deposit {
+  top: auto;
+  bottom: 0;
+  left: var(--rail-tick-free-cancel);
+  right: 0;
+  height: var(--rail-deposit-height);
+  background: var(--texture-hatch-accent);
+  border-top: 1px solid var(--color-accent);
+}
+
+/* Dashed until the free-cancel tick: still reversible. */
+.rail__reversible {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--rail-tick-free-cancel);
+  height: var(--rail-deposit-height);
+  border: 1px dashed var(--color-accent-soft);
+  border-right: 0;
 }
 
 .rail__settle {
   position: absolute;
+  right: 0;
   top: 0;
   bottom: 0;
-  right: 0;
-  width: 4px;
-  background: var(--blue);
-  box-shadow: 0 0 22px 2px rgb(59 91 255 / 0.5);
-  animation: rail-settle 620ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+  width: var(--rail-settle-mark-width);
+  background: rgba(154, 166, 255, 0.55);
+  border-left: 1px solid var(--color-accent);
+  animation: rail-settle var(--duration-beat2) ease both;
+  animation-delay: var(--duration-beat1);
 }
 
-/* Deadlines sit above the hatching, otherwise the encumbered stretch swallows
- * the one date the guest actually cares about. */
 .rail__tick {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -4px;
+  bottom: -4px;
   width: 1px;
-  background: repeating-linear-gradient(
-    to bottom,
-    #6d7288 0 3px,
-    transparent 3px 6px
-  );
-}
-
-.rail__marks {
-  position: relative;
-  height: 0.9rem;
-}
-
-.rail__mark {
-  position: absolute;
-  top: 0;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  background: var(--color-muted);
 }
 
 .rail__scale {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
+  position: relative;
+  height: 11px;
 }
 
-.rail__caption {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.rail--accent .rail__caption {
-  color: var(--ink);
+.rail__scale span {
+  position: absolute;
+  top: 0;
+  font: var(--weight-reg) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+  white-space: nowrap;
 }
 
 .rail--empty .rail__track {
-  background: repeating-linear-gradient(
-    -45deg,
-    #14141c 0 1px,
-    transparent 1px 9px
-  );
+  background: rgba(233, 229, 220, 0.03);
 }
 
 @keyframes rail-fill {
@@ -691,248 +636,589 @@ body {
   }
   to {
     opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ---------- spent ---------- */
-
-.spent {
-  display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-  margin: 0;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
-.spent__label {
-  font-size: 0.66rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.spent__value {
-  font-size: 1.35rem;
-  letter-spacing: -0.02em;
-}
-
-.spent__tail {
-  font-size: 0.7rem;
-  color: var(--muted);
-}
-
-/* ---------- narration ---------- */
-
-.feed {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.feed__line {
-  padding-left: 0.9rem;
-  border-left: 1px solid var(--line);
-  font-size: 0.95rem;
-  color: #c7cad6;
-  animation: line-in 260ms ease both;
-}
-
-.pane--accent .feed__line {
-  border-left-color: rgb(59 91 255 / 0.45);
-}
-
-.feed__idle {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-@keyframes line-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.35rem);
-  }
-  to {
-    opacity: 1;
     transform: none;
   }
 }
 
+/* ---------- metering strip ---------- */
+
+.meter {
+  flex: none;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+  background: rgba(233, 229, 220, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.meter--accent {
+  background: var(--color-accent-wash);
+}
+
+.meter__tag {
+  font: var(--weight-bold) 10px / 1 var(--font-mono);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-ash);
+}
+
+.meter--accent .meter__tag {
+  color: var(--color-accent);
+}
+
+.meter__line {
+  font: var(--weight-reg) 10px / 1 var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- narration ---------- */
+
+.pane__feed {
+  flex: none;
+  height: 104px;
+  padding: 12px var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Older lines slide up under a fade. Never a scrollbar. */
+.pane__feed::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 32px;
+  background: linear-gradient(180deg, var(--color-surface-3), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.feed__line {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.feed__bullet {
+  font: var(--weight-bold) 10px / 1.6 var(--font-mono);
+  color: var(--color-ash);
+  flex: none;
+}
+
+.pane--accent .feed__bullet {
+  color: var(--color-accent);
+}
+
+.feed__caret {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: var(--color-ash);
+  animation: bb-blink 0.9s steps(1) infinite;
+  flex: none;
+}
+
+.pane--accent .feed__caret {
+  background: var(--color-accent);
+}
+
+.feed__idle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.3 var(--font-ui);
+  color: var(--color-faint);
+}
+
+.feed__dots {
+  display: flex;
+  gap: 3px;
+}
+
+.feed__dots span {
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  animation: bb-dot 1.1s linear infinite;
+}
+
+.feed__dots span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.feed__dots span:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
 /* ---------- rooms ---------- */
+
+.pane__rooms {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 12px var(--space-4) var(--space-3);
+  overflow: hidden;
+}
+
+.pane__count {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  white-space: nowrap;
+}
 
 .rooms {
   display: flex;
   flex-direction: column;
 }
 
-.rooms__row {
+.offer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  border-top: 1px solid var(--line);
+  grid-template-columns: minmax(0, 1fr) 84px 134px;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-hairline);
 }
 
-.rooms__name {
-  font-size: 0.92rem;
+.offer__name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font: var(--weight-med) var(--size-ui-md) / 1.2 var(--font-ui);
+}
+
+.offer__name > span:not(.offer__stars) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rooms__stars {
-  font-size: 0.7rem;
-  color: var(--muted);
+/* The room quoted in both lanes. Two chips on one traceable line is the whole
+ * comparison, so the anchor is the only decoration allowed in this list. */
+.offer__anchor {
+  width: 5px;
+  height: 5px;
+  background: var(--color-signal);
+  flex: none;
 }
 
-.rooms__price {
-  font-family: var(--font-mono);
+.offer__stars {
+  font-size: 10px;
+  color: var(--color-faint);
+  flex: none;
+}
+
+.offer__rate {
+  font: var(--weight-semi) var(--size-mono-fact) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.88rem;
+  text-align: right;
 }
 
-.rooms__rest {
-  margin: 0.6rem 0 0;
-  font-size: 0.8rem;
-  color: var(--muted);
+.offer__term {
+  justify-content: center;
 }
 
-/* ---------- finale ---------- */
+.offer__foot {
+  margin: 9px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--color-hairline);
+  font: var(--weight-reg) var(--size-ui-sm) / 1.4 var(--font-ui);
+  color: var(--color-faint);
+}
+
+.skel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px 134px;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.skel span {
+  height: 10px;
+  background: rgba(233, 229, 220, 0.07);
+}
+
+.skel span:first-child {
+  background: linear-gradient(
+    90deg,
+    rgba(233, 229, 220, 0.05),
+    rgba(233, 229, 220, 0.18),
+    rgba(233, 229, 220, 0.05)
+  );
+  background-size: 240% 100%;
+  animation: bb-skel 1.4s linear infinite;
+}
+
+/* ---------- the underwriter's file ---------- */
+
+.ctx {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-left: 2px solid var(--color-accent);
+  background: var(--color-surface-3);
+}
+
+.ctx__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.ctx__name {
+  margin: 0;
+  font: var(--weight-med) var(--size-mono-fact) / 1.2 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.ctx__since {
+  margin-left: auto;
+}
+
+.ctx__axes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 26px;
+  margin: 0;
+}
+
+.axis {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.axis__head {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.axis__note {
+  margin: 0 0 0 auto;
+  font: var(--weight-semi) var(--size-ui-sm) / 1 var(--font-ui);
+  color: var(--color-ink);
+}
+
+/* Stale is not zero: an empty meter plus "no read", never a reading. */
+.axis__note--noread {
+  color: var(--color-faint);
+}
+
+.axis__meter {
+  display: flex;
+  gap: 4px;
+}
+
+.axis__meter i {
+  flex: 1;
+  height: 7px;
+  border: 1px solid rgba(233, 229, 220, 0.16);
+  background: rgba(233, 229, 220, 0.05);
+}
+
+.axis__meter i.on {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.ctx__repayment {
+  margin: 0;
+}
+
+.ctx__where {
+  margin: 0;
+}
+
+/* ---------- finale card ---------- */
 
 .finale {
-  display: grid;
-  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr);
-  gap: 1rem;
-  border: 1px solid var(--line);
-  border-left: 2px solid var(--blue);
-  background: #0d0d14;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  background: var(--color-card-bg);
+  color: var(--color-card-ink);
+  box-shadow: var(--shadow-card);
+  animation: bb-card 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.finale__photo {
-  width: 100%;
-  height: 100%;
-  min-height: 9rem;
-  object-fit: cover;
-  display: block;
-}
-
-.finale__photo--none {
+.finale::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background: repeating-linear-gradient(
-    -45deg,
-    #14141c 0 1px,
-    transparent 1px 9px
+    0deg,
+    rgba(10, 10, 11, 0.05) 0 1px,
+    transparent 1px 3px
   );
 }
 
-.finale__body {
-  padding: 0.9rem 1rem 1rem 0;
+/* min-width and max-width both matter: an img is a flex item with an intrinsic
+ * width, and without them a 1024px photo refuses to shrink, takes the whole card
+ * and squeezes the body into a one-word column. */
+.finale__photo {
+  flex: 0 0 40%;
+  min-width: 0;
+  max-width: 40%;
+  min-height: 190px;
+  /* Stretches to the body rather than capping, so the card never shows a strip
+   * of bare card stock under the photo. */
+  align-self: stretch;
+  object-fit: cover;
+  background: #d8d3c8;
 }
 
-.finale__head {
+.finale__photo--none {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.finale__photo--none::before {
+  content: "NO PHOTO";
+  font: var(--weight-reg) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: 0.14em;
+  color: rgba(10, 10, 11, 0.4);
+}
+
+.finale__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 20px 24px 0;
+}
+
+.finale__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.finale__ident {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.finale__address {
+  margin: 0;
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: 0.22em;
+  color: var(--color-card-muted);
+  text-transform: uppercase;
 }
 
 .finale__name {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+  font: var(--weight-semi) var(--size-ui-display) / 0.98 var(--font-ui);
+  letter-spacing: -0.025em;
 }
 
-.finale__stars {
-  font-size: 0.72rem;
-  color: var(--muted);
+.finale__sub {
+  margin: 0;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.3 var(--font-ui);
+  color: var(--color-card-muted);
 }
 
-.finale__address {
-  margin: 0.2rem 0 0;
-  font-size: 0.82rem;
-  color: var(--muted);
+.finale__seal {
+  position: relative;
+  flex: none;
+  width: 118px;
+  height: 118px;
+  border: 1px solid var(--color-signal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
 }
 
+.finale__seal::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(232, 17, 45, 0.5);
+  border-radius: 50%;
+  animation: bb-ring 14s linear infinite;
+}
+
+.finale__seal b {
+  font: var(--weight-bold) 13px / 1.15 var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--color-signal);
+  text-align: center;
+}
+
+.finale__seal-ref {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(10, 10, 11, 0.6);
+}
+
+/* The price is not the hero: on a screen arguing that the price did not change,
+ * a giant price would be a lie. Name, seal, price, terms. */
 .finale__rate {
   display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-  margin: 0.7rem 0 0.9rem;
+  align-items: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
 }
 
 .finale__amount {
-  font-family: var(--font-mono);
+  font: var(--weight-bold) var(--size-mono-hero) / 0.86 var(--font-mono);
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  font-size: 1.5rem;
-  letter-spacing: -0.03em;
 }
 
 .finale__per {
-  font-size: 0.8rem;
-  color: var(--muted);
+  font: var(--weight-reg) var(--size-ui-sm) / 1.2 var(--font-ui);
+  color: var(--color-card-muted);
 }
 
-.badge {
-  margin-left: auto;
-  padding: 0.15rem 0.45rem;
-  border: 1px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
+.finale__rate .badge {
+  color: var(--color-card-muted);
+  border-color: var(--color-card-line);
 }
 
 .finale__facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 26px;
+  margin: 0;
+}
+
+.finale__facts > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(10, 10, 11, 0.13);
+}
+
+.finale__facts .k,
+.finale__terms .k {
+  font: var(--weight-med) var(--size-mono-micro) / 1.4 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-card-muted);
+  text-transform: uppercase;
+}
+
+.finale__facts .v,
+.finale__terms .v {
+  font: var(--weight-med) var(--size-ui-sm) / 1.2 var(--font-ui);
+  text-align: right;
+}
+
+.finale__terms {
+  display: flex;
+  border-top: 1px solid var(--color-card-line);
+}
+
+.finale__terms > div {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin: 0;
+  gap: 4px;
+  padding: 12px 12px 12px 0;
 }
 
-.finale__facts div {
+.finale__link {
+  color: var(--color-signal);
+  text-align: left;
+}
+
+.finale__pending {
+  color: var(--color-card-muted);
+  text-align: left;
+}
+
+.finale__quote {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: 12px;
+  margin: 0 -24px;
+  padding: 19px 24px;
+  background: var(--color-card-ink);
+  color: var(--color-ink);
+  font: var(--weight-reg) var(--size-ui-lg) / 1.3 var(--font-ui);
 }
 
-.finale__facts dt {
-  min-width: 11ch;
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: var(--muted);
+.finale__quote-num {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--color-signal);
 }
 
-.finale__facts dd {
-  margin: 0;
-  font-size: 0.82rem;
-  overflow-wrap: anywhere;
+.finale-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
 }
 
-.pending {
-  color: var(--muted);
+.finale-frame__cap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.finale-frame .finale {
+  max-width: 1100px;
 }
 
 /* ---------- foot ---------- */
 
 .foot {
-  padding-top: var(--gap);
-  border-top: 1px solid var(--line);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
 }
 
 .foot p {
   margin: 0;
   max-width: 60ch;
-  font-size: 0.88rem;
-  color: var(--muted);
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  color: var(--color-muted);
 }
 
 /* ---------- pipeline wire strip (temp; design replaces) ---------- */
@@ -1029,24 +1315,37 @@ body {
   color: var(--muted);
 }
 
-/* ---------- narrow ---------- */
+/* ---------- narrow: keep the comparison, stack everything else ---------- */
 
 @media (max-width: 860px) {
   .race {
-    grid-template-columns: minmax(0, 1fr);
+    flex-direction: column;
+  }
+
+  .pane__divider {
+    display: none;
+  }
+
+  .ctx__axes {
+    grid-template-columns: 1fr;
   }
 
   .finale {
-    grid-template-columns: minmax(0, 1fr);
+    flex-direction: column;
   }
 
-  .finale__body {
-    padding: 0 1rem 1rem;
+  .finale__photo {
+    flex: none;
+    height: 180px;
+  }
+
+  .prompt-band {
+    height: 72px;
   }
 }
 
-/* Everything, not a list of selectors: new animations arrive with the design
- * layer and none of them may sneak past this. End states are shown instead. */
+/* Everything, not a list of selectors: the design layer adds several animations
+ * and none of them may sneak past this. End states are shown instead. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
