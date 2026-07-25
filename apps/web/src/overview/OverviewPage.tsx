@@ -19,7 +19,7 @@
 // terms, the rooms, the hold and the Hedera schedule together, so nothing here
 // needed a new endpoint.
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchOffers } from "../api";
 import {
   ConnectWalletButton,
@@ -27,17 +27,21 @@ import {
   shortAddress,
   useConsentedWallet,
 } from "../auth";
+import {
+  CITIES,
+  DEFAULT_CITY,
+  cityLabel,
+  hotelsForCity,
+  type CityId,
+} from "../cityCatalog";
 import { ContextFile } from "../ContextFile";
 import { HotelFinaleCard } from "../HotelFinaleCard";
 import { OfferList, OfferSkeleton } from "../OfferList";
 import { HederaMark, TheGraphMark, WorldMark } from "../PartnerMarks";
-import { inventoryLine } from "../terms-copy";
 import type { OffersResponse } from "../types";
 import { SelfieCheck } from "../worldid";
 import { FlowBoundary } from "./FlowBoundary";
 import { YourTerms } from "./YourTerms";
-
-const DEFAULT_CITY = "lisbon";
 
 interface WalletSnap {
   ready: boolean;
@@ -68,9 +72,9 @@ function WalletBridge({ onChange }: { onChange: (snap: WalletSnap) => void }) {
 }
 
 export function OverviewPage() {
-  const [city, setCity] = useState(DEFAULT_CITY);
-  // What was actually sent. Typing does not fire a supplier round trip; asking does.
-  const [askedCity, setAskedCity] = useState(DEFAULT_CITY);
+  const [city, setCity] = useState<CityId>(DEFAULT_CITY);
+  // What was actually sent to /offers. The room strip flips on `city` immediately.
+  const [askedCity, setAskedCity] = useState<string>(DEFAULT_CITY);
   const [wallet, setWallet] = useState<WalletSnap>(NO_WALLET);
   const [personhood, setPersonhood] = useState(false);
 
@@ -134,21 +138,61 @@ export function OverviewPage() {
     setPersonhood(true);
   }, []);
 
-  const limit = data?.terms.inventory === "basic" ? 3 : 5;
+  const cityHotels = useMemo(() => hotelsForCity(city), [city]);
 
   return (
     <div className="ov">
       {privyConfigured ? <WalletBridge onChange={onWallet} /> : null}
 
-      <header className="ov__hero">
-        <p className="kicker">who is behind an agent changes the terms it gets</p>
-        <h1 className="thesis">book a hotel, or let an agent book it for you</h1>
-        <p className="thesis__plain">
-          BookerBob is a hotel booking desk that serves people and ai agents from
-          the same inventory. same rooms, same nightly rate for everyone. what
-          changes is when the money leaves your pocket, and that depends on who is
-          standing behind the booking.
-        </p>
+      <header className="ov__hero ov__hero--split">
+        <div className="ov__herocopy">
+          <p className="kicker">who is behind an agent changes the terms it gets</p>
+          <h1 className="thesis">book a hotel, or let an agent book it for you</h1>
+          <p className="thesis__plain">
+            BookerBob is a hotel booking desk that serves people and ai agents from
+            the same inventory. same rooms, same nightly rate for everyone. what
+            changes is when the money leaves your pocket, and that depends on who is
+            standing behind the booking.
+          </p>
+        </div>
+        <div className="ask ask--end">
+          <form
+            className="ask__prompt"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setAskedCity(city);
+            }}
+          >
+            <label className="ask__said" htmlFor="ov-city">
+              book me a hotel in
+            </label>
+            <select
+              id="ov-city"
+              className="ask__city"
+              value={city}
+              onChange={(e) => {
+                const next = e.target.value as CityId;
+                setCity(next);
+                setAskedCity(next);
+              }}
+              aria-label="city"
+            >
+              {CITIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </form>
+          <div className="ask__hotels">
+            <OfferList offers={cityHotels} limit={4} />
+          </div>
+          <p className="step__note reason">
+            {data
+              ? `${data.checkin} to ${data.checkout}${data.nights ? `, ${data.nights} nights` : ""}`
+              : `four rooms in ${cityLabel(city)}`}
+          </p>
+        </div>
       </header>
 
       {/* Three beats, each carrying the mark of whoever does that piece of work.
@@ -204,36 +248,6 @@ export function OverviewPage() {
 
         <div className="ov__cols">
           <div className="ov__steps">
-            <section className="step">
-              <h3 className="step__title">where and when</h3>
-              <form
-                className="ask__prompt"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setAskedCity(city);
-                }}
-              >
-                <label className="ask__said" htmlFor="ov-city">
-                  book me a hotel in
-                </label>
-                <input
-                  id="ov-city"
-                  className="ask__city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="a city"
-                  spellCheck={false}
-                  autoComplete="off"
-                  size={Math.max(6, city.length + 1)}
-                />
-              </form>
-              <p className="step__note reason">
-                {data
-                  ? `${data.checkin} to ${data.checkout}${data.nights ? `, ${data.nights} nights` : ""}`
-                  : "the demo window is fixed for now"}
-              </p>
-            </section>
-
             <section className="step">
               <h3 className="step__title partner">
                 <WorldMark size={13} />
@@ -295,24 +309,20 @@ export function OverviewPage() {
 
       <section className="ov__rooms">
         <div className="ov__flowhead">
-          <h2 className="ov__h2">rooms at your terms</h2>
-          {data ? (
-            <p className="ov__flowlede">
-              {inventoryLine(data.terms, Math.min(data.offers.length, limit))}
-              {data.source === "cached" ? ", from a saved snapshot" : ""}
-            </p>
-          ) : null}
+          <h2 className="ov__h2">rooms in {cityLabel(city)}</h2>
+          <p className="ov__flowlede">
+            four rooms for the city you picked
+            {data?.source === "cached" ? " · terms still from the live desk" : ""}
+          </p>
         </div>
 
-        {!data && refreshing ? <OfferSkeleton /> : null}
+        {!data && refreshing ? <OfferSkeleton rows={4} /> : null}
 
-        {data ? (
-          <OfferList
-            offers={data.offers}
-            limit={limit}
-            accent={data.terms.payment !== "prepay_100"}
-          />
-        ) : null}
+        <OfferList
+          offers={cityHotels}
+          limit={4}
+          accent={Boolean(data && data.terms.payment !== "prepay_100")}
+        />
       </section>
 
       {data?.hold && data.offers[0] ? (

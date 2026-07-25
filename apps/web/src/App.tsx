@@ -4,6 +4,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddressBands } from "./AddressBands";
 import { fetchOffers, fetchSpent } from "./api";
+import {
+  CITIES,
+  DEFAULT_CITY,
+  hotelsForCity,
+} from "./cityCatalog";
 import { HotelFinaleCard } from "./HotelFinaleCard";
 import {
   ConnectWalletButton,
@@ -12,6 +17,7 @@ import {
 } from "./auth";
 import { hasCredential, type CredentialState } from "./credential";
 import { MachineView } from "./machine";
+import { OfferList } from "./OfferList";
 import { OverviewPage } from "./overview";
 import { ParticipantsBand, ParticipantsBandGuest } from "./ParticipantsBand";
 import { RacePane, type PaneState } from "./RacePane";
@@ -20,20 +26,6 @@ import { PANE_LABEL } from "./terms-copy";
 import { readView, ViewSwitch, writeView, type View } from "./ViewSwitch";
 import { SelfieCheck } from "./worldid";
 import { SCENARIOS, WhoIsAsking } from "./WhoIsAsking";
-
-/**
- * Where the demo starts, not where it is stuck. The field is editable and the
- * city travels to the gateway; what comes back is read off the response, so the
- * screen never claims a city the desk did not actually quote.
- */
-const CITIES = [
-  { value: "lisbon", label: "Lisbon" },
-  { value: "munich", label: "Munich" },
-  { value: "paris", label: "Paris" },
-  { value: "madrid", label: "Madrid" },
-] as const;
-
-const DEFAULT_CITY = CITIES[0].value;
 
 /** Until World AgentKit/Selfie lands — not a prize-complete PoH. */
 const STAND_IN: CredentialState = { status: "stand_in" };
@@ -139,6 +131,7 @@ export function App() {
   /** Privy-authenticated wallet only — null when disconnected. */
   const [myWallet, setMyWallet] = useState<string | null>(null);
   const [city, setCity] = useState<string>(DEFAULT_CITY);
+  const cityHotels = useMemo(() => hotelsForCity(city), [city]);
   // Read from the URL on first paint so a machine-view link opens on it.
   const [view, setView] = useState<View>(() => readView(window.location.search));
   // Product race uses stand-in until World wires verified.
@@ -336,9 +329,10 @@ export function App() {
             </p>
           </div>
         ) : null}
-        <div className="ask">
-          {/* The request itself, and it is a real field: the city travels to the
-            * desk. Enter runs the race, the same as the button below. */}
+        <div className="ask ask--end">
+          {/* City select sits on the right of the masthead. The four rooms below
+            * flip from the local catalog the moment the city changes — before
+            * either lane has finished quoting. */}
           <form
             className="ask__prompt"
             onSubmit={(e) => {
@@ -363,6 +357,9 @@ export function App() {
               ))}
             </select>
           </form>
+          <div className="ask__hotels">
+            <OfferList offers={cityHotels} limit={4} />
+          </div>
           {/* In the human view this is the escape hatch, so it belongs after the
             * cards it is an alternative to, not before them. In the machine view
             * there are no cards, so it stays here as the only way in. */}
