@@ -45,14 +45,15 @@ This is where recording from our own site looks strong, as the founder said.
   World AgentKit, or a person proves themselves directly with World ID. Either way, the
   desk knows a real, unique human is accountable."
 - The Graph (on the context rung): "we read that human's onchain history through The
-  Graph, as coarse bands, never raw numbers. Time you cannot buy back, depth, breadth,
-  size. That is the underwriting signal."
+  Graph, as coarse bands, never raw numbers. One query pattern across lending, DEX and
+  perps, the Messari standardized schemas, so a single MCP reads any of them. Time you
+  cannot buy back, depth, breadth, size. That is the underwriting signal."
 - Show the tiers here, briefly, as the ladder lights up: anonymous pays the whole stay up
   front; a backed human leaves a deposit; a proven history holds the price and pays later;
   a long clean record settles at checkout.
 - Hedera (on the settlement rung): "pay later is not a promise, it is a real scheduled
-  transaction on Hedera, and anonymous agents pay per query over x402. Machines pay
-  machines, on rails."
+  transaction on Hedera, and anonymous agents pay per query with x402 settled on Hedera
+  testnet. Machines pay machines, on rails."
 
 One optional slide here, 4 bullets max: World / The Graph / Hedera / one engine for people
 and agents.
