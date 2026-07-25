@@ -24,9 +24,37 @@ export function worldIdContextHandler(c: Context) {
   return c.json(worldIdConfig());
 }
 
+/**
+ * A cheap ceiling on how often one caller may make us talk to the Portal.
+ *
+ * In memory, so per process and reset when the machine sleeps, which is the same
+ * caveat the AgentKit quota carries and is stated for the same reason. It is not
+ * a security control, it is a courtesy to the Portal and a brake on someone
+ * hammering the one route here that makes an outbound call.
+ */
+const VERIFY_PER_MINUTE = 20;
+const attempts = new Map<string, { count: number; windowStart: number }>();
+
+function withinVerifyRate(caller: string, now = Date.now()): boolean {
+  const window = 60_000;
+  const seen = attempts.get(caller);
+  if (!seen || now - seen.windowStart > window) {
+    attempts.set(caller, { count: 1, windowStart: now });
+    return true;
+  }
+  seen.count += 1;
+  return seen.count <= VERIFY_PER_MINUTE;
+}
+
 export async function worldIdVerifyHandler(c: Context) {
   if (!worldIdReady()) {
     return c.json({ error: "world_id_unconfigured" }, 503);
+  }
+
+  const caller =
+    c.req.header("fly-client-ip") ?? c.req.header("x-forwarded-for") ?? "local";
+  if (!withinVerifyRate(caller)) {
+    return c.json({ error: "too_many_attempts" }, 429);
   }
 
   const payload = await c.req.json().catch(() => null);

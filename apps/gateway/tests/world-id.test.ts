@@ -144,9 +144,14 @@ test("silence on a success status is not turned into a refusal", () => {
   assert.equal(parsePortalVerdict('{"success":true}', "selfie").accepted, true);
 });
 
-test("a session round-trips, and only ours does", { skip: !configured }, () => {
-  const token = mintSession(NULLIFIER);
-  const read = readSession(token);
+// The signing key is a parameter, so these run everywhere. Before that they sat
+// behind `skip: !configured` and a CI without keys would have gone green on a
+// broken module.
+const KEY = "0x" + "ab".repeat(32);
+
+test("a session round-trips, and only ours does", () => {
+  const token = mintSession(NULLIFIER, Date.now, KEY);
+  const read = readSession(token, Date.now, KEY);
 
   assert.equal(read.status, "valid");
   assert.equal(read.status === "valid" && read.nullifier, NULLIFIER);
@@ -159,19 +164,41 @@ test("a session round-trips, and only ours does", { skip: !configured }, () => {
     "nonsense",
     "",
   ]) {
-    assert.equal(readSession(forged).status, "invalid", `${forged.slice(0, 24)} must not verify`);
+    assert.equal(
+      readSession(forged, Date.now, KEY).status,
+      "invalid",
+      `${forged.slice(0, 24)} must not verify`,
+    );
   }
 });
 
-test("an expired session stops being a credential", { skip: !configured }, () => {
-  const token = mintSession(NULLIFIER, () => 1_000_000_000_000);
+test("an expired session stops being a credential", () => {
+  const token = mintSession(NULLIFIER, () => 1_000_000_000_000, KEY);
   const muchLater = () => 1_000_000_000_000 + 31 * 60 * 1000;
 
-  assert.equal(readSession(token, muchLater).status, "invalid");
+  assert.equal(readSession(token, muchLater, KEY).status, "invalid");
   assert.match(
-    (readSession(token, muchLater) as { detail: string }).detail,
+    (readSession(token, muchLater, KEY) as { detail: string }).detail,
     /expired/,
   );
+});
+
+// The hole this guard closes: the session key is derived from the World signing
+// key, so without one it derived from the empty string, which is a constant
+// anybody can recompute from the source. A forged header then read as verified,
+// which opens the settlement routes and switches off the x402 paywall.
+test("a gateway with no key believes nobody", () => {
+  const real = mintSession(NULLIFIER, Date.now, KEY);
+  assert.equal(readSession(real, Date.now, null).status, "invalid");
+
+  // Exactly the forgery the old code accepted: a token signed with the empty key.
+  assert.throws(() => mintSession(NULLIFIER, Date.now, null), /not configured/);
+  assert.equal(readSession("anything.at.all", Date.now, null).status, "invalid");
+});
+
+test("a session signed with another key is not our session", () => {
+  const other = mintSession(NULLIFIER, Date.now, "0x" + "cd".repeat(32));
+  assert.equal(readSession(other, Date.now, KEY).status, "invalid");
 });
 
 // D.1: two proofs, one decision.

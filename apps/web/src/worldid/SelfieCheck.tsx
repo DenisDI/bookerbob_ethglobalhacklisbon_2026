@@ -11,7 +11,7 @@
 
 import { IDKitRequestWidget } from "@worldcoin/idkit";
 import { useCallback, useEffect, useState } from "react";
-import { setWorldIdToken } from "./session";
+import { setWorldIdToken, worldIdExpiresAt } from "./session";
 import "./selfie.css";
 
 const GATEWAY =
@@ -49,27 +49,46 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
   const [phase, setPhase] = useState<Phase>({ name: "loading" });
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    let live = true;
-    fetch(`${GATEWAY}/world-id/context`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error(String(res.status));
-        return (await res.json()) as WorldIdConfig;
-      })
-      .then((config) => {
-        if (live) setPhase({ name: "ready", config });
-      })
-      .catch(() => {
-        // 503 means the gateway has no keys. Either way the honest answer is the
-        // same: this check cannot finish here, so it is not offered as if it could.
-        if (live) setPhase({ name: "unconfigured" });
-      });
-    return () => {
-      live = false;
-    };
+  // A fresh request context every time the step is offered, because the one the
+  // gateway signs lives five minutes.
+  const loadConfig = useCallback(async () => {
+    setPhase({ name: "loading" });
+    try {
+      const res = await fetch(`${GATEWAY}/world-id/context`);
+      if (!res.ok) throw new Error(String(res.status));
+      setPhase({ name: "ready", config: (await res.json()) as WorldIdConfig });
+    } catch {
+      // 503 means the gateway has no keys. Either way the honest answer is the
+      // same: this check cannot finish here, so it is not offered as if it could.
+      setPhase({ name: "unconfigured" });
+    }
   }, []);
 
+  useEffect(() => {
+    void loadConfig();
+  }, [loadConfig]);
+
+  // The gateway stops believing the session on its own schedule. When that moment
+  // comes the screen has to stop claiming it too, or it goes on describing
+  // something that has already stopped being true. Offering the check again is
+  // the honest thing to show next.
+  useEffect(() => {
+    if (phase.name !== "verified") return;
+    const left = worldIdExpiresAt() - Date.now();
+    if (left <= 0) {
+      void loadConfig();
+      return;
+    }
+    const timer = setTimeout(() => void loadConfig(), left);
+    return () => clearTimeout(timer);
+  }, [phase.name, loadConfig]);
+
   const handleVerify = useCallback(async (result: unknown) => {
+    // The proof is with us and the Portal has not answered yet. Without this the
+    // state existed in the type and was never reached, so the button never said
+    // what it was doing.
+    setPhase((prev) => (prev.name === "ready" ? { name: "checking", config: prev.config } : prev));
+
     const res = await fetch(`${GATEWAY}/world-id/verify`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -84,8 +103,11 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
       throw new Error("the check did not verify");
     }
 
-    const { token } = (await res.json()) as { token: string };
-    setWorldIdToken(token);
+    const { token, expiresInSeconds } = (await res.json()) as {
+      token: string;
+      expiresInSeconds: number;
+    };
+    setWorldIdToken(token, expiresInSeconds);
   }, []);
 
   if (phase.name === "unconfigured") {

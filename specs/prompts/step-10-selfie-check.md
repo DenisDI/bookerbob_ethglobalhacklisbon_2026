@@ -70,3 +70,37 @@ and shows an error, and it is why the plan's stop condition existed.
 - 85 gateway tests, 16 MCP tests.
 
 See `docs/FEEDBACK-selfie.md` for the exact error bodies and the four API asks.
+
+## Review pass
+
+The user asked for a review of the module: bugs, adequacy, fit with the project
+and the hackathon. One finding was serious.
+
+**The session key derived from a secret that might not be there.** `sessionKey()`
+took the World signing key, so an unconfigured gateway derived its HMAC from the
+empty string, a constant anybody could recompute from this repository. A forged
+`world-id` header then read as `verified`, which let `mayDeferSettlement` open
+`/prebook` and `/book`, made `shouldMeter()` switch off the x402 paywall, and put
+"verified by World" on a screen for a check that never ran. A fresh clone is
+exactly that gateway, and production was too until the Fly secrets were set.
+
+Measured after the guard, with the forgery the old code accepted:
+
+```
+unconfigured gateway: credential missing, terms bot prepay_100, /prebook 403
+configured gateway:   forgery missing; a real session still verified, elite
+```
+
+Four smaller ones, all fixed in the same pass:
+
+- a person verified by Selfie had no anti-farming quota, while AgentKit did, and
+  D.1 asks for the free path to be a rate limit rather than a perk;
+- the screen kept saying "personhood proved" after the gateway had stopped
+  believing the session, so the expiry is now enforced on both sides;
+- the `checking` state existed in the type and was never reached;
+- `credential.sources` reached the wire but not the web, so the machine view
+  still said only a header could say anything. It now shows both proofs.
+
+Also parameterised the signing key in tests: half the suite sat behind
+`skip: !configured`, which means a CI without keys would have gone green on a
+broken module.

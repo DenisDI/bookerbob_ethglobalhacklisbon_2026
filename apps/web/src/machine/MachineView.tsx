@@ -77,8 +77,17 @@ function identityRows(data: OffersResponse | null, path: Path): Field[] {
     {
       k: "source",
       v: said?.source ?? "none",
-      d: "only a checked header may say agentkit",
+      d: "agentkit from a signed header, world-id from a checked proof",
       accent: Boolean(said?.source),
+    },
+    // Two mechanisms answer two questions: an agent belongs to a human, and a
+    // human is one. Either alone is a credential; when both pass, the decision
+    // keeps both instead of picking a winner and forgetting the other.
+    {
+      k: "sources",
+      v: said?.sources?.join(" + ") ?? (said?.source ?? "none"),
+      d: "both proofs, one decision",
+      accent: (said?.sources?.length ?? 0) > 1,
     },
     // Deliberately not sent. A humanId is anonymous, but it is still somebody's
     // identifier, so the gateway keeps it and the wire carries the status only.

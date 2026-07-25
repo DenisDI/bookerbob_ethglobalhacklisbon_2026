@@ -255,14 +255,20 @@ export function credentialMiddleware(
     let worldId: Credential = NO_CREDENTIAL;
     if (sessionHeader) {
       const session = readSession(sessionHeader);
-      if (session.status === "valid") {
+      if (session.status !== "valid") {
+        console.warn(`world id session rejected: ${session.detail}`);
+      } else if (!(await withinQuota(publicResource(c), session.nullifier))) {
+        // Same anti-farming rule as AgentKit, on the key World gives us for it:
+        // a nullifier is one person, so counting against it is a rate limit and
+        // not a punishment. 00-final-plan D.1 asks for the free path to be
+        // exactly this and not a perk.
+        console.warn("world id session over quota");
+      } else {
         worldId = {
           status: "verified",
           source: "world-id",
           humanId: session.nullifier,
         };
-      } else {
-        console.warn(`world id session rejected: ${session.detail}`);
       }
     }
 

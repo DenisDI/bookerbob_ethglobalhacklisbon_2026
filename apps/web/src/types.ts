@@ -80,6 +80,12 @@ export interface OffersResponse {
   credential: {
     status: "missing" | "stand_in" | "verified";
     source?: CredentialSource;
+    /**
+     * Every check that passed, when more than one did. AgentKit proves an agent
+     * belongs to a human, World ID proves a human is one, and the plan asks for
+     * both in a single term decision, so neither is dropped when both arrive.
+     */
+    sources?: CredentialSource[];
   };
   /**
    * Wallet ownership axis (Privy). `typed` = ?address= alone; `verified` only

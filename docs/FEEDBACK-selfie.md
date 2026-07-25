@@ -139,6 +139,19 @@ as a single example each. We guessed correctly, and guessing is not a plan.
 - `v3` and `v4` are selectable in the simulator, which made it easy to confirm we
   were exercising the 4.0 path rather than a legacy fallback.
 
+## 6. What our own review caught, since a FEEDBACK doc that only blames the SDK is worth less
+
+Deriving a session key from a secret that may be absent is a trap of our own
+making, and it is worth writing down because the shape is general. Our session
+HMAC keyed off the World signing key, so on a gateway without one the key derived
+from the empty string: a constant anyone could recompute from the source. A
+forged header then read as verified, which opened the settlement routes and
+switched off the paywall.
+
+The fix is a guard, not cleverness: no key, no sessions, and the tests now cover
+an unconfigured gateway explicitly rather than skipping when keys are missing. A
+suite that goes green because it skipped is worse than a red one.
+
 ## What we shipped against this
 
 `apps/gateway/src/world-id.ts` and `apps/gateway/src/routes/world-id.ts`: request

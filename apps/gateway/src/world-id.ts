@@ -202,6 +202,15 @@ export async function verifyWithPortal(
     return { ok: false, detail: `no ${credential} response in the proof` };
   }
 
+  // Defence in depth. The action is inside the signature the Portal checks, so a
+  // proof minted for a different action of the same app would be refused there
+  // anyway. Checking it here costs one comparison and means we never spend a
+  // round trip on a proof that was never meant for this decision.
+  const action = (payload as { action?: unknown }).action;
+  if (typeof action === "string" && action !== env.worldAction) {
+    return { ok: false, detail: `proof is for action ${action}, not ${env.worldAction}` };
+  }
+
   try {
     const res = await fetchImpl(`${env.worldPortalUrl}/api/v4/verify/${env.worldRpId}`, {
       method: "POST",
@@ -243,33 +252,60 @@ export async function verifyWithPortal(
  * over the signing key we already need means any machine can read what any other
  * machine issued, with no store and no new secret.
  */
-function sessionKey(): Buffer {
-  return createHmac("sha256", "bookerbob-world-id-session")
-    .update(env.worldSigningKey)
-    .digest();
+function sessionKey(signingKey: string): Buffer {
+  return createHmac("sha256", "bookerbob-world-id-session").update(signingKey).digest();
 }
 
-function sign(body: string): string {
-  return createHmac("sha256", sessionKey()).update(body).digest("base64url");
+function sign(body: string, signingKey: string): string {
+  return createHmac("sha256", sessionKey(signingKey)).update(body).digest("base64url");
 }
 
-export function mintSession(nullifier: string, now: () => number = Date.now): string {
+/**
+ * No key, no sessions. This guard is the whole of a real hole found in review.
+ *
+ * The HMAC key is derived from the World signing key, so on a gateway without one
+ * it derived from the empty string: a constant anybody could recompute from this
+ * file. A forged header then read as `verified`, which opens /prebook and /book,
+ * switches off the x402 paywall because shouldMeter() sees a credential, and puts
+ * "verified by World" on screen for a check that never ran. A repository clone is
+ * exactly that gateway, and production was too until the secrets were set.
+ */
+function keyOrNull(): string | null {
+  return worldIdReady() ? env.worldSigningKey : null;
+}
+
+export function mintSession(
+  nullifier: string,
+  now: () => number = Date.now,
+  signingKey: string | null = keyOrNull(),
+): string {
+  if (!signingKey) throw new Error("world id is not configured, refusing to mint a session");
   const expiresAt = Math.floor(now() / 1000) + SESSION_TTL_SECONDS;
   const body = Buffer.from(`${nullifier}.${expiresAt}`, "utf8").toString("base64url");
-  return `${body}.${sign(body)}`;
+  return `${body}.${sign(body, signingKey)}`;
 }
 
 export type SessionRead =
   | { status: "valid"; nullifier: string; expiresAt: number }
   | { status: "invalid"; detail: string };
 
-export function readSession(token: string, now: () => number = Date.now): SessionRead {
+export function readSession(
+  token: string,
+  now: () => number = Date.now,
+  signingKey: string | null = keyOrNull(),
+): SessionRead {
+  // Before anything else: an unconfigured gateway has no key to check against, so
+  // it believes nobody rather than believing a constant.
+  if (!signingKey) {
+    return { status: "invalid", detail: "world id is not configured here" };
+  }
+
   const cut = token.lastIndexOf(".");
   if (cut <= 0) return { status: "invalid", detail: "malformed session token" };
 
   const body = token.slice(0, cut);
   const presented = Buffer.from(token.slice(cut + 1), "base64url");
-  const expected = Buffer.from(sign(body), "base64url");
+  const expected = Buffer.from(sign(body, signingKey), "base64url");
 
   // Constant time, because comparing a MAC with === leaks how much of it matched.
   if (
