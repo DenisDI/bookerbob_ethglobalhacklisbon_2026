@@ -1,11 +1,9 @@
 # Pre-event research + local secrets — ignore everything listed below.
 # Scratch app code will live outside these ignores when the build clock opens.
 
-# --- archived pre-event research (not part of the submission specs) ---
-# Supersedes the earlier per-file list: those files now live under specs/research/.
-# The submission specs (00-final-plan, 01-03, CUT-ORDER, DEMO-IMPROVEMENTS, KEYS)
-# stay tracked — 00-final-plan §F MUST 12 requires them in the repo.
-specs/research/
+# Nothing under specs/ is ignored any more. The pre-event research was shared
+# with the team on purpose, so it is tracked under specs/research/ and marked as
+# superseded in specs/README.md rather than hidden.
 
 # --- secrets & env ---
 .env
@@ -31,3 +29,4 @@ coverage/
 .idea/
 *.swp
 .cursor/
+.gstack/

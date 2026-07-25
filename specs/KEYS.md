@@ -1,7 +1,7 @@
 # KEYS & ACCOUNTS — BookerBob (ETHGlobal Lisbon 2026)
 
 What you need, where to get it, when. Put secrets only in `.env` (never commit).
-**Canonical rules:** `FINAL-PLAN.md` (supersedes older Graph-testnet / x402-Hedera notes).
+**Canonical rules:** `00-final-plan.md` (supersedes older Graph-testnet / x402-Hedera notes).
 
 Priority: **P0** = block coding soon · **P1** = Sat · **P2** = optional / booth.
 
@@ -106,14 +106,14 @@ Docs: https://thegraph.com/docs/en/subgraphs/tooling/x402-payments/
 
 ### 2.C Subgraph IDs (not secrets)
 
-Listed in `ARCHITECTURE-EXEC.md` §4 (Messari lending / DEX / perps). Confirm sync in
+Live ids and their status live in `packages/context-bands-mcp/registry/`, dead ones in `registry/retired/` with reasons. The older list in `specs/research/ARCHITECTURE-EXEC.md` has three unusable ids. Confirm sync in
 https://thegraph.com/explorer before hardcoding.
 
 ---
 
 ## 3. Hedera — **Scheduled Transaction backbone** (prize path)
 
-Locked in `FINAL-PLAN.md` §A.6 / §D.4. Prize story = Schedule Service, not x402-Hedera.
+Locked in `00-final-plan.md` §A.6 / §D.4. Prize story = Schedule Service, not x402-Hedera.
 
 | Item | Env | Where |
 |---|---|---|
@@ -140,7 +140,7 @@ Optional x402-on-Hedera metering is **not** the prize backbone if facilitator is
 |---|---|---|
 | MCP endpoint | `LISBON2026_BOOKER_MCP_URL` | https://flexrep.xyz/mcp_travel/mcp |
 | Auth / session | `LISBON2026_BOOKER_TOKEN` or session header | **ask whoever runs flexrep** (team / service docs) |
-| Session header | — | `mcp-session-id` after init (per ARCHITECTURE-EXEC) |
+| Session header | — | `mcp-session-id` after init (verified live 2026-07-25) |
 
 RateHawk-backed. Prebook/book may themselves require x402 — confirm with service owner Fri.
 Disclose in README as external deployed API.
@@ -156,7 +156,7 @@ Disclose in README as external deployed API.
 
 **Naming:** in code/env use `LISBON2026_CONTEXT_API_*`. In README disclose vendor as
 "REP public API" only if required; describe as activity/achievement bands — never
-"reputation API" (see `FINAL-PLAN.md` §A).
+"reputation API" (see `00-final-plan.md` §A).
 
 ---
 
@@ -201,7 +201,7 @@ LISBON2026_GRAPH_USDC_KEY=
 LISBON2026_HEDERA_ACCOUNT_ID=
 LISBON2026_HEDERA_PRIVATE_KEY=
 
-# Inventory (ownership must be disclosed — see FINAL-PLAN §A.7)
+# Inventory (ownership must be disclosed — see 00-final-plan.md §A.3)
 LISBON2026_BOOKER_MCP_URL=https://flexrep.xyz/mcp_travel/mcp
 LISBON2026_BOOKER_TOKEN=
 
@@ -228,7 +228,7 @@ Add `.env` to `.gitignore` on repo init (step 1).
 3. 90-min AgentKit×x402 glue spike (correct imports + `@x402/paywall`); **kill 01:30**  
 4. AgentKit register + World Portal app **after 21:00 WEST**; save **tx hash**  
 5. Fund Base mainnet **$2–5 USDC** + Studio key; `_meta` probe subgraphs; whale survivors; **then** bands; kill 02:00  
-6. Commit `specs/CUT-ORDER.md` + FINAL-PLAN; Hedera account + **associate testnet USDC** + faucet  
+6. Commit `specs/CUT-ORDER.md` + `00-final-plan.md`; Hedera account + **associate testnet USDC** + faucet  
 7. GitHub Scratch repo + `.gitignore` when code clock opens  
 
 Do **not** use Graph x402 testnet gateway (NXDOMAIN).

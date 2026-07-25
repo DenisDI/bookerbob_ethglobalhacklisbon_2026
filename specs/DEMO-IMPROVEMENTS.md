@@ -75,4 +75,4 @@ Per-partner submission TEXT opens with its timestamp map ("your integration:
   then 2 degrades to static captions.
 
 
-> Canonical merge target: FINAL-PLAN.md §J / §B. Narration uses Ethereum bands only (Aave + Uniswap).
+> Merged into `00-final-plan.md` §J / §B. Bands now come from six sources, not Ethereum only: see `specs/README.md` for what changed.

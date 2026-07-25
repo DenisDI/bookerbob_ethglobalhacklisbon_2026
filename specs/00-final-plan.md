@@ -4,7 +4,9 @@
 > Public-docs excerpts + battle-test + demo WOW pass. **No project application code
 > before Fri 21:00 WEST.** Canonical plan. Implementation specs: `01-gateway.md`,
 > `02-context-bands-mcp.md`, `03-web-demo.md`; ops: `CUT-ORDER.md`, `KEYS.md`,
-> `DEMO-IMPROVEMENTS.md`. Archived research in `specs/research/` (untracked).
+> `DEMO-IMPROVEMENTS.md`. Pre-event archive in `specs/research/`, superseded, see
+> `specs/README.md`. Where the running code departs from a spec, the departures are
+> listed there.
 
 Deadline: Sun Jul 26 **04:00 WEST freeze**. Draft + placeholder video **Sat evening**.
 Scratch. Product name: **BookerBob**. Do not brand "REP".
