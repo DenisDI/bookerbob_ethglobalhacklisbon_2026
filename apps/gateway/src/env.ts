@@ -63,6 +63,50 @@ export const env = {
   worldRpcUrl: str("LISBON2026_WORLD_RPC_URL"),
 
   /**
+   * World ID Selfie Check. The app id and rp id are public, the signing key is
+   * not: it signs the request context the browser carries, and World's own docs
+   * put "never sign on the client" in bold. See src/world-id.ts.
+   */
+  worldAppId: str("LISBON2026_WORLD_APP_ID"),
+  worldRpId: str("LISBON2026_WORLD_RP_ID"),
+  worldSigningKey: str("LISBON2026_WORLD_SIGNING_KEY"),
+
+  /** What the person is proving uniqueness for. One action, so one nullifier. */
+  worldAction: str("LISBON2026_WORLD_ACTION", "bookerbob-terms"),
+
+  /**
+   * Which credential is asked for.
+   *
+   * Measured on 2026-07-25: the staging simulator refuses a selfie request with
+   * `credential_unavailable`, because its simulated identity does not hold that
+   * credential, and answers proof_of_human happily. So the default follows the
+   * environment rather than the wish, and whichever one runs is named on screen
+   * and in the response. Selfie Check needs sandbox or a real device; see
+   * docs/FEEDBACK-selfie.md.
+   */
+  worldCredential: (() => {
+    const environment = str("LISBON2026_WORLD_ENVIRONMENT", "staging");
+    const fallback = environment === "staging" ? "proof_of_human" : "selfie";
+    const v = str("LISBON2026_WORLD_CREDENTIAL", fallback);
+    return v === "proof_of_human" || v === "passport" || v === "mnc" || v === "selfie"
+      ? v
+      : fallback;
+  })() as "selfie" | "proof_of_human" | "passport" | "mnc",
+
+  /**
+   * staging drives the browser simulator, which is Phase A: a check that needs no
+   * phone. Anything unrecognised falls back to staging rather than quietly
+   * pointing a rehearsal at production.
+   */
+  worldEnvironment: (() => {
+    const v = str("LISBON2026_WORLD_ENVIRONMENT", "staging");
+    return v === "production" || v === "sandbox" ? v : "staging";
+  })() as "production" | "staging" | "sandbox",
+
+  /** Overridable so a test can point at a server it controls. */
+  worldPortalUrl: str("LISBON2026_WORLD_PORTAL_URL", "https://developer.world.org"),
+
+  /**
    * The origin callers actually reach, e.g. https://lisbonhack.world. Set it in
    * production: an AgentKit credential is bound to the resource it was issued
    * for, and behind a TLS-terminating proxy the server cannot work that out from

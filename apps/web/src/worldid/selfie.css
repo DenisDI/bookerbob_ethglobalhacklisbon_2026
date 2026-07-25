@@ -1,0 +1,64 @@
+/* Self-contained, like the wallet button next to it: this file is the only place
+ * the Selfie step is styled, so the design layer can move it without untangling
+ * anything. It sits under the connect button, same corner, same rhythm. */
+
+.selfie {
+  position: fixed;
+  top: 4rem;
+  right: 1rem;
+  z-index: 39;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  max-width: 15rem;
+  text-align: right;
+}
+
+.selfie__button {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--color-line-strong, #23232f);
+  border-radius: 0;
+  background: var(--color-surface, #101017);
+  color: var(--color-ink-bright, #f2f3f7);
+  font: 600 0.85rem/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+.selfie__button:hover:not(:disabled) {
+  border-color: var(--color-ink-bright, #f2f3f7);
+}
+
+.selfie__button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.selfie__reason,
+.selfie.reason {
+  margin: 0;
+  color: var(--color-muted, #767c90);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+/* Verified and unconfigured are both plain statements, not badges: one says a
+ * check ran, the other says it cannot run here, and neither is a decoration. */
+.selfie--done {
+  color: var(--color-ink, #d8dae4);
+}
+
+.selfie--off {
+  color: var(--color-faint, #565b6b);
+}
+
+@media (max-width: 46rem) {
+  .selfie {
+    position: static;
+    max-width: none;
+    align-items: flex-start;
+    text-align: left;
+    margin: 0.75rem 1rem 0;
+  }
+}

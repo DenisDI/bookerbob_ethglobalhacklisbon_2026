@@ -11,9 +11,14 @@ import { offersHandler } from "./routes/offers.js";
 import { paidOffersHandler } from "./routes/paidOffers.js";
 import { prebookHandler } from "./routes/prebook.js";
 import { spentHandler } from "./routes/spent.js";
+import {
+  worldIdContextHandler,
+  worldIdVerifyHandler,
+} from "./routes/world-id.js";
 import { publicOrigin } from "./public-url.js";
 import { credentialMiddleware, verifierFromEnv } from "./world.js";
 import { worldChainStatus, worldRpcUrl } from "./world-chain.js";
+import { worldIdReady } from "./world-id.js";
 import {
   demoPayerAddress,
   meteringMiddleware,
@@ -25,6 +30,8 @@ import {
 //   GET  /offers?city=&address=   identity -> (x402 Hedera if bot) -> Graph -> terms
 //                                 (+ Authorization: Bearer Privy access token)
 //   POST /x402/paid-offers        race bot: demo Hedera pays HBAR, then offers
+//   GET  /world-id/context        signed request context for the Selfie widget
+//   POST /world-id/verify         finished proof -> Portal -> session token
 //   POST /prebook                 Hedera ScheduleCreate for an existing hold
 //   POST /book                    schedule executes (checkout settlement)
 //   GET  /spent                   per-payer x402 totals for the UI counters
@@ -46,6 +53,8 @@ app.use("*", meteringMiddleware());
 app.get("/offers", offersHandler);
 app.post("/x402/paid-offers", paidOffersHandler);
 app.get("/spent", spentHandler);
+app.get("/world-id/context", worldIdContextHandler);
+app.post("/world-id/verify", worldIdVerifyHandler);
 app.post("/prebook", prebookHandler);
 app.post("/book", bookHandler);
 
@@ -66,6 +75,9 @@ app.get("/health", (c) =>
     resource: `${publicOrigin(c)}/offers`,
     // Cached and refreshed off the request path, so this never delays the check
     // Fly polls. null means the first probe has not answered yet.
+    // Same lesson as credentialVerifier: an integration that is quietly not
+    // configured must be visible from outside, not only in a log nobody reads.
+    worldId: worldIdReady() ? env.worldEnvironment : "unconfigured",
     worldChain: worldChainStatus(),
     worldRpc: worldRpcUrl(),
     x402: {

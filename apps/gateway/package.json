@@ -15,6 +15,7 @@
     "@hono/node-server": "^1.13.7",
     "@modelcontextprotocol/sdk": "^1.13.0",
     "@worldcoin/agentkit": "^0.2.0",
+    "@worldcoin/idkit-core": "^4.2.2",
     "@x402/core": "^2.19.0",
     "@x402/fetch": "^2.19.0",
     "@x402/hedera": "^2.19.0",

@@ -1,4 +1,5 @@
 import type { OffersResponse, Tier } from "./types";
+import { worldIdToken } from "./worldid";
 
 // Dev: hit local gateway. Prod: same origin (Fly serves web + API together).
 const GATEWAY =
@@ -40,6 +41,13 @@ export async function fetchOffers(
   const headers: HeadersInit = {};
   if (input.accessToken?.trim()) {
     headers.Authorization = `Bearer ${input.accessToken.trim()}`;
+  }
+  // A finished Selfie Check, if there was one. The gateway minted this token and
+  // is the only thing that can read it, so sending it costs nothing when absent
+  // and claims nothing on its own.
+  const worldId = worldIdToken();
+  if (worldId) {
+    headers["world-id"] = worldId;
   }
 
   const res = await fetch(`${GATEWAY}/offers?${params}`, { headers });

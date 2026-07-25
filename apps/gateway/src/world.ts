@@ -29,6 +29,7 @@ import type { Context, MiddlewareHandler } from "hono";
 import { env } from "./env.js";
 import { publicResource } from "./public-url.js";
 import { probeWorldChain, worldRpcUrl } from "./world-chain.js";
+import { readSession } from "./world-id.js";
 
 /**
  * Where the personhood came from. Two different mechanisms answer two different
@@ -42,7 +43,13 @@ export type CredentialSource = "agentkit" | "world-id";
 export type Credential =
   | { status: "missing"; detail?: string }
   | { status: "stand_in" }
-  | { status: "verified"; source: CredentialSource; humanId: string };
+  | {
+      status: "verified";
+      source: CredentialSource;
+      humanId: string;
+      /** Every check that passed, when more than one did. See combine(). */
+      sources?: CredentialSource[];
+    };
 
 export const NO_CREDENTIAL: Credential = { status: "missing" };
 
@@ -228,9 +235,10 @@ export function credentialMiddleware(
 ): MiddlewareHandler {
   return async (c, next) => {
     const header = c.req.header("agentkit");
+    let presented: Credential = NO_CREDENTIAL;
 
     if (header) {
-      const presented = await verifier.verify(header, publicResource(c));
+      presented = await verifier.verify(header, publicResource(c));
 
       // Logged, never returned: the reason a credential did not check out is
       // operator information, and telling a caller exactly which check it failed
@@ -238,13 +246,49 @@ export function credentialMiddleware(
       if (presented.status === "missing" && presented.detail) {
         console.warn(`credential rejected (${verifier.kind}): ${presented.detail}`);
       }
-      c.set(CREDENTIAL_KEY, presented);
-    } else {
-      c.set(CREDENTIAL_KEY, NO_CREDENTIAL);
     }
+
+    // The second source, and the only one a browser can produce. A person who
+    // finished a Selfie Check carries a session this gateway minted; anyone can
+    // send the header, and only a signature we made verifies.
+    const sessionHeader = c.req.header("world-id");
+    let worldId: Credential = NO_CREDENTIAL;
+    if (sessionHeader) {
+      const session = readSession(sessionHeader);
+      if (session.status === "valid") {
+        worldId = {
+          status: "verified",
+          source: "world-id",
+          humanId: session.nullifier,
+        };
+      } else {
+        console.warn(`world id session rejected: ${session.detail}`);
+      }
+    }
+
+    c.set(CREDENTIAL_KEY, combine(presented, worldId));
 
     await next();
   };
+}
+
+/**
+ * Two proofs, one decision, which is what specs/00-final-plan.md D.1 asks for.
+ *
+ * They answer different questions: AgentKit says a human stands behind this
+ * AGENT, Selfie says the person here is a person. Either alone is a credential.
+ * When both arrive, `source` keeps naming the stronger one, so nothing that
+ * already reads this field changes its mind, and `sources` records that two
+ * separate checks agreed instead of quietly dropping one.
+ */
+export function combine(agentkit: Credential, worldId: Credential): Credential {
+  if (agentkit.status === "verified" && worldId.status === "verified") {
+    return { ...agentkit, sources: ["agentkit", "world-id"] };
+  }
+  if (agentkit.status === "verified") return agentkit;
+  if (worldId.status === "verified") return worldId;
+  // Neither verified: a stand-in still beats nothing, and a detail beats neither.
+  return agentkit.status !== "missing" ? agentkit : worldId.status !== "missing" ? worldId : agentkit;
 }
 
 export function getCredential(c: Context): Credential {
@@ -272,8 +316,13 @@ export function mayDeferSettlement(credential: Credential): boolean {
 export function publicCredential(credential: Credential): {
   status: Credential["status"];
   source?: CredentialSource;
+  sources?: CredentialSource[];
 } {
   return credential.status === "verified"
-    ? { status: "verified", source: credential.source }
+    ? {
+        status: "verified",
+        source: credential.source,
+        ...(credential.sources ? { sources: credential.sources } : {}),
+      }
     : { status: credential.status };
 }

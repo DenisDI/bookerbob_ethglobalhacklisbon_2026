@@ -17,6 +17,7 @@ import { RacePane, type PaneState } from "./RacePane";
 import { RaceLeadIn } from "./RaceLeadIn";
 import { PANE_LABEL } from "./terms-copy";
 import { readView, ViewSwitch, writeView, type View } from "./ViewSwitch";
+import { SelfieCheck } from "./worldid";
 import { SCENARIOS, WhoIsAsking } from "./WhoIsAsking";
 
 /**
@@ -222,6 +223,7 @@ export function App() {
         />
       ) : null}
       <ConnectWalletButton onAddress={setAddress} />
+      <SelfieCheck />
 
       {/* Both views hang off this bar, so the switch is in the same place in
         * either one and the product is named once. */}
