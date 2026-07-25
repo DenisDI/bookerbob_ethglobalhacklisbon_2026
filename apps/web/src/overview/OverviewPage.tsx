@@ -113,6 +113,10 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
           city: askedCity.trim() || undefined,
           accessToken,
           metered: false,
+          // A supplier round trip is about fifteen seconds, so this is generous.
+          // Past it the desk is not slow, it is not answering, and the panel
+          // should say so instead of reading "asking the desk" forever.
+          timeoutMs: 40_000,
         });
         if (!live) return;
         setData(next);

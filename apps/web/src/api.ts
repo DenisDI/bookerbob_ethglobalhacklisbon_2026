@@ -28,6 +28,16 @@ export type FetchOffersInput = {
    * asked for anything yet. That surface passes false and takes the free route.
    */
   metered?: boolean;
+  /**
+   * Give up after this long and say so.
+   *
+   * A supplier round trip is slow by nature, so there is no timeout by default
+   * and the race waits as long as it takes. A surface that shows a person their
+   * own terms is different: when the desk stops answering entirely, "reading the
+   * desk" on screen forever is worse than an honest failure, because it looks
+   * like the page is working and it is not.
+   */
+  timeoutMs?: number;
 };
 
 /**
@@ -71,11 +81,35 @@ export async function fetchOffers(
     headers["world-id"] = worldId;
   }
 
-  const res = await fetch(`${GATEWAY}/offers?${params}`, { headers });
+  const res = await fetchOrGiveUp(
+    `${GATEWAY}/offers?${params}`,
+    { headers },
+    input.timeoutMs,
+  );
   if (!res.ok) {
     throw new OffersError(`the desk answered ${res.status}`);
   }
   return (await res.json()) as OffersResponse;
+}
+
+/**
+ * fetch, with an optional deadline. An aborted request is reported as the desk
+ * not answering rather than as a browser error nobody can act on.
+ */
+async function fetchOrGiveUp(
+  url: string,
+  init: RequestInit,
+  timeoutMs?: number,
+): Promise<Response> {
+  if (!timeoutMs) return fetch(url, init);
+  try {
+    return await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
+  } catch (err) {
+    if ((err as Error)?.name === "TimeoutError") {
+      throw new OffersError("the desk did not answer");
+    }
+    throw err;
+  }
 }
 
 async function fetchPaidBotOffers(
