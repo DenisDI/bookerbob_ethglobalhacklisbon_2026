@@ -1,0 +1,11 @@
+{
+  "name": "mummy-arbitrum",
+  "schemaType": "messari-perps",
+  "subgraphId": "4Po9haSDCDbQ2XtrSXqT8BNB9H6T7EUAmbAorAzHQi9S",
+  "network": "arbitrum-one",
+  "category": "perps",
+  "retired": {
+    "at": "2026-07-25",
+    "reason": "gateway returns 'no allocations': the deployment exists but nobody indexes it, so it cannot be queried."
+  }
+}

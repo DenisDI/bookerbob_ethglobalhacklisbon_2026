@@ -1,0 +1,10 @@
+{
+  "name": "uniswap-v3-ethereum",
+  "schemaType": "uniswap-v3",
+  "subgraphId": "5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV",
+  "network": "mainnet",
+  "category": "dex",
+  "countStrategy": "entities",
+  "verifiedAt": "2026-07-25",
+  "note": "Not a Messari deployment: there is no Account entity. Activity is read per address through Swap.origin and Position.owner. Added as its own schemaType, which is what the registry is for."
+}

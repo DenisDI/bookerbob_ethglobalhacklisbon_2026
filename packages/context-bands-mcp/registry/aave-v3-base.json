@@ -1,0 +1,9 @@
+{
+  "name": "aave-v3-base",
+  "schemaType": "messari-lending",
+  "subgraphId": "D7mapexM5ZsQckLJai2FawTKXJ7CqYGKM8PErnS3cJi9",
+  "network": "base",
+  "category": "lending",
+  "countStrategy": "entities",
+  "verifiedAt": "2026-07-25"
+}

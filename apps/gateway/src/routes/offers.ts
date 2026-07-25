@@ -6,6 +6,7 @@
 // is the actual matrix rather than a canned answer.
 
 import type { Context } from "hono";
+import { getContextSnapshot } from "../context.js";
 import { demo } from "../demo.config.js";
 import { createInventory, InventoryUnavailableError } from "../inventory/index.js";
 import {
@@ -30,8 +31,16 @@ const UNBACKED: TermsSignals = { hasCredential: false, context: null };
 export async function offersHandler(c: Context) {
   const city = c.req.query("city")?.trim() || demo.city;
   const debugTier = c.req.query("tier")?.trim();
+  const address = c.req.query("address")?.trim();
 
-  const signals = debugSignals(debugTier) ?? UNBACKED;
+  // The two axes stay separate. ?tier= stands in for the credential until
+  // AgentKit lands; ?address= is the consented context, and a real address
+  // always overrides the synthetic bands the debug lever carries.
+  const base = debugSignals(debugTier) ?? UNBACKED;
+  const signals: TermsSignals = address
+    ? { ...base, context: await getContextSnapshot(address) }
+    : base;
+
   const terms = decideTerms(signals);
   const limit = offerLimit(terms.inventory);
 
@@ -67,6 +76,14 @@ export async function offersHandler(c: Context) {
       hold,
       source: result.source,
       capturedAt: result.capturedAt,
+      // Bands and categories only, never the counts behind them.
+      context: signals.context
+        ? {
+            address: signals.context.address,
+            bands: signals.context.bands,
+            activeCategories: signals.context.activeCategories,
+          }
+        : null,
       narration: narrator.all(),
       debugTier: debugTier && debugSignals(debugTier) ? debugTier : undefined,
     });

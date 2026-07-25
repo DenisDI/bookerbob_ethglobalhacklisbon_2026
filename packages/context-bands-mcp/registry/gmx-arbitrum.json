@@ -1,0 +1,10 @@
+{
+  "name": "gmx-arbitrum",
+  "schemaType": "messari-perps",
+  "subgraphId": "DiR5cWwB3pwXXQWWdus7fDLR2mnFRQLiBFsVmHAH9VAs",
+  "network": "arbitrum-one",
+  "category": "perps",
+  "countStrategy": "counters",
+  "verifiedAt": "2026-07-25",
+  "note": "Counters are fully populated here (a sampled account showed longPositionCount 5028, swapCount 684, liquidationCount 58), so this deployment is read from counters rather than entity lists. This schema has no Account.positionCount at all."
+}

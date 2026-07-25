@@ -76,7 +76,18 @@ export function narrateTerms(
 
   if (terms.tier === "human") {
     // Scripted, not an apology: the credential alone still carries the guest.
-    n.say("no onchain history yet. human terms via the credential alone");
+    // Which line is true depends on why there is no usable context, and saying
+    // the wrong one on camera would be a small lie.
+    const band = context?.bands.defi_activity;
+    if (!context) {
+      n.say("no wallet shared here. human terms via the credential alone");
+    } else if (band === "unavailable") {
+      n.say("i cannot read their history right now, and i am not going to guess");
+    } else if (band === "T0") {
+      n.say("no onchain history yet. human terms via the credential alone");
+    } else {
+      n.say("not much history on that address yet. human terms via the credential alone");
+    }
     n.say("so i can leave a deposit instead of handing over the whole amount");
     return;
   }

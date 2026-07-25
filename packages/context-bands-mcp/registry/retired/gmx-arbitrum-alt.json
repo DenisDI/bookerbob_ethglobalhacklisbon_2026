@@ -1,0 +1,11 @@
+{
+  "name": "gmx-arbitrum-alt",
+  "schemaType": "messari-perps",
+  "subgraphId": "3La4ZToKjD5185NM6MqLzkHzJ3KUG6fiMhGvnMtPu9YD",
+  "network": "arbitrum-one",
+  "category": "perps",
+  "retired": {
+    "at": "2026-07-25",
+    "reason": "gateway returns 'subgraph not found'. Two ids circulated for GMX Arbitrum; DiR5cWwB... is the live one."
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "uniswap-v3-ethereum-messari",
+  "schemaType": "messari-dex-amm-extended",
+  "subgraphId": "ELUcwgpm14LKPLrBRuVvPvNKHQ9HvwmtKgKSH6123cr7",
+  "network": "mainnet",
+  "category": "dex",
+  "retired": {
+    "at": "2026-07-25",
+    "reason": "gateway returns 'subgraph not found'. Replaced by the canonical Uniswap V3 deployment under its own schemaType."
+  }
+}

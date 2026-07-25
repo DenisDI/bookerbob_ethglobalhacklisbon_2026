@@ -1,0 +1,65 @@
+{
+  "capturedAt": "2026-07-25T12:08:15.485Z",
+  "note": "Real gateway responses. Entity ids are trimmed to keep the file readable; only list lengths matter to the band engine.",
+  "address": "0x646c5ba59f30cf73deea9b00e13aead674c6b07a",
+  "responses": {
+    "aave-v3-arbitrum": {
+      "account": null,
+      "_meta": {
+        "block": {
+          "number": 487559814,
+          "timestamp": 1784981286
+        }
+      }
+    },
+    "aave-v3-base": {
+      "account": null,
+      "_meta": {
+        "block": {
+          "number": 49095970,
+          "timestamp": 1784981287
+        }
+      }
+    },
+    "aave-v3-ethereum": {
+      "account": {
+        "id": "0x646c5ba59f30cf73deea9b00e13aead674c6b07a",
+        "deposits": [
+          {
+            "id": "0x3ea68bb36255d7778d8a79fe3a43cc697db76cfd4d33c495ce1420f993cec83ccc00000000000000"
+          }
+        ],
+        "withdraws": [],
+        "borrows": [],
+        "repays": [],
+        "liquidates": [],
+        "liquidations": []
+      },
+      "_meta": {
+        "block": {
+          "number": 25609681,
+          "timestamp": 1784981291
+        }
+      }
+    },
+    "gmx-arbitrum": {
+      "account": null,
+      "_meta": {
+        "block": {
+          "number": 487559815,
+          "timestamp": 1784981286
+        }
+      }
+    },
+    "uniswap-v3-ethereum": {
+      "swaps": [],
+      "positions": [],
+      "_meta": {
+        "block": {
+          "number": 25609681,
+          "timestamp": 1784981291
+        }
+      }
+    }
+  }
+}

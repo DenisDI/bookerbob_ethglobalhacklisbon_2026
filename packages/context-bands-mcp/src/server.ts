@@ -1,63 +1,65 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import { loadRegistry, loadRetired } from "./registry.js";
+import { AddressError, getContextBands, NoPayerError } from "./service.js";
 
-// Skeleton. Per specs/02-context-bands-mcp.md the real server adds: manifest
-// registry (registry/*.json), Messari query templates, freshness gating, band
-// thresholds with rationale, keyless x402 to The Graph, offline fixture tests.
-// Tool names and shapes are fixed here so consumers can wire against them now.
+// Convenience for running inside this monorepo. Standalone users export
+// GRAPH_API_KEY themselves, and shell values win either way.
+try {
+  process.loadEnvFile(fileURLToPath(new URL("../../../.env", import.meta.url)));
+} catch {
+  // No .env: the service will say what is missing if nothing is exported.
+}
 
-const NOT_WIRED = "skeleton: not wired to The Graph yet";
+// Two tools, documented with real schemas in SKILL.md. Output is bands and
+// categories only: no balances, no counts, no dollar values.
 
 const server = new McpServer({ name: "context-bands-mcp", version: "0.1.0" });
+
+function json(value: unknown) {
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
+  };
+}
 
 server.registerTool(
   "get_context_bands",
   {
     description:
-      "Coarse onchain activity bands (T1-T4) for an address. Bands only, never raw values.",
-    inputSchema: { address: z.string().describe("EVM address, any case") },
+      "Coarse onchain activity bands (T0-T4) for an EVM address, from live subgraphs on The Graph. Returns bands and active categories only, never raw values. A stale source reports 'unavailable' rather than a guess.",
+    inputSchema: {
+      address: z.string().describe("EVM address, any casing"),
+    },
   },
-  async ({ address }) => ({
-    content: [
-      {
-        type: "text" as const,
-        text: JSON.stringify(
-          {
-            address: address.toLowerCase(),
-            bands: null,
-            freshness: [],
-            source: "the-graph:messari-standardized",
-            status: NOT_WIRED,
-          },
-          null,
-          2,
-        ),
-      },
-    ],
-  }),
+  async ({ address }) => {
+    try {
+      return json(await getContextBands(address));
+    } catch (err) {
+      if (err instanceof AddressError || err instanceof NoPayerError) {
+        return {
+          isError: true,
+          content: [{ type: "text" as const, text: err.message }],
+        };
+      }
+      throw err;
+    }
+  },
 );
 
 server.registerTool(
   "get_supported_subgraphs",
   {
-    description: "Registry contents: which subgraphs this server can band.",
+    description:
+      "Registry contents: which subgraphs this server reads, which schema each speaks, and which sources were retired and why.",
     inputSchema: {},
   },
-  async () => ({
-    content: [
-      {
-        type: "text" as const,
-        text: JSON.stringify({ subgraphs: [], status: NOT_WIRED }, null, 2),
-      },
-    ],
-  }),
+  async () => json({ active: loadRegistry(), retired: loadRetired() }),
 );
 
 async function main() {
-  const httpFlag = process.argv.includes("--http");
-  if (httpFlag) {
-    // HTTP transport lands with the registry step; stdio is the documented path.
+  if (process.argv.includes("--http")) {
     console.error("--http transport not implemented yet; run over stdio");
     process.exit(2);
   }

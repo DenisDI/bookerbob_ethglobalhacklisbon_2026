@@ -1,0 +1,10 @@
+{
+  "name": "aave-v3-ethereum",
+  "schemaType": "messari-lending",
+  "subgraphId": "JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk",
+  "network": "mainnet",
+  "category": "lending",
+  "countStrategy": "entities",
+  "verifiedAt": "2026-07-25",
+  "note": "Action counters (depositCount, borrowCount, repayCount, liquidateCount) read 0 for every account in this deployment, verified against an account with a real $1463.67 deposit. The entity lists are correct, so activity is counted from them."
+}
