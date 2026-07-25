@@ -59,9 +59,31 @@ const FAILURE_COPY: Record<string, string> = {
   unreachable: "world did not answer, try again",
 };
 
+/**
+ * A rehearsal switch: `?personhood=stand-in` marks the step done without asking
+ * World anything.
+ *
+ * It exists because the check itself is out of our hands. Face credential is
+ * still "Coming soon" in World App, the World team confirmed the orb-less web
+ * path is broken on their side, and the simulator is a popup that can be slow at
+ * the worst moment. A demo that cannot move past step one is worse than a demo
+ * that says which step was stood in for.
+ *
+ * What it may never do is claim a check that did not run. It calls the same
+ * onVerified the real path calls, which makes the browser ASK with a stand-in,
+ * and the gateway answers `stand_in` exactly as it does for any browser
+ * assertion. Nothing downstream can turn that into "verified by World".
+ */
+function standInRequested(search = window.location.search): boolean {
+  const asked = new URLSearchParams(search).get("personhood")?.trim().toLowerCase();
+  return asked === "stand-in" || asked === "stand_in" || asked === "1";
+}
+
 type Phase =
   /** The gateway has no Portal keys, so the step is honestly not offered. */
   | { name: "unconfigured" }
+  /** Marked done for a rehearsal. Says so, and cannot say anything stronger. */
+  | { name: "stand_in" }
   | { name: "loading" }
   | { name: "ready"; config: WorldIdConfig }
   | { name: "checking"; config: WorldIdConfig }
@@ -91,8 +113,13 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
   }, []);
 
   useEffect(() => {
+    if (standInRequested()) {
+      setPhase({ name: "stand_in" });
+      onVerified?.();
+      return;
+    }
     void loadConfig();
-  }, [loadConfig]);
+  }, [loadConfig, onVerified]);
 
   // The gateway stops believing the session on its own schedule. When that moment
   // comes the screen has to stop claiming it too, or it goes on describing
@@ -151,6 +178,15 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
     );
   }
 
+  if (phase.name === "stand_in") {
+    return (
+      <p className="selfie selfie--done reason">
+        standing in for the personhood check. the desk is asked with a stand-in,
+        which is not a world check and never reads as one
+      </p>
+    );
+  }
+
   if (phase.name === "loading") {
     return <p className="selfie reason">preparing the personhood check</p>;
   }
@@ -202,7 +238,7 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
           {!config
             ? "world id"
             : config.environment === "staging"
-              ? "world id, verified via the simulator"
+              ? "world id, via the world simulator"
               : `world id, ${config.credentials.map((c) => c.replace(/_/g, " ")).join(" or ")}`}
         </p>
       )}
