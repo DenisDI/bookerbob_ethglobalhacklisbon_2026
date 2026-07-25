@@ -1,9 +1,10 @@
 // GET /offers — the main path: identity -> context -> terms -> inventory.
 //
-// Identity (AgentKit) and context bands land in later steps. Until then the
-// only way to reach a non-bot tier is the ?tier= debug parameter, which
-// synthesises SIGNALS and lets the real engine decide, so what a reviewer sees
-// is the actual matrix rather than a canned answer.
+// Product axes (separate):
+//   ?credential=1|0  → hasCredential (World AgentKit/Selfie will own this)
+//   ?address=        → Graph context bands (Privy / typed consent)
+// Debug only:
+//   ?tier=bot|human|verified|elite → synthesises SIGNALS; real address overrides context
 
 import type { Context } from "hono";
 import { lookupContext } from "../context.js";
@@ -26,19 +27,34 @@ import {
 
 const inventory = createInventory();
 
-/** No credential source is wired yet, so every real request is unbacked. */
-const UNBACKED: TermsSignals = { hasCredential: false, context: null };
+function parseCredential(raw: string | undefined): boolean | null {
+  if (raw === undefined || raw === "") return null;
+  const v = raw.trim().toLowerCase();
+  if (v === "1" || v === "true" || v === "yes") return true;
+  if (v === "0" || v === "false" || v === "no") return false;
+  return null;
+}
 
 export async function offersHandler(c: Context) {
   const city = c.req.query("city")?.trim() || demo.city;
   const debugTier = c.req.query("tier")?.trim();
-  // Consented wallet for Graph context bands (Privy / teammate wiring).
   const address = c.req.query("address")?.trim();
+  const credentialFlag = parseCredential(c.req.query("credential") ?? undefined);
 
-  // The two axes stay separate. ?tier= stands in for the credential until
-  // AgentKit lands; ?address= is the consented context, and a real address
-  // always overrides the synthetic bands the debug lever carries.
-  const base = debugSignals(debugTier) ?? UNBACKED;
+  // Debug tier = canned signals for tests. Product path = credential + address.
+  // Real address always overrides synthetic context below.
+  const debug = debugSignals(debugTier);
+  const base: TermsSignals = debug
+    ? {
+        ...debug,
+        hasCredential:
+          credentialFlag !== null ? credentialFlag : debug.hasCredential,
+      }
+    : {
+        hasCredential: credentialFlag === true,
+        context: null,
+      };
+
   const lookup = address ? await lookupContext(address) : null;
   const signals: TermsSignals = lookup
     ? { ...base, context: lookup.status === "ok" ? lookup.snapshot : null }
@@ -60,9 +76,6 @@ export async function offersHandler(c: Context) {
     });
 
     const offers = result.offers.slice(0, limit);
-    // The lock is shown only to tiers whose payment term is a held price. A bot
-    // prepays and a human leaves a deposit, so neither is told about a hold,
-    // even though the supplier's one-shot call creates one.
     const hold = earnsRateLock(terms) ? result.hold : null;
 
     // Guest settlement risk → Hedera schedule. Agent only triggered the ask.
@@ -86,7 +99,6 @@ export async function offersHandler(c: Context) {
 
     return c.json({
       terms,
-      // The deciding fact, so the screen can say why without printing a rubric.
       reason,
       city: result.city,
       checkin: result.checkin,
@@ -99,7 +111,6 @@ export async function offersHandler(c: Context) {
       scheduleUrl,
       source: result.source,
       capturedAt: result.capturedAt,
-      // Bands and categories only, never the counts behind them.
       context: signals.context
         ? {
             address: signals.context.address,
@@ -112,6 +123,8 @@ export async function offersHandler(c: Context) {
         : null,
       narration: narrator.all(),
       debugTier: debugTier && debugSignals(debugTier) ? debugTier : undefined,
+      // Echo so the UI can show the pipeline without guessing.
+      hasCredential: signals.hasCredential,
     });
   } catch (err) {
     if (err instanceof InventoryUnavailableError) {

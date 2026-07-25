@@ -77,4 +77,6 @@ export interface OffersResponse {
   /** Graph context bands for the consented address (null if none / failed). */
   context: ContextBands | null;
   narration: NarrationLine[];
+  /** Echo of the credential axis the gateway used. */
+  hasCredential?: boolean;
 }

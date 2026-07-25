@@ -787,6 +787,100 @@ body {
   color: var(--muted);
 }
 
+/* ---------- pipeline wire strip (temp; design replaces) ---------- */
+
+.pipe {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.85rem 1rem;
+}
+
+.pipe__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  margin-bottom: 0.65rem;
+}
+
+.pipe__title {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pipe__note {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.pipe__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pipe__step {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+}
+
+.pipe__label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.pipe__detail {
+  font-size: 0.8rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.pipe__step--idle .pipe__detail {
+  color: var(--muted);
+}
+
+.pipe__step--active .pipe__label {
+  color: var(--blue);
+}
+
+.pipe__step--active .pipe__detail {
+  color: var(--ink);
+}
+
+.pipe__step--done .pipe__label {
+  color: #6dcea8;
+}
+
+.pipe__step--warn .pipe__label {
+  color: #d4a15a;
+}
+
+.pipe__step--skip .pipe__detail {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--line);
+}
+
+.pipe__link {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+}
+
+.pipe-hint {
+  margin: -0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 /* ---------- narrow ---------- */
 
 @media (max-width: 860px) {

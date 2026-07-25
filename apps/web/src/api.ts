@@ -6,21 +6,26 @@ const GATEWAY =
 
 export class OffersError extends Error {}
 
+export type FetchOffersInput = {
+  /** Product axis: human-backed agent. World will set this after verify. */
+  credential: boolean;
+  /** Consented wallet / ENS for Graph bands. */
+  address?: string;
+  /** Debug only — synthesises signals; do not use on the stage race. */
+  debugTier?: Tier;
+};
+
 /**
- * Two separate axes, exactly as the gateway treats them.
- *
- * `tier` is the debug lever standing in for a credential until AgentKit lands.
- * `address` is the consented context: an address or an ENS name, and the real
- * bands behind it decide whether a credentialed request reaches verified or
- * elite. Sending an address without a credential still yields bot, which is the
- * point rather than a bug.
+ * Product path: credential + address.
+ * Debug path: optional debugTier (synthetic bands unless address overrides).
  */
 export async function fetchOffers(
-  tier: Tier,
-  address?: string,
+  input: FetchOffersInput,
 ): Promise<OffersResponse> {
-  const params = new URLSearchParams({ tier });
-  if (address?.trim()) params.set("address", address.trim());
+  const params = new URLSearchParams();
+  params.set("credential", input.credential ? "1" : "0");
+  if (input.address?.trim()) params.set("address", input.address.trim());
+  if (input.debugTier) params.set("tier", input.debugTier);
 
   const res = await fetch(`${GATEWAY}/offers?${params}`);
   if (!res.ok) {

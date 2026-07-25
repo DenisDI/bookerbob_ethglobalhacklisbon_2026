@@ -9,14 +9,22 @@ import {
   privyConfigured,
   useConsentedWallet,
 } from "./auth";
+import {
+  credentialLabel,
+  hasCredential,
+  type CredentialState,
+} from "./credential";
+import { PipelineStatus, PipelineStatusGuest } from "./PipelineStatus";
 import { RacePane, type PaneState } from "./RacePane";
 import { PANE_LABEL } from "./terms-copy";
-import type { Tier } from "./types";
 
 const PROMPT = "book me a hotel in lisbon";
 
 /** Metered queries cost a cent each; only the unbacked agent pays them. */
 const QUERY_PRICE_USD = 0.01;
+
+/** Until World AgentKit/Selfie lands — not a prize-complete PoH. */
+const STAND_IN: CredentialState = { status: "stand_in" };
 
 const IDLE: PaneState = { status: "idle", data: null, error: null, spentUsd: 0 };
 
@@ -41,17 +49,41 @@ function PrivyAddressBridge({ onAddress }: { onAddress: (a: string) => void }) {
   return null;
 }
 
+function PipelineWithWallet({
+  credential,
+  addressField,
+  backed,
+}: {
+  credential: CredentialState;
+  addressField: string;
+  backed: PaneState;
+}) {
+  const wallet = useConsentedWallet();
+  return (
+    <PipelineStatus
+      wallet={{
+        ready: wallet.ready,
+        authenticated: wallet.authenticated,
+        address: wallet.address,
+      }}
+      credential={credential}
+      addressField={addressField}
+      backed={backed}
+    />
+  );
+}
+
 export function App() {
   const [bot, setBot] = useState<PaneState>(IDLE);
   const [backed, setBacked] = useState<PaneState>(IDLE);
   const [address, setAddress] = useState("");
+  // Product race uses stand-in until World wires verified.
+  const [credential] = useState<CredentialState>(STAND_IN);
   const reducedMotion = usePrefersReducedMotion();
   const running = bot.status === "working" || backed.status === "working";
 
   const run = useCallback(
     async (overrideAddress?: string) => {
-      // Only the backed side carries an address. The unbacked agent has nobody
-      // to consent on its behalf, so asking about a wallet there would be theatre.
       const consented = overrideAddress ?? address;
       const start = (
         set: React.Dispatch<React.SetStateAction<PaneState>>,
@@ -68,12 +100,15 @@ export function App() {
       start(setBacked, false);
 
       const settle = async (
-        tier: Tier,
         set: React.Dispatch<React.SetStateAction<PaneState>>,
-        consentedAddress?: string,
+        opts: { credential: boolean; address?: string },
       ) => {
         try {
-          const data = await fetchOffers(tier, consentedAddress);
+          // No debugTier — final tier comes only from decide() + live Graph.
+          const data = await fetchOffers({
+            credential: opts.credential,
+            address: opts.address,
+          });
           set((prev) => ({ ...prev, status: "done", data, error: null }));
         } catch (err) {
           set((prev) => ({
@@ -84,13 +119,15 @@ export function App() {
         }
       };
 
-      // Backed side: credential stand-in + Graph address → terms → maybe Hedera.
       await Promise.all([
-        settle("bot", setBot),
-        settle("human", setBacked, consented),
+        settle(setBot, { credential: false }),
+        settle(setBacked, {
+          credential: hasCredential(credential),
+          address: consented || undefined,
+        }),
       ]);
     },
-    [address],
+    [address, credential],
   );
 
   const autorun = useRef(false);
@@ -120,6 +157,25 @@ export function App() {
           />
         </div>
       </header>
+
+      {privyConfigured ? (
+        <PipelineWithWallet
+          credential={credential}
+          addressField={address}
+          backed={backed}
+        />
+      ) : (
+        <PipelineStatusGuest
+          credential={credential}
+          addressField={address}
+          backed={backed}
+        />
+      )}
+
+      <p className="pipe-hint mono">
+        backed axis: {credentialLabel(credential)}
+        {address.trim() ? ` · graph address ${address.trim()}` : ""}
+      </p>
 
       <div className="race">
         <RacePane
