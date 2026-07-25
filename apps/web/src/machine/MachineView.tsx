@@ -104,11 +104,26 @@ function bandRows(context: ContextBands): Field[] {
     };
   });
 
+  // Every axis unreadable is its own outcome, and it is not the same as low bands.
+  // Said outright so a machine reading this does not have to infer it from four
+  // repeated `unavailable` values.
+  const allUnavailable = AXES.every((axis) => context.bands[axis] === "unavailable");
+
   return [
     { k: "address", v: context.address ?? "none" },
     { k: "ens", v: context.ens?.name ?? "none", d: "resolved, or none" },
     { k: "since", v: context.since ? String(context.since) : "none", d: "year only" },
     ...rows,
+    ...(allUnavailable
+      ? [
+          {
+            k: "bands",
+            v: "none readable",
+            d: "no axis contributed, so context did not move the tier",
+            withheld: true,
+          },
+        ]
+      : []),
     {
       k: "signals.repayment",
       v: context.signals.repayment,
@@ -172,7 +187,8 @@ function settlementRows(data: OffersResponse): Field[] {
 function OfferTable({ offers, hold }: { offers: Offer[]; hold: OffersResponse["hold"] }) {
   return (
     <>
-      <table className="otable">
+      <div className="otable-wrap">
+        <table className="otable">
         <thead>
           <tr>
             <th>hotelId</th>
@@ -189,7 +205,8 @@ function OfferTable({ offers, hold }: { offers: Offer[]; hold: OffersResponse["h
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
       <Fields
         caption="hold"
         rows={

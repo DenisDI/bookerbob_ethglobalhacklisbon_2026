@@ -1340,7 +1340,8 @@ body {
   gap: var(--space-3);
   flex-wrap: wrap;
   /* Clears the fixed wallet control in the corner. */
-  padding: var(--space-3) 172px var(--space-3) var(--space-4);
+  padding: var(--space-3) clamp(var(--space-4), 12vw, 172px) var(--space-3)
+    var(--space-4);
   border-bottom: 1px solid var(--color-line);
 }
 
@@ -1701,6 +1702,12 @@ body {
   color: var(--color-ash);
 }
 
+/* The one status that is a system mark rather than a branch. */
+.frame__status--error {
+  color: var(--color-signal);
+  border-color: var(--color-signal);
+}
+
 .frame__actor,
 .frame__prov {
   font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
@@ -1912,6 +1919,13 @@ body {
 
 /* ---------- offers table ---------- */
 
+/* The table is the one block here with an irreducible minimum width: hotel ids and
+ * timestamps do not wrap usefully. It scrolls inside its own box so the page never
+ * does. */
+.otable-wrap {
+  overflow-x: auto;
+}
+
 .otable {
   width: 100%;
   border-collapse: collapse;
@@ -2063,6 +2077,47 @@ body {
   .taking-part__row {
     grid-template-columns: 1fr;
     gap: var(--space-3);
+  }
+
+  /* Machine view at phone width. The three-column schema row cannot hold: the key
+   * and value columns alone are wider than the screen, and the domain column ends
+   * up one character wide. Same treatment as the tool cards: key beside value,
+   * domain on the line under it. */
+  .fld {
+    grid-template-columns: minmax(5rem, 9rem) minmax(0, 1fr);
+    gap: 0 var(--space-2);
+  }
+
+  .fld__k {
+    grid-area: 1 / 1;
+  }
+
+  .fld__v {
+    grid-area: 1 / 2;
+  }
+
+  .fld__d {
+    grid-area: 2 / 2;
+  }
+
+  /* Both ways out of the 402 still read, one under the other. */
+  .branch {
+    grid-template-columns: 1fr;
+  }
+
+  .frame {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .machine__legend {
+    max-width: none;
+  }
+
+  /* The wallet control is fixed to this corner and floats over everything. At this
+   * width there is no room beside it, so the bar starts under it instead. */
+  .topbar {
+    padding-top: 56px;
+    padding-right: var(--space-4);
   }
 
   .finale {

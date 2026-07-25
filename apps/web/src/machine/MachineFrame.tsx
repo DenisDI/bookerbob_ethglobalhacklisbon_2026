@@ -72,7 +72,17 @@ export function Frame({
             {ARROW[direction]}
           </span>
           <h3 className="frame__title">{title}</h3>
-          {status ? <span className="frame__status">{status}</span> : null}
+          {status ? (
+            // 402 is a branch in this product and is drawn like one. Only a 5xx is
+            // a failure, and only a failure takes the system mark.
+            <span
+              className={`frame__status ${
+                status.startsWith("5") ? "frame__status--error" : ""
+              }`}
+            >
+              {status}
+            </span>
+          ) : null}
           {partner ? (
             <span className="frame__partner partner">{MARKS[partner]}</span>
           ) : null}
