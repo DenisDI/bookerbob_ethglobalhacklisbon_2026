@@ -1,0 +1,45 @@
+{
+  "capturedAt": "2026-07-25T12:55:58.550Z",
+  "note": "Forward resolution of a real name, plus a reverse lookup on an address that collects records whose label preimage the subgraph does not know.",
+  "forward": {
+    "name": "vitalik.eth",
+    "response": {
+      "domains": [
+        {
+          "name": "vitalik.eth",
+          "createdAt": "1497775154",
+          "resolvedAddress": {
+            "id": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+          }
+        }
+      ],
+      "_meta": {
+        "block": {
+          "number": 25609919,
+          "timestamp": 1784984147
+        }
+      }
+    }
+  },
+  "junkReverse": {
+    "address": "0x1111111111111111111111111111111111111111",
+    "response": {
+      "domains": [
+        {
+          "name": "acompany.[5b27bed6d8333e3d9ba5dd7d7376822c897a711c0a03ea7d4bf41022a2d39826].eth",
+          "createdAt": "1502579639"
+        },
+        {
+          "name": "space.[5b27bed6d8333e3d9ba5dd7d7376822c897a711c0a03ea7d4bf41022a2d39826].eth",
+          "createdAt": "1502611451"
+        }
+      ],
+      "_meta": {
+        "block": {
+          "number": 25609919,
+          "timestamp": 1784984147
+        }
+      }
+    }
+  }
+}

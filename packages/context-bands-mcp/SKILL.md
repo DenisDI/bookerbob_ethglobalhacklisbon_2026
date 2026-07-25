@@ -143,8 +143,21 @@ containing a bracket are skipped.
 ## Run
 
 ```bash
-GRAPH_API_KEY=... npx context-bands-mcp     # stdio
+GRAPH_API_KEY=... npx context-bands-mcp          # stdio
+GRAPH_API_KEY=... npx context-bands-mcp --http   # :3001, or --http 3005
 ```
+
+The HTTP transport is stateless and takes plain JSON-RPC at `/mcp`, so the server
+can be exercised with curl by anyone who has no MCP client at hand. `/health`
+answers separately. Charging for inbound queries is deliberately absent.
+
+**Paying The Graph.** Today this uses a Studio key. The keyless route (pay per
+query in USDC on Base mainnet, no account anywhere) is **not implemented**: it
+needs a funded wallet to run even once, and this package does not ship a code
+path it has not seen work. The payment interface is one method that owns the
+whole round trip, `Payer.fetchJson`, because paying per query means answering an
+HTTP 402 rather than adding a header — so the keyless route drops in as a second
+implementation without touching anything above it.
 
 Inside this repo the same key may be exported as `LISBON2026_GRAPH_API_KEY`,
 which takes precedence. `GRAPH_API_KEY` stays the name for anyone reusing the

@@ -70,14 +70,19 @@ export function bandAtLeast(
  *
  * SETTLING AT CHECKOUT (pay_at_checkout) hands over the most: a room is held
  * and nothing moves until the guest arrives. So it asks for everything above,
- * plus size, plus a longer record, and it refuses on a liquidation. Being
- * liquidated is not a moral failing and it is not scored: it is direct evidence
- * that this counterparty has been caught short before, which is precisely the
- * risk being taken on.
+ * plus size, plus a longer record, and it refuses on two facts. Having been
+ * liquidated is direct evidence of being caught short before. Carrying an open
+ * loan is money already committed elsewhere. Neither is a moral failing and
+ * neither is scored: they are the exposure being taken on, and both still leave
+ * the price held.
  */
 const RATE_LOCK_TENURE = "T2";
 const CHECKOUT_TENURE = "T3";
 const CHECKOUT_SCALE = "T3";
+const CHECKOUT_BLOCKED_BY: readonly ContextSnapshot["signals"]["repayment"][] = [
+  "liquidated",
+  "borrowing_open",
+];
 
 export function decideTerms(signals: TermsSignals): Terms {
   if (!signals.hasCredential) {
@@ -95,10 +100,11 @@ export function decideTerms(signals: TermsSignals): Terms {
 
   if (!established) return humanTerms;
 
+  const repayment = context?.signals.repayment;
   const earnsCheckout =
     bandAtLeast(context, "tenure", CHECKOUT_TENURE) &&
     bandAtLeast(context, "scale", CHECKOUT_SCALE) &&
-    context?.signals.repayment !== "liquidated";
+    !(repayment && CHECKOUT_BLOCKED_BY.includes(repayment));
 
   return earnsCheckout
     ? { tier: "elite", inventory: "elite", payment: "pay_at_checkout" }

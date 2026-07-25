@@ -129,6 +129,12 @@ layer ships as a seam with the Studio key wired first.
 keyless pitch is the strongest thing about the gateway and it is currently
 gated behind moving real money.
 
+Concretely, this is why our keyless path is absent rather than half-built: we
+would have had to write and ship a payment loop we could never once observe
+working. The payment interface is shaped for it (`Payer.fetchJson` owns the whole
+round trip, because answering a 402 is a conversation and not a header), and the
+second implementation is a small addition. What is missing is a way to try it.
+
 ## What we shipped against this
 
 `packages/context-bands-mcp`: a manifest registry that declares a counting

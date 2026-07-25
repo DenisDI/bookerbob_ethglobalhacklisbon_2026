@@ -62,6 +62,8 @@ export function narrateTerms(
   terms: Terms,
   shown: number,
   context: ContextSnapshot | null = null,
+  /** True when an address was given and the lookup did not come back. */
+  lookupFailed = false,
 ): void {
   if (terms.tier === "bot") {
     n.say(`nobody is standing behind this request, so i only get to see ${shown}`);
@@ -83,7 +85,11 @@ export function narrateTerms(
     // Which line is true depends on why there is no usable context, and saying
     // the wrong one on camera would be a small lie.
     const band = context?.bands.activity;
-    if (!context) {
+    if (lookupFailed) {
+      // Never say a wallet was not shared when one was: the request had an
+      // address, we simply could not read it.
+      n.say("i asked about their wallet and could not get an answer");
+    } else if (!context) {
       n.say("no wallet shared here. human terms via the credential alone");
     } else if (band === "unavailable") {
       n.say("i cannot read their history right now, and i am not going to guess");
@@ -109,6 +115,10 @@ export function narrateTerms(
   switch (context?.signals.repayment) {
     case "clean":
       n.say("they have borrowed before and paid it back, never caught short");
+      break;
+    case "borrowing_open":
+      // Not a judgement, just money already committed somewhere else.
+      n.say("they still owe on something, so this one settles at booking");
       break;
     case "liquidated":
       // Not a verdict on the person, just the reason the money moves earlier.

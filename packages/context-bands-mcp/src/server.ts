@@ -82,10 +82,23 @@ server.registerTool(
   async () => json({ active: loadRegistry(), retired: loadRetired() }),
 );
 
+/** `--http` or `--http 3005`; falls back to MCP_HTTP_PORT, then 3001. */
+function httpPort(argv: string[]): number | null {
+  const at = argv.indexOf("--http");
+  if (at === -1) return null;
+  const next = argv[at + 1];
+  const explicit = next && !next.startsWith("-") ? Number(next.replace(":", "")) : NaN;
+  if (Number.isFinite(explicit)) return explicit;
+  const fromEnv = Number(process.env.MCP_HTTP_PORT);
+  return Number.isFinite(fromEnv) && fromEnv > 0 ? fromEnv : 3001;
+}
+
 async function main() {
-  if (process.argv.includes("--http")) {
-    console.error("--http transport not implemented yet; run over stdio");
-    process.exit(2);
+  const port = httpPort(process.argv);
+  if (port !== null) {
+    const { serveHttp } = await import("./http.js");
+    await serveHttp(server, port);
+    return;
   }
   await server.connect(new StdioServerTransport());
   console.error("context-bands-mcp ready on stdio");

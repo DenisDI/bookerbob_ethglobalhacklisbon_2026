@@ -105,6 +105,20 @@ test("having been liquidated closes pay at checkout, not the rate lock", () => {
   assert.equal(clean.payment, "pay_at_checkout");
 });
 
+test("an open loan closes pay at checkout but keeps the rate lock", () => {
+  const owing = decideTerms({
+    hasCredential: true,
+    context: ctx(STRONG, "borrowing_open"),
+  });
+
+  assert.equal(owing.tier, "verified", "money already committed elsewhere");
+  assert.equal(owing.payment, "rate_lock_pay_later");
+
+  // Identical file, debt settled: the loan is provably the deciding fact.
+  const settled = decideTerms({ hasCredential: true, context: ctx(STRONG, "clean") });
+  assert.equal(settled.payment, "pay_at_checkout");
+});
+
 test("never having borrowed is not held against anyone", () => {
   const terms = decideTerms({
     hasCredential: true,

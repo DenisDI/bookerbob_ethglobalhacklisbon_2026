@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-07-25T12:32:29.244Z",
+  "capturedAt": "2026-07-25T12:55:55.213Z",
   "note": "Real gateway responses. Entity ids are trimmed to keep the file readable; only list lengths matter to the band engine.",
   "address": "0x646c5ba59f30cf73deea9b00e13aead674c6b07a",
   "responses": {
@@ -7,8 +7,8 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 487565653,
-          "timestamp": 1784982747
+          "number": 487571286,
+          "timestamp": 1784984152
         }
       }
     },
@@ -16,8 +16,8 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 49096699,
-          "timestamp": 1784982745
+          "number": 49097402,
+          "timestamp": 1784984151
         }
       }
     },
@@ -56,8 +56,8 @@
       },
       "_meta": {
         "block": {
-          "number": 25609800,
-          "timestamp": 1784982719
+          "number": 25609919,
+          "timestamp": 1784984147
         }
       }
     },
@@ -65,8 +65,8 @@
       "domains": [],
       "_meta": {
         "block": {
-          "number": 25609802,
-          "timestamp": 1784982743
+          "number": 25609919,
+          "timestamp": 1784984147
         }
       }
     },
@@ -74,8 +74,8 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 487565653,
-          "timestamp": 1784982747
+          "number": 487571293,
+          "timestamp": 1784984154
         }
       }
     },
@@ -85,8 +85,8 @@
       "positions": [],
       "_meta": {
         "block": {
-          "number": 25609801,
-          "timestamp": 1784982731
+          "number": 25609919,
+          "timestamp": 1784984147
         }
       }
     }

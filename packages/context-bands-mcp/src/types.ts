@@ -38,8 +38,17 @@ export type BandName = "activity" | "tenure" | "breadth" | "scale";
  * Public repayment history of the consented address. Not a scale and not a
  * verdict on a person: it states whether borrowed money came back, which is
  * exactly the question behind deferring settlement.
+ *
+ *   no_credit_history  never borrowed. Neutral: most addresses are here
+ *   clean              borrowed and most of it came back
+ *   borrowing_open     borrowed, little returned so far, no liquidation
+ *   liquidated         has been liquidated
  */
-export type RepaymentSignal = "no_credit_history" | "clean" | "liquidated";
+export type RepaymentSignal =
+  | "no_credit_history"
+  | "clean"
+  | "borrowing_open"
+  | "liquidated";
 
 export type FreshnessStatus = "live" | "stale" | "error";
 
@@ -66,10 +75,15 @@ export interface Reading {
   volumeUsd: number;
   /** Distinct markets or pools touched. */
   venues: number;
-  /** Lending only: borrowed and returned, in USD. */
+  /** Lending only: borrowed and returned, in USD, over the page read. */
   borrowed: number;
   repaid: number;
-  /** Lending only: times THIS address was liquidated. Not times it liquidated. */
+  /**
+   * Times THIS address was liquidated, never times it acted as a liquidator.
+   * Lending reports it from the liquidations list; perpetuals report it from
+   * liquidationCount, because being caught short on a perp is the same fact
+   * about the same counterparty.
+   */
   liquidations: number;
 }
 

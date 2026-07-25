@@ -1,6 +1,7 @@
 // One competitor in the race. Both panes get the identical request; everything
 // visible below the label is a consequence of who is behind it.
 
+import { ContextFile } from "./ContextFile";
 import { HotelFinaleCard } from "./HotelFinaleCard";
 import { NarrationFeed } from "./NarrationFeed";
 import { OfferList } from "./OfferList";
@@ -43,6 +44,7 @@ export function RacePane({ label, accent, state, reducedMotion }: Props) {
             accent={accent}
           />
           <p className="pane__term">{paymentLine(data.terms.payment)}</p>
+          {data.context ? <ContextFile context={data.context} /> : null}
         </>
       ) : (
         <div className="rail rail--empty">

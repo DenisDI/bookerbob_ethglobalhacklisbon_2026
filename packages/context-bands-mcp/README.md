@@ -15,7 +15,8 @@ whose axes disagree. The busiest one we sampled has a real repayment record and
 two liquidations behind it.
 
 ```bash
-GRAPH_API_KEY=... npx context-bands-mcp
+GRAPH_API_KEY=... npx context-bands-mcp          # stdio
+GRAPH_API_KEY=... npx context-bands-mcp --http   # :3001, curl-able
 ```
 
 ## Why it is not a wrapper
@@ -31,7 +32,10 @@ GRAPH_API_KEY=... npx context-bands-mcp
 - **Retired sources keep their reasons.** `registry/retired/` records ids that
   died and why, instead of deleting them quietly.
 - **Offline tests.** `npm test` runs the band engine against recorded gateway
-  responses with no network and no key.
+  responses with no network and no key, including the ENS paths and the filter
+  that stops unresolvable label records from donating tenure.
+- **Two transports.** stdio for MCP clients, HTTP for a terminal. Neither is a
+  wrapper around the other.
 - **A second consumer.** `scripts/example-bands-agent.ts` at the repo root is a
   gated group chat, unrelated to this project's own gateway.
 

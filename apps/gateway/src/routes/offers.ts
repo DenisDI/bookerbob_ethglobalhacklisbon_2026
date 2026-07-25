@@ -6,7 +6,7 @@
 // is the actual matrix rather than a canned answer.
 
 import type { Context } from "hono";
-import { getContextSnapshot } from "../context.js";
+import { lookupContext } from "../context.js";
 import { demo } from "../demo.config.js";
 import { createInventory, InventoryUnavailableError } from "../inventory/index.js";
 import {
@@ -37,9 +37,11 @@ export async function offersHandler(c: Context) {
   // AgentKit lands; ?address= is the consented context, and a real address
   // always overrides the synthetic bands the debug lever carries.
   const base = debugSignals(debugTier) ?? UNBACKED;
-  const signals: TermsSignals = address
-    ? { ...base, context: await getContextSnapshot(address) }
+  const lookup = address ? await lookupContext(address) : null;
+  const signals: TermsSignals = lookup
+    ? { ...base, context: lookup.status === "ok" ? lookup.snapshot : null }
     : base;
+  const lookupFailed = lookup?.status === "failed";
 
   const terms = decideTerms(signals);
   const limit = offerLimit(terms.inventory);
@@ -62,7 +64,7 @@ export async function offersHandler(c: Context) {
     const hold = earnsRateLock(terms) ? result.hold : null;
 
     narrateSearch(narrator, city, result);
-    narrateTerms(narrator, terms, offers.length, signals.context);
+    narrateTerms(narrator, terms, offers.length, signals.context, lookupFailed);
     narrateHold(narrator, hold);
 
     return c.json({

@@ -63,7 +63,16 @@ app creation happened after hacking start (Fri 21:00 WEST): [tx hash here].
 npm install
 npm run dev:gateway   # Hono gateway :3000
 npm run dev:web       # race demo :5173
-npx context-bands-mcp # standalone MCP (stdio; --http :3001)
+npx context-bands-mcp        # standalone MCP over stdio
+npx context-bands-mcp --http # same server on :3001, curl-able without a client
+```
+
+The context server runs on its own and answers about any address or ENS name:
+
+```
+curl -X POST localhost:3001/mcp -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_context_bands","arguments":{"address":"vitalik.eth"}}}'
 ```
 
 Secrets live in `.env` (see `.env.example`); nothing sensitive is committed.

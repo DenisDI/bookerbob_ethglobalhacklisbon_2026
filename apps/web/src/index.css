@@ -136,6 +136,201 @@ body {
   cursor: progress;
 }
 
+/* ---------- who is backing this ---------- */
+
+.ask-address {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.ask-address__label {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ask-address__row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ask-address__input {
+  flex: 1 1 18ch;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  background: #0d0d14;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.ask-address__input:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+.ask-address__go {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--canvas);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.ask-address__go:hover:not(:disabled) {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--ink);
+}
+
+.ask-address__go:disabled {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: progress;
+}
+
+.chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.chip:hover:not(:disabled),
+.chip--on {
+  border-color: var(--blue);
+  color: var(--ink);
+}
+
+.chip:disabled {
+  cursor: progress;
+}
+
+.ask-address__hint {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ---------- the underwriting file ---------- */
+
+.file {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--blue);
+  background: #0d0d14;
+}
+
+.file__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.file__name {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.file__since {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.file__axes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 1rem;
+  margin: 0;
+}
+
+.axis {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.axis__label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.axis__value {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+/* Four segments, filled to the band. Legible without knowing what T3 means. */
+.axis__meter {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.axis__meter i {
+  width: 0.85rem;
+  height: 0.4rem;
+  background: #24242f;
+}
+
+.axis__meter i.on {
+  background: var(--blue);
+}
+
+.axis__band {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.file__repayment {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.file__where {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 /* ---------- race ---------- */
 
 .race {

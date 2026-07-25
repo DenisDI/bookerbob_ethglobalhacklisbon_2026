@@ -2,6 +2,7 @@
 // who is accountable for the request.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AddressBands } from "./AddressBands";
 import { fetchOffers } from "./api";
 import { RacePane, type PaneState } from "./RacePane";
 import { PANE_LABEL } from "./terms-copy";
@@ -30,10 +31,14 @@ function usePrefersReducedMotion(): boolean {
 export function App() {
   const [bot, setBot] = useState<PaneState>(IDLE);
   const [backed, setBacked] = useState<PaneState>(IDLE);
+  const [address, setAddress] = useState("");
   const reducedMotion = usePrefersReducedMotion();
   const running = bot.status === "working" || backed.status === "working";
 
-  const run = useCallback(async () => {
+  const run = useCallback(async (overrideAddress?: string) => {
+    // Only the backed side carries an address. The unbacked agent has nobody to
+    // consent on its behalf, so asking about a wallet there would be theatre.
+    const consented = overrideAddress ?? address;
     const start = (
       set: React.Dispatch<React.SetStateAction<PaneState>>,
       charge: boolean,
@@ -51,9 +56,10 @@ export function App() {
     const settle = async (
       tier: Tier,
       set: React.Dispatch<React.SetStateAction<PaneState>>,
+      consentedAddress?: string,
     ) => {
       try {
-        const data = await fetchOffers(tier);
+        const data = await fetchOffers(tier, consentedAddress);
         set((prev) => ({ ...prev, status: "done", data, error: null }));
       } catch (err) {
         set((prev) => ({
@@ -64,19 +70,28 @@ export function App() {
       }
     };
 
-    // Fired together on purpose: the race is the point.
-    await Promise.all([settle("bot", setBot), settle("verified", setBacked)]);
-  }, []);
+    // Fired together on purpose: the race is the point. The backed side asks as
+    // a credentialed human and lets the real bands decide whether that becomes
+    // verified or elite; the tier is derived, never asserted.
+    await Promise.all([
+      settle("bot", setBot),
+      settle("human", setBacked, consented),
+    ]);
+  }, [address]);
 
-  // ?autorun starts the race on load, so every beat of the demo is reachable
-  // without setting it up by hand between takes (specs/03-web-demo.md). Guarded
-  // because a double-invoked effect would bill the metered agent twice.
+  // ?autorun starts the race on load and ?address= preloads the consented
+  // wallet, so every beat of the demo is reachable in one step without setting it
+  // up by hand between takes (specs/03-web-demo.md). Guarded because a
+  // double-invoked effect would bill the metered agent twice.
   const autorun = useRef(false);
   useEffect(() => {
     if (autorun.current) return;
-    if (!new URLSearchParams(window.location.search).has("autorun")) return;
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("autorun")) return;
     autorun.current = true;
-    void run();
+    const preset = params.get("address") ?? "";
+    if (preset) setAddress(preset);
+    void run(preset);
   }, [run]);
 
   return (
@@ -86,9 +101,12 @@ export function App() {
         <h1 className="thesis">who is behind an agent changes the terms it gets</h1>
         <div className="ask">
           <p className="ask__prompt">{PROMPT}</p>
-          <button className="ask__run" onClick={run} disabled={running}>
-            {running ? "running" : "run both"}
-          </button>
+          <AddressBands
+            value={address}
+            onChange={setAddress}
+            onSubmit={(override) => void run(override)}
+            disabled={running}
+          />
         </div>
       </header>
 

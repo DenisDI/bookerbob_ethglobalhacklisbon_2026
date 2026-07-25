@@ -144,10 +144,9 @@ function aggregate(results: SourceResult[]): Totals {
   return totals;
 }
 
+/** Only called when at least one source counted, so there is no stale case here. */
 function activityBand(totals: Totals): Band {
   const entries = [...totals.byCategory.values()];
-  if (entries.length === 0) return "unavailable";
-
   const active = entries.filter((t) => t.actions > 0);
   const total = entries.reduce((sum, t) => sum + t.actions, 0);
   const peak = entries.reduce((max, t) => Math.max(max, t.actions), 0);
@@ -172,14 +171,25 @@ function tenureBand(earliest: number | null, hasSources: boolean, now: number): 
 }
 
 /**
- * Borrowed money either came back or it did not. "no_credit_history" is not a
- * negative: most addresses have never borrowed, and the credential still earns
- * human terms on its own.
+ * Borrowed money either came back or it did not.
+ *
+ * "Any repayment at all" would be far too generous: an address that borrowed
+ * $50,000 and returned $10 would read as having paid it back. So `clean` asks
+ * that most of it came back, and an address still carrying the debt is called
+ * what it is. `no_credit_history` is not a negative — most addresses have never
+ * borrowed, and the credential earns human terms on its own.
+ *
+ * Both sums are bounded by the page that was read (the most recent 100 events
+ * per list), so this is a ratio over recent behaviour, not a lifetime audit.
  */
+const REPAID_SHARE_FOR_CLEAN = 0.5;
+
 function repaymentSignal(totals: Totals): RepaymentSignal {
   if (totals.liquidations > 0) return "liquidated";
-  if (totals.borrowed > 0 && totals.repaid > 0) return "clean";
-  return "no_credit_history";
+  if (totals.borrowed <= 0) return "no_credit_history";
+  return totals.repaid >= totals.borrowed * REPAID_SHARE_FOR_CLEAN
+    ? "clean"
+    : "borrowing_open";
 }
 
 export function computeBands(

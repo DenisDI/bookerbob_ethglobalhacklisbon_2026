@@ -131,6 +131,9 @@ const messariLending: ActivityTemplate = {
         stamp(rows(account.lastDeposit)),
         stamp(rows(account.lastBorrow)),
       ),
+      // Value brought in: collateral supplied plus debt drawn. Repayments and
+      // withdrawals are left out on purpose, so the same dollar is not counted
+      // twice on its way back out.
       volumeUsd: usd(deposits) + usd(borrows),
       venues: venues.size,
       borrowed: usd(borrows),

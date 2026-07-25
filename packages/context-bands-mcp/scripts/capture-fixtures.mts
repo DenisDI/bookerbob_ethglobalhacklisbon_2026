@@ -65,3 +65,41 @@ for (const [label, rawAddress] of Object.entries(ADDRESSES)) {
   writeFileSync(`${OUT}/${label}.json`, `${JSON.stringify(file, null, 2)}\n`);
   console.log(`${label}: ${address} -> ${Object.keys(responses).length} sources`);
 }
+
+// ENS on its own: the forward path a judge uses by typing a name, and the
+// reverse path against an address that collects unresolvable label records.
+const ensManifest = registry.find((m) => m.role === "naming");
+const ensTemplate = ensManifest ? TEMPLATES[ensManifest.schemaType] : undefined;
+
+if (ensManifest && ensTemplate?.kind === "naming") {
+  const forward = await query<unknown>(
+    payer,
+    ensManifest.subgraphId,
+    ensTemplate.forwardQuery,
+    ensTemplate.forwardVariables("vitalik.eth"),
+  );
+  const junk = await query<unknown>(
+    payer,
+    ensManifest.subgraphId,
+    ensTemplate.reverseQuery,
+    ensTemplate.reverseVariables("0x1111111111111111111111111111111111111111"),
+  );
+
+  writeFileSync(
+    `${OUT}/ens.json`,
+    `${JSON.stringify(
+      {
+        capturedAt: new Date().toISOString(),
+        note: "Forward resolution of a real name, plus a reverse lookup on an address that collects records whose label preimage the subgraph does not know.",
+        forward: { name: "vitalik.eth", response: forward },
+        junkReverse: {
+          address: "0x1111111111111111111111111111111111111111",
+          response: junk,
+        },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  console.log("ens: forward + junk reverse captured");
+}

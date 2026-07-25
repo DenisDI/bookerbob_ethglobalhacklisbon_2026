@@ -220,6 +220,42 @@ test("tenure comes from the oldest thing seen, including an ENS name", () => {
   assert.equal(withName.bands.tenure, "T4", "the name is older than the activity");
 });
 
+test("a typed name resolves to an address with its registration date", () => {
+  const template = TEMPLATES.ens;
+  assert.ok(template && template.kind === "naming");
+
+  const f = JSON.parse(
+    readFileSync(fileURLToPath(new URL("./fixtures/ens.json", import.meta.url)), "utf8"),
+  ) as {
+    forward: { response: unknown };
+    junkReverse: { response: unknown };
+  };
+
+  const resolved = template.readForward(f.forward.response);
+  assert.ok(resolved, "vitalik.eth must resolve");
+  assert.equal(resolved.address, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045");
+  assert.equal(resolved.record.name, "vitalik.eth");
+  assert.ok(
+    (resolved.record.createdAt ?? 0) > 0 && (resolved.record.createdAt ?? 0) < 1_500_000_000,
+    "the name predates 2017-07, which is the whole point of using it for tenure",
+  );
+
+  // Junk: every record on this address has an unresolvable label, so the right
+  // answer is no name at all rather than an ancient one.
+  assert.equal(
+    template.readReverse(f.junkReverse.response),
+    null,
+    "bracketed labels must not become a name, or a burn address inherits 2017",
+  );
+});
+
+test("a name that does not exist resolves to nothing, not to a guess", () => {
+  const template = TEMPLATES.ens;
+  assert.ok(template && template.kind === "naming");
+  assert.equal(template.readForward({ domains: [] }), null);
+  assert.equal(template.readForward({}), null);
+});
+
 test("addresses are normalised, names are recognised, junk is rejected", () => {
   assert.equal(
     normaliseAddress("0x62E2CEB6933A0747579F4F9F96D3253A7AF0B237"),

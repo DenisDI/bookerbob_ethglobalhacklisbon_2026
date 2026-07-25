@@ -31,7 +31,11 @@ export type BandName = "activity" | "tenure" | "breadth" | "scale";
  * it is the public record of the consented address, and it speaks directly to
  * who should carry risk between booking and the stay.
  */
-export type RepaymentSignal = "no_credit_history" | "clean" | "liquidated";
+export type RepaymentSignal =
+  | "no_credit_history"
+  | "clean"
+  | "borrowing_open"
+  | "liquidated";
 
 /** What the context-bands MCP tells us about a consented address. */
 export interface ContextSnapshot {
