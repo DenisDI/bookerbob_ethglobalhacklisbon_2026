@@ -746,7 +746,11 @@ body {
   background: var(--color-accent-wash);
 }
 
+/* The strip is a fixed 27px, so the tag may not wrap into it: two lines of 10px
+ * plus the leading is taller than the strip that holds them. */
 .meter__tag {
+  flex: none;
+  white-space: nowrap;
   font: var(--weight-bold) 10px / 1 var(--font-mono);
   letter-spacing: var(--tracking-micro);
   color: var(--color-ash);
