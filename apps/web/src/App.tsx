@@ -46,8 +46,9 @@ function usePrefersReducedMotion(): boolean {
 }
 
 /**
- * Privy session bridge: fill the address field on connect, and expose
- * getAccessToken so /offers can prove ownership server-side.
+ * Privy session bridge: after connect + SIWE, put the live wallet into the
+ * address field (overwrites showcase chips — the connected wallet is the
+ * consent). Also expose getAccessToken so /offers can prove ownership.
  */
 function PrivySessionBridge({
   onAddress,
@@ -56,14 +57,15 @@ function PrivySessionBridge({
   onAddress: (a: string) => void;
   accessTokenRef: React.MutableRefObject<() => Promise<string | null>>;
 }) {
-  const { address, authenticated, getAccessToken } = useConsentedWallet();
+  const { ready, address, authenticated, getAccessToken } = useConsentedWallet();
   accessTokenRef.current = async () => {
     if (!authenticated) return null;
     return getAccessToken();
   };
   useEffect(() => {
-    if (authenticated && address) onAddress(address);
-  }, [authenticated, address, onAddress]);
+    if (!ready || !authenticated || !address) return;
+    onAddress(address);
+  }, [ready, authenticated, address, onAddress]);
   return null;
 }
 
@@ -210,7 +212,7 @@ export function App() {
           accessTokenRef={accessTokenRef}
         />
       ) : null}
-      <ConnectWalletButton />
+      <ConnectWalletButton onAddress={setAddress} />
 
       {/* Both views hang off this bar, so the switch is in the same place in
         * either one and the product is named once. */}
