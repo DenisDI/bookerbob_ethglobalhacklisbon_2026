@@ -32,8 +32,7 @@ underwriting.
 
 **External inventory service.** Hotel inventory is served by an MCP API at
 flexrep.xyz (RateHawk-backed). **Ownership: REP, our own team's product, built and
-deployed before this event.** Disclosed to ETHGlobal organizers in Discord on
-2026-07-24; written acknowledgment in `docs/DISCLOSURE-SIGNOFF.md`. No code from
+deployed before this event.** No code from
 that service is in this repository. It is used only as an interchangeable data
 source behind an inventory adapter; the repo ships a second in-event source
 (`fixtures/lisbon.json`) and the demo runs on either. The gateway, terms engine,

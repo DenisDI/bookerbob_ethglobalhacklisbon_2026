@@ -1,8 +1,7 @@
 // Inventory adapter: one interface, two interchangeable sources.
 //
-// PENDING: the live path stays unannounced in the submission until the
-// organizer sign-off lands in docs/DISCLOSURE-SIGNOFF.md (00-final-plan A.3).
-// The captured snapshot needs no sign-off, so the demo is buildable either way.
+// The live source is our own team's deployed service, disclosed by name in the
+// README. The snapshot is the second source that keeps the demo alive without it.
 //
 // The live booker is primary. The captured snapshot is the second in-event
 // source required by specs/00-final-plan.md A.3 — it exists so a slow or
