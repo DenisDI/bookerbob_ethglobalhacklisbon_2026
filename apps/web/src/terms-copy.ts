@@ -48,6 +48,15 @@ export function paymentLine(payment: Payment): string {
   }
 }
 
+/**
+ * Whether these terms let the money wait, which is the only reason a settlement
+ * gets scheduled. Mirrors the gateway's earnsRateLock, kept here so the copy
+ * layer can ask the question without importing the underwriting engine.
+ */
+export function earnsSchedule(payment: Payment): boolean {
+  return payment === "rate_lock_pay_later" || payment === "pay_at_checkout";
+}
+
 /** Short label for the rail caption. */
 export function moneyMovesLabel(payment: Payment): string {
   switch (payment) {

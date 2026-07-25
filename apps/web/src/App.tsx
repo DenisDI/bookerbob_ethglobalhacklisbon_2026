@@ -10,12 +10,8 @@ import {
   privyConfigured,
   useConsentedWallet,
 } from "./auth";
-import {
-  credentialLabel,
-  hasCredential,
-  type CredentialState,
-} from "./credential";
-import { PipelineStatus, PipelineStatusGuest } from "./PipelineStatus";
+import { hasCredential, type CredentialState } from "./credential";
+import { ParticipantsBand, ParticipantsBandGuest } from "./ParticipantsBand";
 import { RacePane, type PaneState } from "./RacePane";
 import { PANE_LABEL } from "./terms-copy";
 
@@ -50,7 +46,7 @@ function PrivyAddressBridge({ onAddress }: { onAddress: (a: string) => void }) {
   return null;
 }
 
-function PipelineWithWallet({
+function ParticipantsWithWallet({
   credential,
   addressField,
   backed,
@@ -61,7 +57,7 @@ function PipelineWithWallet({
 }) {
   const wallet = useConsentedWallet();
   return (
-    <PipelineStatus
+    <ParticipantsBand
       wallet={{
         ready: wallet.ready,
         authenticated: wallet.authenticated,
@@ -188,23 +184,18 @@ export function App() {
       </header>
 
       {privyConfigured ? (
-        <PipelineWithWallet
+        <ParticipantsWithWallet
           credential={credential}
           addressField={address}
           backed={backed}
         />
       ) : (
-        <PipelineStatusGuest
+        <ParticipantsBandGuest
           credential={credential}
           addressField={address}
           backed={backed}
         />
       )}
-
-      <p className="pipe-hint mono">
-        backed axis: {credentialLabel(credential)}
-        {address.trim() ? ` · graph address ${address.trim()}` : ""}
-      </p>
 
       <div className="racehead">
         <span className="label">the race</span>

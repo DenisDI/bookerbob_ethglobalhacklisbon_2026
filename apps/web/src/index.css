@@ -1239,98 +1239,114 @@ body {
   color: var(--color-muted);
 }
 
-/* ---------- pipeline wire strip (temp; design replaces) ---------- */
+/* ---------- what is taking part ---------- */
 
-.pipe {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  padding: 0.85rem 1rem;
-}
-
-.pipe__head {
+.taking-part {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  align-items: baseline;
-  margin-bottom: 0.65rem;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
+  background: var(--color-surface-3);
 }
 
-.pipe__title {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+.taking-part__cap {
+  margin: 0;
 }
 
-.pipe__note {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.pipe__steps {
+.taking-part__row {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.4rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
 }
 
-.pipe__step {
-  display: grid;
-  grid-template-columns: 6.5rem minmax(0, 1fr);
-  gap: 0.75rem;
-  align-items: baseline;
-  font-size: 0.82rem;
+/* One step per cell, and the rule on the left is what makes it a step in a
+ * sequence rather than three loose facts. */
+.part {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-line);
 }
 
-.pipe__label {
+.part__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin: 0;
+  /* The mark inherits this, so the whole step changes colour together. */
+  color: var(--color-ash);
+}
+
+.part__name {
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 0.68rem;
-  color: var(--muted);
 }
 
-.pipe__detail {
-  font-size: 0.8rem;
-  color: var(--ink);
-  overflow-wrap: anywhere;
+.part__role {
+  font: var(--weight-reg) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+  text-transform: uppercase;
 }
 
-.pipe__step--idle .pipe__detail {
-  color: var(--muted);
+.part__line {
+  margin: 0;
+  color: var(--color-ink);
 }
 
-.pipe__step--active .pipe__label {
-  color: var(--blue);
+.part__link {
+  font: var(--weight-med) var(--size-ui-sm) / 1.2 var(--font-ui);
 }
 
-.pipe__step--active .pipe__detail {
-  color: var(--ink);
+/* A step still waiting is grey, and its sentence is quiet: nothing has happened
+ * there yet, so nothing there is allowed to look answered. */
+.part--waiting .part__who {
+  color: var(--color-faint);
 }
 
-.pipe__step--done .pipe__label {
-  color: #6dcea8;
+.part--waiting .part__line {
+  color: var(--color-muted);
 }
 
-.pipe__step--warn .pipe__label {
-  color: #d4a15a;
+.part--working .part__who {
+  color: var(--color-accent);
+  animation: bb-pulse 1.6s steps(1) infinite;
 }
 
-.pipe__step--skip .pipe__detail {
-  color: var(--muted);
-  text-decoration: line-through;
-  text-decoration-color: var(--line);
+/* Provisional: the step is taking part and it does move the terms, but nothing
+ * has been proven. A dashed rule says so without a warning colour, and there is
+ * no pulse, because a constant is not in flight. */
+.part--standin {
+  border-left-style: dashed;
+  border-left-color: var(--color-accent-soft);
 }
 
-.pipe__link {
-  margin: 0.75rem 0 0;
-  font-size: 0.82rem;
+.part--standin .part__who {
+  color: var(--color-accent-soft);
 }
 
-.pipe-hint {
-  margin: -0.5rem 0 0;
-  font-size: 0.75rem;
-  color: var(--muted);
+/* Colour arrives when the step has actually done its work. */
+.part--done {
+  border-left-color: var(--color-accent-soft);
+}
+
+.part--done .part__who {
+  color: var(--color-accent);
+}
+
+/* Not needed for these terms is a real outcome, not a failure: quiet, never
+ * struck through, never red. */
+.part--aside .part__who,
+.part--aside .part__line {
+  color: var(--color-faint);
 }
 
 /* ---------- narrow: keep the comparison, stack everything else ---------- */
@@ -1346,6 +1362,13 @@ body {
 
   .ctx__axes {
     grid-template-columns: 1fr;
+  }
+
+  /* The three steps stack in journey order, so the sequence survives the
+   * narrow width even though the row does not. */
+  .taking-part__row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
   }
 
   .finale {
