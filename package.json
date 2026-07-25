@@ -19,7 +19,10 @@
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present && tsc -p scripts/tsconfig.json",
     "lint:lexicon": "node scripts/lexicon-check.mjs",
-    "capture:fixtures": "tsx scripts/capture-fixtures.ts"
+    "capture:fixtures": "tsx scripts/capture-fixtures.ts",
+    "test:scenarios": "tsx scripts/scenario-tester.ts",
+    "test:scenarios:learn": "tsx scripts/scenario-tester.ts --learn --soft-hedera",
+    "test:scenarios:prod": "LISBON2026_GATEWAY_URL=https://lisbonhack.world tsx scripts/scenario-tester.ts --soft-hedera"
   },
   "devDependencies": {
     "tsx": "^4.19.2",

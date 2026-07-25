@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "description": "BookerBob race scenarios: credential × Graph address × Hedera. Learned cases get needsReview:true until someone confirms the expect block.",
+  "cases": [
+    {
+      "id": "health",
+      "kind": "health",
+      "expect": { "ok": true }
+    },
+    {
+      "id": "bot-no-address",
+      "kind": "offers",
+      "query": { "credential": "0" },
+      "expect": {
+        "credentialStatus": "missing",
+        "tier": "bot",
+        "payment": "prepay_100",
+        "hasContext": false,
+        "schedule": "absent",
+        "hold": false
+      }
+    },
+    {
+      "id": "bot-with-rich-address",
+      "kind": "offers",
+      "query": { "credential": "0", "address": "vitalik.eth" },
+      "expect": {
+        "credentialStatus": "missing",
+        "tier": "bot",
+        "payment": "prepay_100",
+        "schedule": "absent",
+        "hold": false
+      },
+      "notes": "Graph alone never upgrades a bot."
+    },
+    {
+      "id": "stand-in-no-address",
+      "kind": "offers",
+      "query": { "credential": "1" },
+      "expect": {
+        "credentialStatus": "stand_in",
+        "tier": "human",
+        "payment": "deposit",
+        "hasContext": false,
+        "schedule": "absent",
+        "hold": false
+      }
+    },
+    {
+      "id": "stand-in-vitalik",
+      "kind": "offers",
+      "query": { "credential": "1", "address": "vitalik.eth" },
+      "expect": {
+        "credentialStatus": "stand_in",
+        "tier": "elite",
+        "payment": "pay_at_checkout",
+        "hasContext": true,
+        "schedule": "if_rate_lock",
+        "hold": true
+      },
+      "notes": "Showcase rich file. Hedera schedule required when secrets are live."
+    },
+    {
+      "id": "stand-in-long-borrower",
+      "kind": "offers",
+      "query": {
+        "credential": "1",
+        "address": "0x62e2ceb6933a0747579f4f9f96d3253a7af0b237"
+      },
+      "expect": {
+        "credentialStatus": "stand_in",
+        "tierAnyOf": ["human", "verified", "elite"],
+        "hasContext": true,
+        "schedule": "if_rate_lock"
+      },
+      "notes": "Pinned UI address; bands may drift — tierAnyOf keeps it honest."
+    },
+    {
+      "id": "stand-in-first-day",
+      "kind": "offers",
+      "query": {
+        "credential": "1",
+        "address": "0x646c5ba59f30cf73deea9b00e13aead674c6b07a"
+      },
+      "expect": {
+        "credentialStatus": "stand_in",
+        "tierAnyOf": ["human", "verified"],
+        "hasContext": true,
+        "schedule": "if_rate_lock"
+      },
+      "notes": "Thin file — should not be elite on a healthy Graph read."
+    },
+    {
+      "id": "agentkit-vitalik",
+      "kind": "agentkit",
+      "query": { "address": "vitalik.eth" },
+      "expect": {
+        "credentialStatus": "verified",
+        "credentialSource": "agentkit",
+        "tier": "elite",
+        "payment": "pay_at_checkout",
+        "hasContext": true,
+        "schedule": "if_rate_lock",
+        "hold": true
+      },
+      "optional": true,
+      "notes": "Skipped unless LISBON2026_AGENT_PRIVATE_KEY is set. World prize path."
+    }
+  ]
+}

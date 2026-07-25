@@ -33,9 +33,15 @@ underwriting.
 ```bash
 npm run smoke -w @bookerbob/hedera-schedule
 npm run demo -w @bookerbob/hedera-schedule   # create + execute + HashScan URLs
+
+# Race scenarios (credential × Graph × Hedera)
+npm run test:scenarios                       # local gateway
+npm run test:scenarios:prod                  # lisbonhack.world (soft Hedera)
+npm run test:scenarios:learn                 # append novel fails to catalog
 ```
 
 See `packages/hedera-schedule/README.md`. Routes: `POST /prebook`, `POST /book`.
+Catalog: `scripts/scenarios/catalog.json`.
 
 ## How the terms are decided
 

@@ -30,3 +30,6 @@ coverage/
 *.swp
 .cursor/
 .gstack/
+
+# scenario tester last report (catalog.json is tracked)
+scripts/scenarios/last-run.json
