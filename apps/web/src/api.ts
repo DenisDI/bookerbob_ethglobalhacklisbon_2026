@@ -1,8 +1,10 @@
 import type { OffersResponse, Tier } from "./types";
 
+// Dev: hit local gateway. Prod: same origin (Fly serves web + API together).
+// Hardcoding localhost in the bundle makes lisbonhack.world → Failed to fetch.
 const GATEWAY =
-  (import.meta.env.VITE_LISBON2026_GATEWAY_URL as string | undefined) ??
-  "http://localhost:3000";
+  (import.meta.env.VITE_LISBON2026_GATEWAY_URL as string | undefined)?.trim() ||
+  (import.meta.env.DEV ? "http://localhost:3000" : "");
 
 export class OffersError extends Error {}
 
