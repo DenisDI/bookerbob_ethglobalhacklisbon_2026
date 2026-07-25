@@ -11,10 +11,11 @@
 import { ContextFile } from "./ContextFile";
 import { NarrationFeed } from "./NarrationFeed";
 import { OfferList, OfferSkeleton } from "./OfferList";
-import { TheGraphMark, WorldMark } from "./PartnerMarks";
+import { HederaMark, TheGraphMark, WorldMark } from "./PartnerMarks";
 import { EmptyRail, SettlementRail } from "./SettlementRail";
 import { SpentCounter } from "./SpentCounter";
 import {
+  earnsSchedule,
   inventoryLine,
   meterLine,
   paymentLine,
@@ -123,6 +124,23 @@ export function RacePane({
               accent={accent}
             />
             <p className="pane__term">{paymentLine(data.terms.payment)}</p>
+
+            {/* Hedera's moment, in the lane where it happens: the money is
+              * allowed to wait, so something has to carry the promise to pay at
+              * the end. Only ever drawn on terms that actually defer, and it
+              * claims a schedule only when there is one to open. */}
+            {earnsSchedule(data.terms.payment) ? (
+              <p className="pane__settle partner">
+                <HederaMark size={13} />
+                {data.scheduleUrl ? (
+                  <a href={data.scheduleUrl} target="_blank" rel="noreferrer">
+                    settlement scheduled, see it on hashscan
+                  </a>
+                ) : (
+                  <span className="label">settles on checkout day</span>
+                )}
+              </p>
+            ) : null}
           </>
         ) : (
           <EmptyRail

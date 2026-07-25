@@ -561,6 +561,22 @@ body {
   color: var(--color-ink);
 }
 
+/* The settlement line only ever appears on terms that defer, so the mark beside
+ * it is always at its own moment. Accent, because deferring the money is the
+ * thing someone is answerable for. */
+.pane__settle {
+  margin: 0;
+  color: var(--color-accent);
+}
+
+.pane__settle .label {
+  color: var(--color-accent);
+}
+
+.pane__settle a {
+  font: var(--weight-med) var(--size-ui-sm) / 1.2 var(--font-ui);
+}
+
 /* ---------- spent counter ---------- */
 
 .spent {
@@ -1227,6 +1243,13 @@ body {
   flex-direction: column;
   gap: 4px;
   padding: 12px 12px 12px 0;
+}
+
+/* Weighted by ink, not by colour: the card is bone and the accent does not
+ * survive on bone. Its label goes to full card ink while the two cells beside it
+ * stay muted, which is enough to make the settlement read first of the three. */
+.finale__settle .k {
+  color: var(--color-card-ink);
 }
 
 .finale__link {

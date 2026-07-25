@@ -145,9 +145,12 @@ export function HotelFinaleCard({
                 : "not cancellable"}
             </span>
           </div>
-          <div>
+          {/* The peak of the whole story, so it is the one cell on this card that
+            * is allowed to be louder than its neighbours: a real room, a real
+            * hold, and a real payment already scheduled for a day in the future. */}
+          <div className="finale__settle">
             <span className="partner">
-              <HederaMark />
+              <HederaMark size={14} />
               <span className="k">SETTLEMENT SCHEDULED</span>
             </span>
             {scheduleUrl ? (
