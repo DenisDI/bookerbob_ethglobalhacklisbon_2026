@@ -19,12 +19,16 @@ export async function paidOffersHandler(c: Context) {
   const origin = publicOrigin(c);
   const res = await paidOffersProxy(origin, query);
   const text = await res.text();
+  // HashScan headers are the proof the bot lane actually paid — do not drop them.
   return new Response(text, {
     status: res.status,
     headers: {
       "content-type": res.headers.get("content-type") ?? "application/json",
       "x-bookerbob-spent-usd": res.headers.get("x-bookerbob-spent-usd") ?? "",
       "x-bookerbob-spent-payer": res.headers.get("x-bookerbob-spent-payer") ?? "",
+      "x-bookerbob-payment-tx": res.headers.get("x-bookerbob-payment-tx") ?? "",
+      "x-bookerbob-payment-tx-url":
+        res.headers.get("x-bookerbob-payment-tx-url") ?? "",
     },
   });
 }

@@ -7,7 +7,8 @@
 // Pattern: matevszm/x402-hedera-example — server holds no settle key; Blocky402
 // facilitator is the fee-payer. payTo is a Hedera account id (0.0.x).
 
-import { x402Client } from "@x402/core/client";
+import { transactionUrl } from "@bookerbob/hedera-schedule";
+import { x402Client, x402HTTPClient } from "@x402/core/client";
 import {
   HTTPFacilitatorClient,
   x402ResourceServer,
@@ -42,8 +43,9 @@ const EVM_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 // Blocky402 rejects bare EVM aliases as payTo — use the entity id. Map known
 // testnet receivers so LISBON2026_X402_PAYTO_ACCOUNT can be either form.
 const EVM_TO_ACCOUNT: Record<string, string> = {
-  // user receiver (mirror: testnet.mirrornode.hedera.com)
-  "0xdccb15a7c3d3d7f603d41e2a21add3ed1136e86a": "0.0.9700187",
+  // Legacy alias that previously mapped to 0.0.9700187 — payments now target
+  // LISBON2026_X402_PAYTO_ACCOUNT (default receiver: 0.0.9692348).
+  "0xdccb15a7c3d3d7f603d41e2a21add3ed1136e86a": "0.0.9692348",
 };
 
 function payTo(): string | null {
@@ -166,9 +168,24 @@ function hederaSigner(accountId: string, privateKey: string) {
   }
 }
 
+/** Pull settlement tx id from PAYMENT-RESPONSE (Hedera: transaction or transactionId). */
+function settlementTxId(settlement: {
+  success?: boolean;
+  transaction?: string;
+  transactionId?: string;
+} | null): string | null {
+  if (!settlement?.success) return null;
+  const raw = settlement.transaction || settlement.transactionId || "";
+  const id = String(raw).trim();
+  return id.length > 0 ? id : null;
+}
+
 /**
  * Race helper: pay with the demo Hedera account then return /offers.
  * Real agents should hit /offers with their own PAYMENT-SIGNATURE instead.
+ *
+ * Forwards HashScan headers so LANE A can link a real testnet transfer, not a
+ * client-side fake counter.
  */
 export async function paidOffersProxy(
   origin: string,
@@ -178,11 +195,11 @@ export async function paidOffersProxy(
   const url = `${origin.replace(/\/$/, "")}/offers?${query.toString()}`;
 
   if (!x402Configured()) {
+    // No paywall → no claim of payment. Soft local for inventory only.
     const res = await fetch(url);
-    const entry = recordSpend("soft-local", QUERY_PRICE_USD);
     const headers = new Headers(res.headers);
-    headers.set("x-bookerbob-spent-usd", String(entry.usd));
-    headers.set("x-bookerbob-spent-payer", "soft-local");
+    headers.set("x-bookerbob-spent-usd", "0");
+    headers.set("x-bookerbob-spent-payer", "unmetered");
     return new Response(res.body, { status: res.status, headers });
   }
 
@@ -204,7 +221,28 @@ export async function paidOffersProxy(
     new ExactHederaClientScheme(signer),
   );
   const fetchPaid = wrapFetchWithPayment(fetch, client);
-  return fetchPaid(url);
+  const res = await fetchPaid(url);
+
+  const httpClient = new x402HTTPClient(client);
+  const settlement = httpClient.getPaymentSettleResponse((name) =>
+    res.headers.get(name),
+  );
+  const txId = settlementTxId(settlement);
+  const headers = new Headers(res.headers);
+
+  if (txId) {
+    headers.set("x-bookerbob-payment-tx", txId);
+    headers.set("x-bookerbob-payment-tx-url", transactionUrl(txId));
+  } else if (res.ok) {
+    // Paid path without a settle receipt must not look like a real payment.
+    console.warn("x402: /offers succeeded but PAYMENT-RESPONSE had no tx id");
+  }
+
+  if (settlement?.payer) {
+    headers.set("x-bookerbob-spent-payer", String(settlement.payer));
+  }
+
+  return new Response(res.body, { status: res.status, headers });
 }
 
 export const x402Meta = {

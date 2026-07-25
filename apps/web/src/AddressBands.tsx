@@ -32,6 +32,11 @@ interface Props {
   showChips?: boolean;
   /** Lets a caller demote this to the secondary way in. */
   label?: string;
+  /**
+   * Privy-authenticated wallet. When set, show "run my wallet" which fills
+   * this address and runs. Hidden when nobody is connected.
+   */
+  myWallet?: string | null;
 }
 
 export function AddressBands({
@@ -41,8 +46,10 @@ export function AddressBands({
   disabled,
   showChips = true,
   label = "whose standing should back the request",
+  myWallet = null,
 }: Props) {
   const [touched, setTouched] = useState(false);
+  const mine = myWallet?.trim() || null;
 
   return (
     <section className="ask-address">
@@ -66,14 +73,31 @@ export function AddressBands({
             if (e.key === "Enter" && !disabled) onSubmit();
           }}
         />
-        <button
-          className="ask-address__go"
-          onClick={() => onSubmit()}
-          disabled={disabled}
-          type="button"
-        >
-          run both
-        </button>
+        <div className="ask-address__actions">
+          {mine ? (
+            <button
+              className="ask-address__go ask-address__go--mine"
+              onClick={() => {
+                setTouched(true);
+                onChange(mine);
+                onSubmit(mine);
+              }}
+              disabled={disabled}
+              type="button"
+              title={mine}
+            >
+              run my wallet
+            </button>
+          ) : null}
+          <button
+            className="ask-address__go"
+            onClick={() => onSubmit()}
+            disabled={disabled}
+            type="button"
+          >
+            run both
+          </button>
+        </div>
       </div>
 
       {showChips ? (

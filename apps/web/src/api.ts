@@ -25,9 +25,17 @@ export type FetchOffersInput = {
  * the demo Hedera account settles 0.01 HBAR via x402; credentialed lane hits
  * GET /offers free.
  */
+export type PaidOffersResult = OffersResponse & {
+  spentUsd?: number;
+  /** Hedera testnet transfer id from x402 PAYMENT-RESPONSE. */
+  paymentTxId?: string | null;
+  /** HashScan page for that transfer — only set when the settle receipt is real. */
+  paymentTxUrl?: string | null;
+};
+
 export async function fetchOffers(
   input: FetchOffersInput,
-): Promise<OffersResponse & { spentUsd?: number }> {
+): Promise<PaidOffersResult> {
   if (!input.credential) {
     return fetchPaidBotOffers(input);
   }
@@ -59,7 +67,7 @@ export async function fetchOffers(
 
 async function fetchPaidBotOffers(
   input: FetchOffersInput,
-): Promise<OffersResponse & { spentUsd?: number }> {
+): Promise<PaidOffersResult> {
   const res = await fetch(`${GATEWAY}/x402/paid-offers`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -80,7 +88,10 @@ async function fetchPaidBotOffers(
   const data = (await res.json()) as OffersResponse;
   const spentHeader = res.headers.get("x-bookerbob-spent-usd");
   const spentUsd = spentHeader ? Number(spentHeader) : undefined;
-  return { ...data, spentUsd };
+  const paymentTxId = res.headers.get("x-bookerbob-payment-tx")?.trim() || null;
+  const paymentTxUrl =
+    res.headers.get("x-bookerbob-payment-tx-url")?.trim() || null;
+  return { ...data, spentUsd, paymentTxId, paymentTxUrl };
 }
 
 /** Gateway ledger for the race counters. */

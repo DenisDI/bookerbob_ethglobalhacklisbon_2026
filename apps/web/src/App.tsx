@@ -25,15 +25,25 @@ import { SCENARIOS, WhoIsAsking } from "./WhoIsAsking";
  * city travels to the gateway; what comes back is read off the response, so the
  * screen never claims a city the desk did not actually quote.
  */
-const DEFAULT_CITY = "lisbon";
+const CITIES = [
+  { value: "lisbon", label: "Lisbon" },
+  { value: "munich", label: "Munich" },
+  { value: "paris", label: "Paris" },
+  { value: "madrid", label: "Madrid" },
+] as const;
 
-/** Metered queries cost a cent each; only the unbacked agent pays them. */
-const QUERY_PRICE_USD = 0.01;
+const DEFAULT_CITY = CITIES[0].value;
 
 /** Until World AgentKit/Selfie lands — not a prize-complete PoH. */
 const STAND_IN: CredentialState = { status: "stand_in" };
 
-const IDLE: PaneState = { status: "idle", data: null, error: null, spentUsd: 0 };
+const IDLE: PaneState = {
+  status: "idle",
+  data: null,
+  error: null,
+  spentUsd: 0,
+  paymentTxUrl: null,
+};
 
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -49,25 +59,51 @@ function usePrefersReducedMotion(): boolean {
 
 /**
  * Privy session bridge: after connect + SIWE, put the live wallet into the
- * address field (overwrites showcase chips — the connected wallet is the
- * consent). Also expose getAccessToken so /offers can prove ownership.
+ * address field, expose getAccessToken, and fire onConnected once so both
+ * race lanes run automatically — the connect is the consent.
  */
 function PrivySessionBridge({
   onAddress,
+  onWallet,
+  onConnected,
+  busy,
   accessTokenRef,
 }: {
   onAddress: (a: string) => void;
+  /** Live Privy wallet, or null when logged out — drives "run my wallet". */
+  onWallet: (a: string | null) => void;
+  /** Fired once per connected address when the race is idle. */
+  onConnected: (address: string) => void;
+  busy: boolean;
   accessTokenRef: React.MutableRefObject<() => Promise<string | null>>;
 }) {
   const { ready, address, authenticated, getAccessToken } = useConsentedWallet();
+  /** Last address we auto-ran for; cleared on logout so reconnect fires again. */
+  const ranFor = useRef<string | null>(null);
+
   accessTokenRef.current = async () => {
     if (!authenticated) return null;
     return getAccessToken();
   };
+
   useEffect(() => {
-    if (!ready || !authenticated || !address) return;
+    if (!ready || !authenticated || !address) {
+      onWallet(null);
+      if (!authenticated) ranFor.current = null;
+      return;
+    }
     onAddress(address);
-  }, [ready, authenticated, address, onAddress]);
+    onWallet(address);
+  }, [ready, authenticated, address, onAddress, onWallet]);
+
+  useEffect(() => {
+    if (!ready || !authenticated || !address || busy) return;
+    const key = address.toLowerCase();
+    if (ranFor.current === key) return;
+    ranFor.current = key;
+    onConnected(address);
+  }, [ready, authenticated, address, busy, onConnected]);
+
   return null;
 }
 
@@ -99,7 +135,9 @@ export function App() {
   const [bot, setBot] = useState<PaneState>(IDLE);
   const [backed, setBacked] = useState<PaneState>(IDLE);
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState(DEFAULT_CITY);
+  /** Privy-authenticated wallet only — null when disconnected. */
+  const [myWallet, setMyWallet] = useState<string | null>(null);
+  const [city, setCity] = useState<string>(DEFAULT_CITY);
   // Read from the URL on first paint so a machine-view link opens on it.
   const [view, setView] = useState<View>(() => readView(window.location.search));
   // Product race uses stand-in until World wires verified.
@@ -143,6 +181,7 @@ export function App() {
           data: null,
           error: null,
           spentUsd: prev.spentUsd,
+          paymentTxUrl: prev.paymentTxUrl,
         }));
 
       start(setBot);
@@ -157,26 +196,32 @@ export function App() {
         },
       ) => {
         try {
-          // Bot lane settles Hedera x402 via /x402/paid-offers; spentUsd comes
-          // from the gateway ledger header, not a client-side fake increment.
+          // Bot lane: only trust spentUsd when the gateway also returns a
+          // HashScan tx from the x402 settle receipt — never invent +$0.01.
           const data = await fetchOffers({
             credential: opts.credential,
             address: opts.address,
             city: city.trim() || undefined,
             accessToken: opts.accessToken,
           });
-          set((prev) => ({
-            ...prev,
-            status: "done",
-            data,
-            error: null,
-            spentUsd:
-              !opts.credential && typeof data.spentUsd === "number"
-                ? data.spentUsd
-                : !opts.credential
-                  ? prev.spentUsd + QUERY_PRICE_USD
+          set((prev) => {
+            const paid =
+              !opts.credential &&
+              typeof data.spentUsd === "number" &&
+              Boolean(data.paymentTxUrl);
+            return {
+              ...prev,
+              status: "done",
+              data,
+              error: null,
+              spentUsd: paid
+                ? data.spentUsd!
+                : opts.credential
+                  ? prev.spentUsd
                   : prev.spentUsd,
-          }));
+              paymentTxUrl: data.paymentTxUrl ?? prev.paymentTxUrl,
+            };
+          });
         } catch (err) {
           set((prev) => ({
             ...prev,
@@ -203,6 +248,13 @@ export function App() {
 
   useEffect(() => writeView(view), [view]);
 
+  const onWalletConnected = useCallback(
+    (walletAddress: string) => {
+      void run(walletAddress);
+    },
+    [run],
+  );
+
   const autorun = useRef(false);
   useEffect(() => {
     if (autorun.current) return;
@@ -219,6 +271,9 @@ export function App() {
       {privyConfigured ? (
         <PrivySessionBridge
           onAddress={setAddress}
+          onWallet={setMyWallet}
+          onConnected={onWalletConnected}
+          busy={running}
           accessTokenRef={accessTokenRef}
         />
       ) : null}
@@ -270,16 +325,19 @@ export function App() {
             <label className="ask__said" htmlFor="city">
               book me a hotel in
             </label>
-            <input
+            <select
               id="city"
               className="ask__city"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="a city"
-              spellCheck={false}
-              autoComplete="off"
-              size={Math.max(6, city.length + 1)}
-            />
+              aria-label="city"
+            >
+              {CITIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
           </form>
           {/* In the human view this is the escape hatch, so it belongs after the
             * cards it is an alternative to, not before them. In the machine view
@@ -290,6 +348,7 @@ export function App() {
               onChange={setAddress}
               onSubmit={(override) => void run(override)}
               disabled={running}
+              myWallet={myWallet}
             />
           ) : null}
         </div>
@@ -313,6 +372,7 @@ export function App() {
               disabled={running}
               showChips={false}
               label="or put any wallet behind it"
+              myWallet={myWallet}
             />
           </div>
         </>

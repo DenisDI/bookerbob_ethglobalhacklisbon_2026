@@ -1,27 +1,34 @@
 // What this agent paid just to be allowed to ask.
 //
 // Bot lane: gateway x402 ledger (Hedera testnet HBAR) via /x402/paid-offers.
-// Display stays $0.01 units (one query = 0.01 HBAR). Backed lane: $0.
-//
-// The design asks for creeping third and fourth decimals, incrementing every
-// 140ms, and adds "cap the creep so they never roll to $0.15 mid-shot". That is
-// digits we do not have, tuned for the camera, so the big typography is kept and
-// the number stays the real one. A zero on the backed lane is the win, not a
-// disabled state, and it is never greyed out.
+// Display stays $0.01 units (one query = 0.01 HBAR). The HashScan link is the
+// proof — without a settle receipt we do not claim "AND COUNTING".
+// Backed lane: $0.
 
 interface Props {
   usd: number;
   counting: boolean;
+  /** Real Hedera testnet transfer on HashScan, when x402 settled. */
+  paymentTxUrl?: string | null;
 }
 
-export function SpentCounter({ usd, counting }: Props) {
+export function SpentCounter({ usd, counting, paymentTxUrl = null }: Props) {
   return (
-    <p className="spent">
-      <span className="spent__label">spent:</span>
-      <span className="spent__value">${usd.toFixed(2)}</span>
-      <span className="spent__tail">
-        {counting ? "AND COUNTING" : "NOTHING CHARGED"}
-      </span>
-    </p>
+    <div className="spent">
+      <p className="spent__row">
+        <span className="spent__label">spent:</span>
+        <span className="spent__value">${usd.toFixed(2)}</span>
+        <span className="spent__tail">
+          {counting ? "AND COUNTING" : "NOTHING CHARGED"}
+        </span>
+      </p>
+      {paymentTxUrl ? (
+        <p className="spent__proof partner">
+          <a href={paymentTxUrl} target="_blank" rel="noreferrer">
+            last query paid on hedera · hashscan
+          </a>
+        </p>
+      ) : null}
+    </div>
   );
 }

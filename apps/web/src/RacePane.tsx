@@ -32,6 +32,8 @@ export interface PaneState {
   data: OffersResponse | null;
   error: string | null;
   spentUsd: number;
+  /** Latest real Hedera x402 transfer (HashScan), bot lane only. */
+  paymentTxUrl: string | null;
 }
 
 interface Props {
@@ -95,7 +97,11 @@ export function RacePane({
           </span>
         </div>
 
-        <SpentCounter usd={state.spentUsd} counting={state.spentUsd > 0} />
+        <SpentCounter
+          usd={state.spentUsd}
+          counting={state.spentUsd > 0 && Boolean(state.paymentTxUrl)}
+          paymentTxUrl={!accent ? state.paymentTxUrl : null}
+        />
 
         <div className="pane__tags">
           <span className="label">STANDING</span>
@@ -142,6 +148,20 @@ export function RacePane({
                 ) : (
                   <span className="label">settles on checkout day</span>
                 )}
+              </p>
+            ) : null}
+
+            {/* Bot lane: the pay-per-query transfer is the Hedera beat here. */}
+            {!accent && state.paymentTxUrl ? (
+              <p className="pane__settle partner">
+                <HederaMark size={13} />
+                <a
+                  href={state.paymentTxUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  paid 0.01 hbar for this search · hashscan
+                </a>
               </p>
             ) : null}
           </>

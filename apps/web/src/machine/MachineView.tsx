@@ -437,18 +437,23 @@ export function MachineView({
                   {
                     k: "spentUsd",
                     v:
-                      lane.spentUsd > 0
+                      lane.spentUsd > 0 && lane.paymentTxUrl
                         ? `$${lane.spentUsd.toFixed(2)}`
-                        : "ledger unset / soft local",
-                    d: "x-bookerbob-spent-usd from the gateway",
-                    accent: lane.spentUsd > 0,
+                        : "no settle receipt",
+                    d: "x-bookerbob-spent-usd only when PAYMENT-RESPONSE has a tx",
+                    accent: Boolean(lane.paymentTxUrl),
+                  },
+                  {
+                    k: "paymentTx",
+                    v: lane.paymentTxUrl ?? "missing",
+                    d: "HashScan link from x402 settle — not a client fake",
+                    accent: Boolean(lane.paymentTxUrl),
                   },
                 ]}
               />
               <p className="frame__note">
-                a cent, and then the same cent again on the next question. nobody
-                is answerable, so the money is the only thing standing behind the
-                request.
+                a real hedera testnet transfer per query. without a hashscan
+                receipt the lane does not claim it paid.
               </p>
             </Frame>
           )}
