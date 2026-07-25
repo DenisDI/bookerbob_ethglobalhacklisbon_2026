@@ -104,13 +104,18 @@ export const env = {
   })() as ReadonlyArray<"selfie" | "proof_of_human" | "passport" | "mnc">,
 
   /**
-   * staging drives the browser simulator, which is Phase A: a check that needs no
-   * phone. Anything unrecognised falls back to staging rather than quietly
-   * pointing a rehearsal at production.
+   * production, because that is what our Portal app is. Measured rather than
+   * assumed: `POST developer.world.org/api/v1/precheck/{app_id}` answers
+   * `"is_staging": false` for app_6e50c804. Defaulting to staging sent every real
+   * World App to a bridge our app does not live on, and the browser simulator hid
+   * it completely, because the simulator itself lives in staging.
+   *
+   * The phoneless path is still one request away: /world-id/context?env=staging,
+   * which the UI offers as "no world app? use the simulator".
    */
   worldEnvironment: (() => {
-    const v = str("LISBON2026_WORLD_ENVIRONMENT", "staging");
-    return v === "production" || v === "sandbox" ? v : "staging";
+    const v = str("LISBON2026_WORLD_ENVIRONMENT", "production");
+    return v === "staging" || v === "sandbox" ? v : "production";
   })() as "production" | "staging" | "sandbox",
 
   /** Overridable so a test can point at a server it controls. */

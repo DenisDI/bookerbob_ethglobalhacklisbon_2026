@@ -191,6 +191,81 @@ the screen names whichever one actually ran.
 - surface the requested credential in the widget's own copy, so an integrator
   sees "Selfie Check" or "Orb" before a real user does.
 
+## 10. `credential_unavailable` is rendered to the user as "Something went wrong"
+
+Chased with a real phone for an evening, and the answer was one word the user was
+never shown.
+
+A real World App connected to our app happily, said "Congratulations! You've
+successfully connected your World ID to Booker Bob", and then the browser widget
+showed:
+
+```
+Something went wrong
+We couldn't complete your request. Please try again.
+```
+
+No code, no category, nothing in our gateway logs, because the proof never
+reached us. Only after attaching a debugger to the page did the real answer
+appear in `onError`:
+
+```
+credential_unavailable
+```
+
+The person simply holds neither credential we asked for: no Selfie Check
+enrolment and no orb. That is not an error, it is an ordinary state, and it has
+an obvious next action for the user: set up Selfie Check in World App. Instead
+both the phone and the browser implied something had broken, and we spent the
+evening testing environments and protocol versions that were never the problem.
+
+**Asks:**
+- render `credential_unavailable` as its own screen with the enrolment path, not
+  as the generic failure. It is the single most likely outcome for any new
+  integrator's first real test;
+- say in `onError` docs which codes are user states rather than faults, so an
+  integrator can copy the distinction into their own UI;
+- the earlier "Humans Only, visit an Orb" screen was the same condition for the
+  orb credential and it was far clearer. Selfie deserves the same treatment.
+
+## 11. An integrator can self-diagnose through an endpoint that is not in the 4.0 docs
+
+We spent an evening guessing at environments and protocol versions with a person
+standing over a phone, and the answer was one unauthenticated POST away:
+
+```
+POST https://developer.world.org/api/v1/precheck/{app_id}
+{"action":"<action>","external_nullifier":"","nullifier_hash":""}
+
+{"name":"Booker Bob","is_staging":false,"is_verified":false,
+ "enable_face_check":true,
+ "action":{"action":"bookerbob-terms","max_verifications":1,"status":"active"},
+ "can_user_verify":"yes"}
+```
+
+Two facts we could not otherwise see. `is_staging: false` told us our app is a
+production app, so the `environment: "staging"` we had been sending pointed every
+real World App at a bridge our app does not live on, and the browser simulator hid
+it because the simulator itself lives in staging. And `max_verifications: 1` told
+us that every action, including ones the Portal auto-creates on first use, allows
+one verification per person forever, which quietly poisons every repeat during
+debugging and would burn a judge's single attempt on stage.
+
+**Asks:**
+- put this endpoint in the 4.0 docs as the first debugging step. It answers "is my
+  app configured the way I think" in one call, and nothing else does;
+- make the environment mismatch loud. A staging request against a production app
+  should say so, rather than connecting, congratulating the user, and then failing
+  with a generic error in the browser;
+- default `max_verifications` to unlimited for auto-created actions, or say in the
+  Portal UI that one is the default. One is a surprising default for a value that
+  can never be reset per person.
+
+Also worth reconciling: `docs.world.org/world-id/idkit/verification-flows` says
+"if the user lacks the requested credential, World ID walks them through
+enrollment first". What we observed was `credential_unavailable` with no
+enrollment offered. Whichever is right, the other one is misleading.
+
 ## What we shipped against this
 
 `apps/gateway/src/world.ts`: verification behind a `CredentialVerifier`

@@ -21,7 +21,15 @@ export function worldIdContextHandler(c: Context) {
     return c.json({ error: "world_id_unconfigured" }, 503);
   }
 
-  return c.json(worldIdConfig());
+  // Two audiences stand at a demo table: somebody holding a World App, and
+  // somebody holding nothing. They need different environments, so the browser
+  // may ask for one rather than the server picking for everybody. Anything
+  // unrecognised falls through to the configured default.
+  const asked = c.req.query("env")?.trim();
+  const environment =
+    asked === "production" || asked === "staging" || asked === "sandbox" ? asked : undefined;
+
+  return c.json(worldIdConfig(Date.now, environment));
 }
 
 /**
@@ -46,6 +54,23 @@ function withinVerifyRate(caller: string, now = Date.now()): boolean {
   return seen.count <= VERIFY_PER_MINUTE;
 }
 
+export type VerifyReason =
+  /** The proof carried no credential this gateway accepts. */
+  | "credential_missing"
+  /** The Portal looked and said no. */
+  | "portal_refused"
+  /** The proof was for another action, or its context had expired. */
+  | "stale"
+  /** We could not reach the Portal at all. */
+  | "unreachable";
+
+export function reasonFor(detail: string): VerifyReason {
+  if (/no .* response in the proof/.test(detail)) return "credential_missing";
+  if (/action|expire|too old/i.test(detail)) return "stale";
+  if (/portal \d|portal said no/.test(detail)) return "portal_refused";
+  return "unreachable";
+}
+
 export async function worldIdVerifyHandler(c: Context) {
   if (!worldIdReady()) {
     return c.json({ error: "world_id_unconfigured" }, 503);
@@ -64,10 +89,12 @@ export async function worldIdVerifyHandler(c: Context) {
 
   const result = await verifyWithPortal(payload);
   if (!result.ok) {
-    // Logged in full, returned as one word. Same rule as a rejected credential:
-    // which check failed is operator information.
+    // The full sentence is logged; a category comes back. The line between the
+    // two is whether it helps forge the next attempt: "your proof did not
+    // verify" does not, and a person standing at a demo needs to know which of
+    // these four things happened rather than reading "something went wrong".
     console.warn(`world id proof rejected: ${result.detail}`);
-    return c.json({ error: "proof_rejected" }, 400);
+    return c.json({ error: "proof_rejected", reason: reasonFor(result.detail) }, 400);
   }
 
   // The nullifier stays on this side. What the browser gets back says only that

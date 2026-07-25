@@ -130,3 +130,51 @@ Measured after the change: the simulator run passes end to end in 23.5s and the
 screen reads "personhood proved by proof of human", which is the truth in that
 environment. What a real World App now offers is the one thing only a phone can
 confirm.
+
+## What a real phone actually said
+
+After the orb wall came down, a real World App still failed, and the browser
+would only say "Something went wrong". The gateway log was empty, which was the
+useful clue: no proof ever reached us, so nothing on our side had refused it.
+
+Attaching a debugger to the page produced the one word that mattered:
+`credential_unavailable`. The person holds neither credential, no Selfie Check
+enrolment and no orb, which is an ordinary state with an obvious next step and
+not a fault. The screen now says so, and both FEEDBACK docs carry it as the
+single most likely outcome of any integrator's first real test.
+
+Consequences worth stating plainly. The phoneless path is the reliable one for a
+stage: the staging simulator holds proof_of_human and passes in about 23 seconds.
+A judge with a World App passes only if they have already enrolled Selfie Check
+or been to an Orb.
+
+## Diagnosed without the phone
+
+Three failed attempts on a real World App, each answered with "Something went
+wrong", and asking the user to retry was the wrong move. The Portal answers
+directly:
+
+```
+POST developer.world.org/api/v1/precheck/{app_id}
+-> {"is_staging": false, "is_verified": false, "enable_face_check": true,
+    "action": {"max_verifications": 1, "status": "active"}, "can_user_verify": "yes"}
+```
+
+`is_staging: false` means our app is production while we were sending
+`environment: "staging"`, so every real phone was pointed at a bridge our app does
+not live on. The simulator hid this completely, because the simulator lives in
+staging: the path that worked was the path that could not reveal the bug.
+
+`max_verifications: 1` means each person may verify an action once, ever. Every
+action the Portal auto-creates carries it. That poisons repeated debugging and
+would burn a judge's only attempt.
+
+The default is production now, and the phoneless path is offered in the step
+itself as "no world app? use the simulator", which loads
+`/world-id/context?env=staging`. Both are labelled for what they are. Measured
+after the change: the simulator path completes in 29s and reads "personhood
+proved by proof of human".
+
+One thing stays open and only a human can close it: whether a World ID holds a
+Selfie Check credential at all, which is not the same as having Face Auth turned
+on in World App.

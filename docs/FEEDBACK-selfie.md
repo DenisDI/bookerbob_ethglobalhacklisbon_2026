@@ -168,6 +168,26 @@ The fix is a guard, not cleverness: no key, no sessions, and the tests now cover
 an unconfigured gateway explicitly rather than skipping when keys are missing. A
 suite that goes green because it skipped is worse than a red one.
 
+## 7. The first real phone said `credential_unavailable`, and the screen said nothing
+
+Measured on a real World App, after the orb wall was fixed: the phone connects,
+congratulates the user, and the browser shows the generic failure. Our gateway
+log stayed empty because no proof was ever sent, and the code only appeared with
+a debugger attached to the page.
+
+The person holds neither credential: no Selfie Check enrolment, no orb. So the
+honest sentence on our screen is now the enrolment path, not an apology:
+
+```
+this world id has no selfie check or orb credential yet. set one up in world
+app, or use the simulator
+```
+
+It also means the phoneless path is the one that works on a stage today: the
+staging simulator holds proof_of_human and passes in seconds. A judge with a
+World App passes only if they have already enrolled Selfie Check or been to an
+Orb.
+
 ## What we shipped against this
 
 `apps/gateway/src/world-id.ts` and `apps/gateway/src/routes/world-id.ts`: request

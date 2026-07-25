@@ -62,3 +62,21 @@
     margin: 0.75rem 1rem 0;
   }
 }
+
+/* Secondary by weight, not by honesty: this is the path for a person without a
+ * World App, and it works. */
+.selfie__alt {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-muted, #767c90);
+  font: inherit;
+  font-size: 0.72rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.selfie__alt:hover {
+  color: var(--color-ink, #d8dae4);
+}

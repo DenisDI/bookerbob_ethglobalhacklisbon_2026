@@ -73,7 +73,10 @@ export function worldIdReady(): boolean {
  * two timestamps. Signing on the client was the one thing World's own docs put in
  * bold, and it is the sort of shortcut that looks harmless in a demo.
  */
-export function worldIdConfig(now: () => number = Date.now): WorldIdConfig {
+export function worldIdConfig(
+  now: () => number = Date.now,
+  environment: WorldIdConfig["environment"] = env.worldEnvironment,
+): WorldIdConfig {
   if (!worldIdReady()) throw new Error("world id is not configured");
 
   const signed = signRequest({
@@ -87,7 +90,7 @@ export function worldIdConfig(now: () => number = Date.now): WorldIdConfig {
     rpId: env.worldRpId,
     action: env.worldAction,
     credentials: env.worldCredentials,
-    environment: env.worldEnvironment,
+    environment,
     rpContext: {
       rp_id: env.worldRpId,
       nonce: signed.nonce,

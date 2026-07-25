@@ -41,6 +41,24 @@ type WorldIdConfig = {
   rpContext: RpContext;
 };
 
+/**
+ * Said in words, because a code on a screen is not an explanation.
+ *
+ * The first entry is the one that cost an evening. A real World App answers
+ * `credential_unavailable` when the person holds neither credential we accept,
+ * and the widget renders that as "Something went wrong", which sends an
+ * integrator hunting through environments and protocol versions. It is not a
+ * fault at all: it means this World ID has nothing to show yet.
+ */
+const FAILURE_COPY: Record<string, string> = {
+  credential_unavailable:
+    "this world id has no selfie check or orb credential yet. set one up in world app, or use the simulator",
+  credential_missing: "the proof carried no credential this desk accepts",
+  portal_refused: "world could not verify that proof",
+  stale: "the request went stale, press the button again",
+  unreachable: "world did not answer, try again",
+};
+
 type Phase =
   /** The gateway has no Portal keys, so the step is honestly not offered. */
   | { name: "unconfigured" }
@@ -54,13 +72,15 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
   const [phase, setPhase] = useState<Phase>({ name: "loading" });
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState("");
+  const [failure, setFailure] = useState("");
 
   // A fresh request context every time the step is offered, because the one the
   // gateway signs lives five minutes.
-  const loadConfig = useCallback(async () => {
+  const loadConfig = useCallback(async (environment?: string) => {
     setPhase({ name: "loading" });
     try {
-      const res = await fetch(`${GATEWAY}/world-id/context`);
+      const query = environment ? `?env=${environment}` : "";
+      const res = await fetch(`${GATEWAY}/world-id/context${query}`);
       if (!res.ok) throw new Error(String(res.status));
       setPhase({ name: "ready", config: (await res.json()) as WorldIdConfig });
     } catch {
@@ -105,8 +125,12 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
 
     if (!res.ok) {
       // Thrown on purpose: the widget shows its own failure state, and a proof
-      // the Portal refused must not look like one it accepted.
-      throw new Error("the check did not verify");
+      // the Portal refused must not look like one it accepted. The category
+      // travels with it so the screen can say which of four things happened
+      // instead of leaving a person at a demo with "something went wrong".
+      const { reason } = (await res.json().catch(() => ({}))) as { reason?: string };
+      setFailure(reason ?? "unreachable");
+      throw new Error(reason ?? "the check did not verify");
     }
 
     const { token, credential, expiresInSeconds } = (await res.json()) as {
@@ -153,6 +177,19 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
         {phase.name === "checking" ? "checking" : "prove you are a person"}
       </button>
 
+      {/* Two people stand at a demo table: one holding a World App, one holding
+        * nothing. The simulator is not a lesser path, it is the path for the
+        * second person, and saying so plainly beats a stuck button. */}
+      {config?.environment !== "staging" ? (
+        <button
+          type="button"
+          className="selfie__alt"
+          onClick={() => void loadConfig("staging")}
+        >
+          no world app? use the simulator
+        </button>
+      ) : null}
+
       {phase.name === "failed" ? (
         <p className="selfie__reason reason">{phase.reason}</p>
       ) : (
@@ -169,6 +206,11 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
           action={config.action}
           rp_context={config.rpContext}
           environment={config.environment}
+          // Measured, not guessed: turning this on sent IDKit to
+          // bridge.worldcoin.org, the protocol 3.0 bridge, where Selfie Check
+          // does not exist as a credential at all. The phone then answered
+          // credential_unavailable for a person who had enrolled selfie three
+          // times. Legacy proofs and Selfie Check are mutually exclusive.
           allow_legacy_proofs={false}
           constraints={
             config.credentials.length > 1
@@ -188,7 +230,12 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
               config,
               // The code is World's own, quoted rather than paraphrased, so a
               // FEEDBACK note can be written from what the user actually saw.
-              reason: `the check did not finish: ${code}`,
+              // Our own category first when we have one, then the widget's code,
+              // then the code itself rather than a shrug.
+              reason:
+                FAILURE_COPY[failure] ??
+                FAILURE_COPY[code] ??
+                `the check did not finish: ${code}`,
             })
           }
         />
