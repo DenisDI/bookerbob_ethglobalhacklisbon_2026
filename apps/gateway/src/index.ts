@@ -38,7 +38,21 @@ import {
 
 const app = new Hono();
 
-app.use("*", cors());
+// The payment headers have to survive a cross-origin read, or the dev setup
+// (web on 5173, gateway on 3000) shows a receipt with a zero counter beside it:
+// a browser hides any response header it was not told to expose.
+app.use(
+  "*",
+  cors({
+    origin: "*",
+    exposeHeaders: [
+      "x-bookerbob-spent-usd",
+      "x-bookerbob-spent-payer",
+      "x-bookerbob-payment-tx",
+      "x-bookerbob-payment-tx-url",
+    ],
+  }),
+);
 
 // Ahead of the routes on purpose. specs/01-gateway.md puts credential resolution
 // in front of the x402 paywall so a credentialed request skips metering; keeping

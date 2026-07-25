@@ -43,3 +43,44 @@ test("anything that is not an opt-out still pays", async () => {
     assert.equal(await metered(q), true, `${q} must not read as an opt-out`);
   }
 });
+
+// The receipt and the counter travel together or not at all. They used to live
+// in headers alone, which a proxy can drop and a browser can hide, so a screen
+// could truthfully show a HashScan link beside "$0.00, 0 queries".
+test("payment facts ride in the body next to the offers", async () => {
+  const { withPaymentFacts } = await import("../src/routes/paidOffers.js");
+  const merged = JSON.parse(
+    withPaymentFacts('{"terms":{"tier":"bot"},"offers":[]}', {
+      spentUsd: 0.08,
+      paymentTxId: "0.0.7162784@1785015428.054415548",
+      paymentTxUrl: "https://hashscan.io/testnet/transaction/0.0.7162784-1785015428-054415548",
+      payer: "0.0.9699769",
+    }),
+  );
+
+  assert.equal(merged.terms.tier, "bot", "the offers body is not disturbed");
+  assert.equal(merged.spentUsd, 0.08);
+  assert.match(merged.paymentTxUrl, /hashscan\.io/);
+});
+
+test("a missing receipt stays missing rather than becoming a plausible number", async () => {
+  const { withPaymentFacts } = await import("../src/routes/paidOffers.js");
+  const merged = JSON.parse(
+    withPaymentFacts('{"offers":[]}', {
+      spentUsd: null,
+      paymentTxId: null,
+      paymentTxUrl: null,
+      payer: null,
+    }),
+  );
+  assert.equal(merged.spentUsd, null);
+  assert.equal(merged.paymentTxUrl, null);
+});
+
+test("a body we did not write is passed through untouched", async () => {
+  const { withPaymentFacts } = await import("../src/routes/paidOffers.js");
+  const error = '{"error":"demo_payer_unset"}';
+  const facts = { spentUsd: null, paymentTxId: null, paymentTxUrl: null, payer: null };
+  assert.equal(JSON.parse(withPaymentFacts(error, facts)).error, "demo_payer_unset");
+  assert.equal(withPaymentFacts("not json at all", facts), "not json at all");
+});
