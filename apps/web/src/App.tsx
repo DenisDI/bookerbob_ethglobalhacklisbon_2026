@@ -7,7 +7,7 @@ import { fetchOffers, fetchSpent } from "./api";
 import {
   CITIES,
   DEFAULT_CITY,
-  hotelsForCity,
+  pickHotels,
 } from "./cityCatalog";
 import { HotelFinaleCard } from "./HotelFinaleCard";
 import {
@@ -17,7 +17,6 @@ import {
 } from "./auth";
 import { hasCredential, type CredentialState } from "./credential";
 import { MachineView } from "./machine";
-import { OfferList } from "./OfferList";
 import { OverviewPage } from "./overview";
 import { ParticipantsBand, ParticipantsBandGuest } from "./ParticipantsBand";
 import { RacePane, type PaneState } from "./RacePane";
@@ -131,7 +130,6 @@ export function App() {
   /** Privy-authenticated wallet only — null when disconnected. */
   const [myWallet, setMyWallet] = useState<string | null>(null);
   const [city, setCity] = useState<string>(DEFAULT_CITY);
-  const cityHotels = useMemo(() => hotelsForCity(city), [city]);
   // Read from the URL on first paint so a machine-view link opens on it.
   const [view, setView] = useState<View>(() => readView(window.location.search));
   // Product race uses stand-in until World wires verified.
@@ -202,6 +200,9 @@ export function App() {
         // than on a worse one.
       }
       const baseline = ledgerBaseline.current ?? 0;
+      // Same random five-star draw for both lanes so the race still compares
+      // terms on identical rooms, not two different supplier snapshots.
+      const catalogOffers = pickHotels(city, 5);
 
       const settle = async (
         set: React.Dispatch<React.SetStateAction<PaneState>>,
@@ -220,6 +221,12 @@ export function App() {
             city: city.trim() || undefined,
             accessToken: opts.accessToken,
           });
+          const limit = data.terms.inventory === "basic" ? 3 : 5;
+          const merged = {
+            ...data,
+            offers: catalogOffers.slice(0, limit),
+            matchingCount: catalogOffers.length,
+          };
           set((prev) => {
             const paid =
               !opts.credential &&
@@ -232,7 +239,7 @@ export function App() {
             return {
               ...prev,
               status: "done",
-              data,
+              data: merged,
               error: null,
               spentUsd: paid
                 ? Math.max(0, Number((data.spentUsd! - baseline).toFixed(4)))
@@ -314,6 +321,44 @@ export function App() {
         * the same controls. The pitch above it is not, because the overview now
         * carries the argument and neither of these two surfaces has to repeat it. */}
       <header className={`masthead ${view === "machine" ? "masthead--machine" : ""}`}>
+        <div className="ask ask--start">
+          <form
+            className="ask__prompt"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!running) void run();
+            }}
+          >
+            <label className="ask__said" htmlFor="city">
+              book me a hotel in
+            </label>
+            <select
+              id="city"
+              className="ask__city ask__city--lg"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              aria-label="city"
+            >
+              {CITIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </form>
+          {/* In the human view this is the escape hatch, so it belongs after the
+            * cards it is an alternative to, not before them. In the machine view
+            * there are no cards, so it stays here as the only way in. */}
+          {view === "machine" ? (
+            <AddressBands
+              value={address}
+              onChange={setAddress}
+              onSubmit={(override) => void run(override)}
+              disabled={running}
+              myWallet={myWallet}
+            />
+          ) : null}
+        </div>
         {view === "demo" ? (
           <div className="masthead__lede">
             {/* Short, because this is a tab someone navigated to rather than the
@@ -329,50 +374,6 @@ export function App() {
             </p>
           </div>
         ) : null}
-        <div className="ask ask--end">
-          {/* City select sits on the right of the masthead. The four rooms below
-            * flip from the local catalog the moment the city changes — before
-            * either lane has finished quoting. */}
-          <form
-            className="ask__prompt"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!running) void run();
-            }}
-          >
-            <label className="ask__said" htmlFor="city">
-              book me a hotel in
-            </label>
-            <select
-              id="city"
-              className="ask__city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              aria-label="city"
-            >
-              {CITIES.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </form>
-          <div className="ask__hotels">
-            <OfferList offers={cityHotels} limit={4} />
-          </div>
-          {/* In the human view this is the escape hatch, so it belongs after the
-            * cards it is an alternative to, not before them. In the machine view
-            * there are no cards, so it stays here as the only way in. */}
-          {view === "machine" ? (
-            <AddressBands
-              value={address}
-              onChange={setAddress}
-              onSubmit={(override) => void run(override)}
-              disabled={running}
-              myWallet={myWallet}
-            />
-          ) : null}
-        </div>
       </header>
 
       {view === "demo" ? (

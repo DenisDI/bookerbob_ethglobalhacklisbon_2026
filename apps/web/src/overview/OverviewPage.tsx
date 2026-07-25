@@ -31,7 +31,7 @@ import {
   CITIES,
   DEFAULT_CITY,
   cityLabel,
-  hotelsForCity,
+  pickHotels,
   type CityId,
 } from "../cityCatalog";
 import { ContextFile } from "../ContextFile";
@@ -138,24 +138,15 @@ export function OverviewPage() {
     setPersonhood(true);
   }, []);
 
-  const cityHotels = useMemo(() => hotelsForCity(city), [city]);
+  // Fresh shuffle whenever the city changes — five from a pool of fifteen ★★★★★.
+  const cityHotels = useMemo(() => pickHotels(city, 5), [city]);
 
   return (
     <div className="ov">
       {privyConfigured ? <WalletBridge onChange={onWallet} /> : null}
 
-      <header className="ov__hero ov__hero--split">
-        <div className="ov__herocopy">
-          <p className="kicker">who is behind an agent changes the terms it gets</p>
-          <h1 className="thesis">book a hotel, or let an agent book it for you</h1>
-          <p className="thesis__plain">
-            BookerBob is a hotel booking desk that serves people and ai agents from
-            the same inventory. same rooms, same nightly rate for everyone. what
-            changes is when the money leaves your pocket, and that depends on who is
-            standing behind the booking.
-          </p>
-        </div>
-        <div className="ask ask--end">
+      <header className="ov__hero">
+        <div className="ask ask--start">
           <form
             className="ask__prompt"
             onSubmit={(e) => {
@@ -168,7 +159,7 @@ export function OverviewPage() {
             </label>
             <select
               id="ov-city"
-              className="ask__city"
+              className="ask__city ask__city--lg"
               value={city}
               onChange={(e) => {
                 const next = e.target.value as CityId;
@@ -184,15 +175,20 @@ export function OverviewPage() {
               ))}
             </select>
           </form>
-          <div className="ask__hotels">
-            <OfferList offers={cityHotels} limit={4} />
-          </div>
-          <p className="step__note reason">
-            {data
-              ? `${data.checkin} to ${data.checkout}${data.nights ? `, ${data.nights} nights` : ""}`
-              : `four rooms in ${cityLabel(city)}`}
-          </p>
         </div>
+        <p className="kicker">who is behind an agent changes the terms it gets</p>
+        <h1 className="thesis">book a hotel, or let an agent book it for you</h1>
+        <p className="thesis__plain">
+          BookerBob is a hotel booking desk that serves people and ai agents from
+          the same inventory. same rooms, same nightly rate for everyone. what
+          changes is when the money leaves your pocket, and that depends on who is
+          standing behind the booking.
+        </p>
+        <p className="step__note reason">
+          {data
+            ? `${data.checkin} to ${data.checkout}${data.nights ? `, ${data.nights} nights` : ""}`
+            : `five-star rooms in ${cityLabel(city)}`}
+        </p>
       </header>
 
       {/* Three beats, each carrying the mark of whoever does that piece of work.
@@ -311,16 +307,16 @@ export function OverviewPage() {
         <div className="ov__flowhead">
           <h2 className="ov__h2">rooms in {cityLabel(city)}</h2>
           <p className="ov__flowlede">
-            four rooms for the city you picked
+            five random five-star rooms from the local catalog
             {data?.source === "cached" ? " · terms still from the live desk" : ""}
           </p>
         </div>
 
-        {!data && refreshing ? <OfferSkeleton rows={4} /> : null}
+        {!data && refreshing ? <OfferSkeleton rows={5} /> : null}
 
         <OfferList
           offers={cityHotels}
-          limit={4}
+          limit={5}
           accent={Boolean(data && data.terms.payment !== "prepay_100")}
         />
       </section>
