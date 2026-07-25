@@ -3,30 +3,41 @@
  * Two rules carry the whole look:
  *
  * 1. Colour means accountability. The unbacked pane is drawn in greys only.
- *    Blue appears where a real person stands behind the request, so the palette
- *    itself states the thesis before a word is read.
- * 2. Monospace is for machine facts, sans is for the agent's sentences. Prices,
- *    dates and hold ids are ledger entries; narration is speech.
+ *    The accent appears only where a real person stands behind the request, so
+ *    the palette states the thesis before a word is read. Red is for system
+ *    marks (the recording dot, the seal, a failed payment) and never a lane.
+ * 2. Monospace is for machine facts, proportional is for the agent's sentences.
+ *    Prices, dates and hold ids are ledger entries; narration is speech.
  *
  * System faces only, deliberately: a conference network must never be able to
- * take the typography down mid demo.
+ * take the typography down mid demo. The design was drawn in Archivo and
+ * JetBrains Mono; both token stacks name them first, so dropping self-hosted
+ * woff2 files in later picks them up with no other change. No CDN link, ever.
  */
+
+@import "./tokens.css";
 
 :root {
   color-scheme: dark;
 
-  --canvas: #0a0a0f;
-  --surface: #101017;
-  --line: #23232f;
-  --ink: #f2f3f7;
-  --muted: #767c90;
-  --blue: #3b5bff;
+  /* Mapped onto the design tokens rather than forked, so every rule already
+   * written against these names keeps working. */
+  --canvas: var(--color-canvas);
+  --surface: var(--color-surface-2);
+  --line: var(--color-line);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
 
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  /* #3b5bff is the brand blue and stays on fills and borders. Small type uses
+   * the lifted accent: the brand value fails at 10px in a 720p screen
+   * recording, which is this demo's actual delivery medium. */
+  --blue: var(--color-accent);
+  --blue-fill: #3b5bff;
+
+  --font-sans: var(--font-ui);
 
   --gap: clamp(1rem, 2.4vw, 2rem);
-  --hatch: repeating-linear-gradient(-45deg, #14141c 0 1px, transparent 1px 9px);
+  --hatch: var(--texture-hatch-ghost);
 }
 
 * {
@@ -44,16 +55,153 @@ body {
   background: var(--canvas);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: var(--size-ui-md);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
+
+/* ---------- primitives from the design package ---------- */
 
 .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
+/* Micro-label: a machine fact, so mono, uppercase, wide tracking. */
+.label {
+  font:
+    var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-faint);
+  text-transform: uppercase;
+}
+
+/* The agent talking. Never mono: this is speech, not a record. */
+.speech {
+  font: var(--weight-reg) var(--size-ui-md) / 1.3 var(--font-ui);
+  letter-spacing: -0.004em;
+  color: var(--color-ink);
+}
+
+/* The one fact that decided the terms. */
+.reason {
+  font: var(--weight-reg) var(--size-ui-sm) / 1.3 var(--font-ui);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 7px;
+  border: 1px solid var(--color-line-strong);
+  background: none;
+  color: var(--color-muted);
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+}
+
+.chip--accent {
+  color: var(--color-accent);
+  border-color: var(--color-accent-soft);
+}
+
+.chip--solid {
+  color: var(--color-canvas);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.chip--ash {
+  color: var(--color-canvas);
+  background: var(--color-ash);
+  border-color: var(--color-ash);
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-dot);
+  background: var(--color-accent);
+  flex: none;
+}
+
+.dot--ash {
+  background: var(--color-ash);
+}
+
+.dot--signal {
+  background: var(--color-signal);
+}
+
+.pulse {
+  animation: bb-pulse 1.2s steps(1) infinite;
+}
+
+.badge {
+  padding: 4px 5px;
+  border: 1px solid var(--color-line-strong);
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+}
+
+.partner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.partner svg {
+  display: block;
+  flex: none;
+}
+
+@keyframes bb-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes bb-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes bb-skel {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes bb-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.22;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* Links stay on the accent. The package stylesheet paints them
+ * --color-signal, which contradicts its own rule that red is for system marks
+ * only, so the rule wins over the sheet. */
 :where(a) {
   color: var(--blue);
   text-decoration-thickness: 1px;
@@ -897,14 +1045,13 @@ body {
   }
 }
 
+/* Everything, not a list of selectors: new animations arrive with the design
+ * layer and none of them may sneak past this. End states are shown instead. */
 @media (prefers-reduced-motion: reduce) {
-  .rail__held,
-  .rail__settle,
-  .feed__line {
-    animation: none;
-  }
-
-  .ask__run {
-    transition: none;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
