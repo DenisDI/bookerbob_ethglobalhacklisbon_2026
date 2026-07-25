@@ -128,7 +128,10 @@ test("the portal is asked before anything is believed", { skip: !configured }, a
 
   assert.equal(result.ok, true);
   assert.equal(result.ok && result.nullifier, NULLIFIER);
-  assert.match(calls[0]!.url, new RegExp(`/api/v4/verify/${env.worldRpId}$`));
+  // App id, the way the Portal's own snippet writes it. Both ids are accepted
+  // today, so this assertion is about staying canonical rather than about a
+  // behaviour we observed differing.
+  assert.match(calls[0]!.url, new RegExp(`/api/v4/verify/${env.worldAppId}$`));
   assert.deepEqual(calls[0]!.body, payload, "the proof is forwarded as-is, never rewritten");
 });
 

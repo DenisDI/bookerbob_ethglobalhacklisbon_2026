@@ -266,7 +266,30 @@ Also worth reconciling: `docs.world.org/world-id/idkit/verification-flows` says
 enrollment first". What we observed was `credential_unavailable` with no
 enrollment offered. Whichever is right, the other one is misleading.
 
-## 12. Selfie Check is documented, requestable, and not yet issuable to anyone
+## 12. Selfie Check on the web fails for a person without the orb, confirmed by the World team
+
+The strongest finding of the integration, and one we could not have closed
+alone: it was reproduced with the World team at their booth, on our own build.
+
+- A World ID **with** the orb credential completes Selfie Check on the web. The
+  team's own accounts did.
+- A World ID **without** the orb completes Selfie Check **in World App** and
+  fails on the web. That is our teammate's account, and it is the case that had
+  us chasing environments, protocol versions and Portal settings for an evening.
+
+Same relying party, same request, same code path in our gateway. The difference
+is only in the person's credentials, and the failure surfaces as
+`credential_unavailable` rendered as "Something went wrong". The World team
+called it a bug on their side.
+
+Two things follow that are worth fixing regardless of that bug:
+
+- the orb-less case is the majority case at any hackathon, so whatever the web
+  path does for it should not be the generic failure dialog;
+- an integrator has no way to tell "this person cannot do it" from "this build
+  cannot do it". A distinct code would have saved the evening.
+
+## 13. The consumer app and the developer surface disagree about Selfie Check
 
 This is the finding that ends the thread, and it is the one we would most like
 back as an hour of our lives.

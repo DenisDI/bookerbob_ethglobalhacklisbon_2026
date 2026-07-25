@@ -109,14 +109,17 @@ export const env = {
   })() as ReadonlyArray<"selfie" | "proof_of_human" | "passport" | "mnc">,
 
   /**
-   * production, because that is what our Portal app is. Measured rather than
-   * assumed: `POST developer.world.org/api/v1/precheck/{app_id}` answers
-   * `"is_staging": false` for app_6e50c804. Defaulting to staging sent every real
-   * World App to a bridge our app does not live on, and the browser simulator hid
-   * it completely, because the simulator itself lives in staging.
+   * production, confirmed with the World team on site.
    *
-   * The phoneless path is still one request away: /world-id/context?env=staging,
-   * which the UI offers as "no world app? use the simulator".
+   * They reproduced what we were seeing and named it their bug: a person whose
+   * World ID is orb verified completes Selfie Check on the web, and a person
+   * without the orb completes it in World App but not on the web. Our integration
+   * is the same code in both cases, so there is nothing on this side to fix and
+   * nothing to route around.
+   *
+   * The simulator stays offered in the step for anybody who hits that bug,
+   * /world-id/context?env=staging, labelled as a simulator, because that is what
+   * it is. See docs/FEEDBACK-world.md.
    */
   worldEnvironment: (() => {
     const v = str("LISBON2026_WORLD_ENVIRONMENT", "production");

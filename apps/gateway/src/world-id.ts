@@ -13,7 +13,7 @@
 //   signRequest({ signingKeyHex, action, ttl }) -> { sig, nonce, createdAt, expiresAt }
 //   RpContext                                    = { rp_id, nonce, created_at, expires_at, signature }
 //   IDKit result (v4)                            = { responses: [{ identifier, nullifier, issuer_schema_id, ... }] }
-//   POST {portal}/api/v4/verify/{rp_id}          <- that result, forwarded as-is
+//   POST {portal}/api/v4/verify/{app_id}         <- that result, forwarded as-is
 //
 // THE RULE, same as world.ts: the browser cannot assert a credential. It can only
 // carry a proof to us, and only the Portal's answer turns it into one.
@@ -222,7 +222,11 @@ export async function verifyWithPortal(
   }
 
   try {
-    const res = await fetchImpl(`${env.worldPortalUrl}/api/v4/verify/${env.worldRpId}`, {
+    // App id in the path, which is what the Portal's own "Verify Proof (Cloud)"
+    // snippet shows. Both ids are accepted, byte for byte the same answer on a
+    // forged proof, but canonical beats works-by-accident. The RP signing key is
+    // not involved here at all: cloud verify checks the proof itself.
+    const res = await fetchImpl(`${env.worldPortalUrl}/api/v4/verify/${env.worldAppId}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       // Forwarded as-is. The Portal defines this shape and any field we

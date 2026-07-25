@@ -65,7 +65,7 @@ type Phase =
   | { name: "loading" }
   | { name: "ready"; config: WorldIdConfig }
   | { name: "checking"; config: WorldIdConfig }
-  | { name: "verified"; credential: string }
+  | { name: "verified"; credential: string; simulated: boolean }
   | { name: "failed"; config: WorldIdConfig | null; reason: string };
 
 export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
@@ -158,8 +158,9 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
   if (phase.name === "verified") {
     return (
       <p className="selfie selfie--done reason">
-        personhood proved by {phase.credential.replace(/_/g, " ")}. this browser now
-        asks as a person, not as a stranger
+        personhood proved by {phase.credential.replace(/_/g, " ")}
+        {phase.simulated ? " in the world simulator" : ""}. this browser now asks
+        as a person, not as a stranger
       </p>
     );
   }
@@ -177,16 +178,20 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
         {phase.name === "checking" ? "checking" : "prove you are a person"}
       </button>
 
-      {/* Two people stand at a demo table: one holding a World App, one holding
-        * nothing. The simulator is not a lesser path, it is the path for the
-        * second person, and saying so plainly beats a stuck button. */}
-      {config?.environment !== "staging" ? (
+      {/* Both paths are offered and both are named. The simulator is the one a
+        * person can actually walk today, because Face credential is still
+        * "Coming soon" in the production World App, so calling it anything other
+        * than a simulator would be a lie. The phone path stays for anybody whose
+        * World ID is orb verified. */}
+      {config ? (
         <button
           type="button"
           className="selfie__alt"
-          onClick={() => void loadConfig("staging")}
+          onClick={() => void loadConfig(config.environment === "staging" ? "production" : "staging")}
         >
-          no world app? use the simulator
+          {config.environment === "staging"
+            ? "orb verified world app? verify on your phone"
+            : "no orb? verify via the simulator"}
         </button>
       ) : null}
 
@@ -194,9 +199,11 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
         <p className="selfie__reason reason">{phase.reason}</p>
       ) : (
         <p className="selfie__reason reason">
-          {config
-            ? `world id, ${config.credentials.map((c) => c.replace(/_/g, " ")).join(" or ")} (${config.environment})`
-            : "world id"}
+          {!config
+            ? "world id"
+            : config.environment === "staging"
+              ? "world id, verified via the simulator"
+              : `world id, ${config.credentials.map((c) => c.replace(/_/g, " ")).join(" or ")}`}
         </p>
       )}
 
@@ -221,7 +228,11 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
           onOpenChange={setOpen}
           handleVerify={handleVerify}
           onSuccess={() => {
-            setPhase({ name: "verified", credential: done || config.credentials[0]! });
+            setPhase({
+              name: "verified",
+              credential: done || config.credentials[0]!,
+              simulated: config.environment !== "production",
+            });
             onVerified?.();
           }}
           onError={(code) =>
