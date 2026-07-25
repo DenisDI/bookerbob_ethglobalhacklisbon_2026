@@ -103,6 +103,10 @@ query Dex($a: Bytes!) {
 GRAPH_API_KEY=... npx context-bands-mcp     # stdio
 ```
 
+Inside this repo the same key may be exported as `LISBON2026_GRAPH_API_KEY`,
+which takes precedence. `GRAPH_API_KEY` stays the name for anyone reusing the
+package: a reusable server should not demand a project-specific variable.
+
 In `claude_desktop_config.json`:
 
 ```json

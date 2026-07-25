@@ -3,8 +3,13 @@
 // Today this pays with a Studio key. The keyless route is the stronger story
 // (pay per query in USDC on Base mainnet, no account anywhere), so the payment
 // choice is an explicit seam rather than an if-statement buried in a fetch:
-// when GRAPH_X402_KEY is funded, a second Payer implementation drops in here
+// when the Base wallet is funded, a second Payer implementation drops in here
 // and nothing else changes.
+//
+// Key lookup takes GRAPH_API_KEY, the name anyone reusing this package would
+// export, and prefers LISBON2026_GRAPH_API_KEY when set so it also obeys this
+// repo's secret-naming convention. A reusable package must not demand a
+// project-specific variable name.
 
 export interface GraphError extends Error {
   subgraphId: string;
@@ -26,9 +31,17 @@ export function studioKeyPayer(apiKey: string): Payer {
   };
 }
 
+export const API_KEY_VARS = [
+  "LISBON2026_GRAPH_API_KEY",
+  "GRAPH_API_KEY",
+] as const;
+
 export function payerFromEnv(): Payer | null {
-  const key = process.env.GRAPH_API_KEY?.trim();
-  return key ? studioKeyPayer(key) : null;
+  for (const name of API_KEY_VARS) {
+    const key = process.env[name]?.trim();
+    if (key) return studioKeyPayer(key);
+  }
+  return null;
 }
 
 const TIMEOUT_MS = 12_000;

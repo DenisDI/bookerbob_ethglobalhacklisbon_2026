@@ -5,7 +5,7 @@
 
 import { computeBands } from "./bands.js";
 import { failedFreshness, readFreshness } from "./freshness.js";
-import { type Payer, payerFromEnv, query } from "./graph.js";
+import { API_KEY_VARS, type Payer, payerFromEnv, query } from "./graph.js";
 import { loadRegistry } from "./registry.js";
 import { TEMPLATES } from "./templates/index.js";
 import type { BandsResult, SourceResult, SubgraphManifest } from "./types.js";
@@ -126,7 +126,7 @@ export async function getContextBands(
   const payer = options.payer ?? payerFromEnv();
   if (!payer) {
     throw new NoPayerError(
-      "no way to pay for queries: set GRAPH_API_KEY (or fund the keyless route)",
+      `no way to pay for queries: set one of ${API_KEY_VARS.join(" or ")}`,
     );
   }
 
