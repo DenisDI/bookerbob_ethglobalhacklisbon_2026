@@ -13,6 +13,12 @@ export type FetchOffersInput = {
   credential: boolean;
   /** Consented wallet / ENS for Graph bands. */
   address?: string;
+  /**
+   * Where to look. The live booker honours this; the captured snapshot answers
+   * with the city it really quoted, so the screen reads `city` back off the
+   * response rather than assuming the ask was met.
+   */
+  city?: string;
   /** Debug only — synthesises signals; do not use on the stage race. */
   debugTier?: Tier;
 };
@@ -27,6 +33,7 @@ export async function fetchOffers(
   const params = new URLSearchParams();
   params.set("credential", input.credential ? "1" : "0");
   if (input.address?.trim()) params.set("address", input.address.trim());
+  if (input.city?.trim()) params.set("city", input.city.trim());
   if (input.debugTier) params.set("tier", input.debugTier);
 
   const res = await fetch(`${GATEWAY}/offers?${params}`);

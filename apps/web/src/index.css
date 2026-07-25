@@ -286,21 +286,49 @@ body {
   color: var(--color-muted);
 }
 
+/* Stacked, because these two lines are one form read top to bottom: what to book,
+ * then whose standing backs the asking. */
 .ask {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
-  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .ask__prompt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
   margin: 0;
   padding: 0.55rem 0.85rem;
   border: 1px solid var(--color-line);
+}
+
+.ask__said {
   font-family: var(--font-mono);
   font-size: var(--size-ui-sm);
   color: var(--color-faint);
   white-space: nowrap;
+}
+
+/* Underlined rather than boxed, matching the address field: both are places the
+ * guest writes, and they should look like the same kind of place. */
+.ask__city {
+  min-width: 0;
+  padding: 2px 1px;
+  border: 0;
+  border-bottom: 1px solid var(--color-accent-soft);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--size-ui-sm);
+}
+
+.ask__city:focus-visible {
+  outline: 0;
+  border-bottom-color: var(--color-accent);
 }
 
 /* ---------- who is backing this ---------- */
@@ -406,28 +434,49 @@ body {
   flex: 1;
 }
 
-/* The prompt, said once, identically to both agents. */
-.prompt-band {
-  position: relative;
-  height: 104px;
+/* The prompt, said once, identically to both agents.
+ *
+ * Deliberately not a hero. The two answers below are the argument; the request is
+ * the setup, and at hero size it took the emphasis and shouted a city nobody
+ * chose. Lowercase, one confident size, no fringing. */
+.saidonce {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-line);
   background: var(--color-surface-3);
 }
 
-.prompt-band__text {
+.saidonce__cap {
   margin: 0;
-  font: var(--weight-black) clamp(28px, 6.4vw, var(--size-ui-hero)) / 1 var(--font-ui);
+}
+
+/* Lowercased in the styling, not in the data: the supplier's "Lisbon" is what we
+ * keep and send on, and this is only the voice the sentence is said in. */
+.saidonce__text {
+  margin: 0;
+  font: var(--weight-semi) clamp(22px, 3.2vw, 34px) / 1.1 var(--font-ui);
   letter-spacing: var(--tracking-hero);
-  text-transform: uppercase;
   color: var(--color-ink-bright);
-  white-space: nowrap;
-  text-shadow:
-    -2px 0 rgba(232, 17, 45, 0.6),
-    2px 0 rgba(154, 166, 255, 0.55);
+  text-transform: lowercase;
+}
+
+/* The city is the part that answers to a field, so it is the part that is lit. */
+.saidonce__city {
+  color: var(--color-accent);
+}
+
+.saidonce__facts {
+  margin: 0;
+  font-size: var(--size-mono-fact);
+  color: var(--color-muted);
+}
+
+/* Asked one city, quoted another. A real state, said plainly, never an error. */
+.saidonce__swap {
+  max-width: 74ch;
+  color: var(--color-faint);
 }
 
 .race {
@@ -1378,10 +1427,6 @@ body {
   .finale__photo {
     flex: none;
     height: 180px;
-  }
-
-  .prompt-band {
-    height: 72px;
   }
 }
 

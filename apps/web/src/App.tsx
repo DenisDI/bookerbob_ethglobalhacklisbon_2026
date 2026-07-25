@@ -13,9 +13,15 @@ import {
 import { hasCredential, type CredentialState } from "./credential";
 import { ParticipantsBand, ParticipantsBandGuest } from "./ParticipantsBand";
 import { RacePane, type PaneState } from "./RacePane";
+import { SaidOnce } from "./SaidOnce";
 import { PANE_LABEL } from "./terms-copy";
 
-const PROMPT = "book me a hotel in lisbon";
+/**
+ * Where the demo starts, not where it is stuck. The field is editable and the
+ * city travels to the gateway; what comes back is read off the response, so the
+ * screen never claims a city the desk did not actually quote.
+ */
+const DEFAULT_CITY = "lisbon";
 
 /** Metered queries cost a cent each; only the unbacked agent pays them. */
 const QUERY_PRICE_USD = 0.01;
@@ -74,6 +80,7 @@ export function App() {
   const [bot, setBot] = useState<PaneState>(IDLE);
   const [backed, setBacked] = useState<PaneState>(IDLE);
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState(DEFAULT_CITY);
   // Product race uses stand-in until World wires verified.
   // The server owns this. The browser may ask with a stand-in, but only the
   // gateway can say the credential was verified by World, because only it saw
@@ -120,9 +127,11 @@ export function App() {
       ) => {
         try {
           // No debugTier — final tier comes only from decide() + live Graph.
+          // Both lanes get the same city: one prompt is the whole premise.
           const data = await fetchOffers({
             credential: opts.credential,
             address: opts.address,
+            city: city.trim() || undefined,
           });
           set((prev) => ({ ...prev, status: "done", data, error: null }));
         } catch (err) {
@@ -142,7 +151,7 @@ export function App() {
         }),
       ]);
     },
-    [address, credential],
+    [address, city, credential],
   );
 
   const autorun = useRef(false);
@@ -173,7 +182,29 @@ export function App() {
           </p>
         </div>
         <div className="ask">
-          <p className="ask__prompt">{PROMPT}</p>
+          {/* The request itself, and it is a real field: the city travels to the
+            * desk. Enter runs the race, the same as the button below. */}
+          <form
+            className="ask__prompt"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!running) void run();
+            }}
+          >
+            <label className="ask__said" htmlFor="city">
+              book me a hotel in
+            </label>
+            <input
+              id="city"
+              className="ask__city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="a city"
+              spellCheck={false}
+              autoComplete="off"
+              size={Math.max(6, city.length + 1)}
+            />
+          </form>
           <AddressBands
             value={address}
             onChange={setAddress}
@@ -205,9 +236,7 @@ export function App() {
         <span className="racehead__rec label">rec</span>
       </div>
 
-      <div className="prompt-band">
-        <p className="prompt-band__text">{PROMPT}</p>
-      </div>
+      <SaidOnce asked={city} answered={backed.data ?? bot.data} />
 
       <div className="race">
         <RacePane
