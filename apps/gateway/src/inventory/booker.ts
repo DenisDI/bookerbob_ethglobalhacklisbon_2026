@@ -40,7 +40,7 @@ export class BookerError extends Error {
 
 async function withClient<T>(fn: (client: Client) => Promise<T>): Promise<T> {
   if (!env.bookerToken) {
-    throw new BookerError("BOOKER_TOKEN is not set", "no_credentials");
+    throw new BookerError("LISBON2026_BOOKER_TOKEN is not set", "no_credentials");
   }
   const transport = new StreamableHTTPClientTransport(new URL(env.bookerUrl), {
     requestInit: { headers: { Authorization: `Bearer ${env.bookerToken}` } },
@@ -212,7 +212,7 @@ export async function captureRaw(query: InventoryQuery): Promise<{
 export async function bookHotel(): Promise<never> {
   if (!env.bookingEnabled) {
     throw new BookerError(
-      "real bookings are off: booker runs prebook-only and BOOKER_BOOKING_ENABLED is not true",
+      "real bookings are off: booker runs prebook-only and LISBON2026_BOOKER_BOOKING_ENABLED is not true",
       "booking_disabled",
     );
   }

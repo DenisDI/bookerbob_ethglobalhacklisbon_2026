@@ -31,9 +31,9 @@ Priority: **P0** = block coding soon · **P1** = Sat · **P2** = optional / boot
 
 | Item | Env suggestion | Where |
 |---|---|---|
-| `app_id` | `WORLD_APP_ID` | https://developer.world.org → create app |
-| `rp_id` | `WORLD_RP_ID` | same app → relying party |
-| `signing_key` | `WORLD_SIGNING_KEY` | same app → signing key (backend pre-sign) |
+| `app_id` | `LISBON2026_WORLD_APP_ID` | https://developer.world.org → create app |
+| `rp_id` | `LISBON2026_WORLD_RP_ID` | same app → relying party |
+| `signing_key` | `LISBON2026_WORLD_SIGNING_KEY` | same app → signing key (backend pre-sign) |
 
 Flow: Portal app → backend signs with `@worldcoin/idkit-core/signing` → IDKit in
 browser → verify `POST https://developer.world.org/api/v4/verify/{rp_id}`.
@@ -55,7 +55,7 @@ Docs:
 
 | Item | Where / how |
 |---|---|
-| Agent wallet private key (dev) | Generate locally; keep in `.env` as `AGENT_PRIVATE_KEY` |
+| Agent wallet private key (dev) | Generate locally; keep in `.env` as `LISBON2026_AGENT_PRIVATE_KEY` |
 | Register command | `npx @worldcoin/agentkit-cli register <agent-address>` |
 | Approver | One teammate with **verified World App** approves the tx (World Chain) |
 | Verify | On-chain AgentBook lookup (no Portal key for verify itself) |
@@ -84,7 +84,7 @@ in World App. Do not block weekend on this.
 
 | Item | Env | Where |
 |---|---|---|
-| Studio API / gateway key | `GRAPH_API_KEY` | https://thegraph.com/studio/ → API keys |
+| Studio API / gateway key | `LISBON2026_GRAPH_API_KEY` | https://thegraph.com/studio/ → API keys |
 | Query URL shape | — | `POST https://gateway.thegraph.com/api/<KEY>/subgraphs/id/<SUBGRAPH_ID>` |
 
 Hackathon free tier: unclear — ask `@graphhackers` Telegram / Graph booth if rate-limited.
@@ -97,7 +97,7 @@ Dev-only explorer MCP (not runtime): https://subgraphs.mcp.thegraph.com/sse (sam
 |---|---|---|
 | No Graph API key | — | `POST https://gateway.thegraph.com/api/x402/subgraphs/id/{id}` |
 | ~~Testnet Graph gateway~~ | — | **DOES NOT EXIST (NXDOMAIN)** — do not use |
-| Payer wallet | `GRAPH_X402_PRIVATE_KEY` | Base **mainnet** wallet with **$2–5 USDC** (weekend budget) |
+| Payer wallet | `LISBON2026_GRAPH_USDC_KEY` | Base **mainnet** wallet with **$2–5 USDC** (weekend budget) |
 | Client package | — | `@graphprotocol/client-x402` |
 
 Docs: https://thegraph.com/docs/en/subgraphs/tooling/x402-payments/
@@ -117,8 +117,8 @@ Locked in `FINAL-PLAN.md` §A.6 / §D.4. Prize story = Schedule Service, not x40
 
 | Item | Env | Where |
 |---|---|---|
-| Testnet account id | `HEDERA_ACCOUNT_ID` | https://portal.hedera.com |
-| Private key | `HEDERA_PRIVATE_KEY` | portal (download once) |
+| Testnet account id | `LISBON2026_HEDERA_ACCOUNT_ID` | https://portal.hedera.com |
+| Private key | `LISBON2026_HEDERA_PRIVATE_KEY` | portal (download once) |
 | Operator / payer for schedules | same or second testnet account | faucet HBAR |
 | Network | — | Hedera **testnet** |
 | Docs | — | Schedule Service + SDK; templates/payments-scheduler on scaffold-hbar |
@@ -129,7 +129,7 @@ Optional x402-on-Hedera metering is **not** the prize backbone if facilitator is
 
 | Item | Env | Where |
 |---|---|---|
-| Real USDC on Base | `GRAPH_X402_PRIVATE_KEY` | Bridge/buy ~$2–5 USDC on Base mainnet |
+| Real USDC on Base | `LISBON2026_GRAPH_USDC_KEY` | Bridge/buy ~$2–5 USDC on Base mainnet |
 | Do not use | — | Graph x402 testnet gateway (NXDOMAIN) |
 
 ---
@@ -138,8 +138,8 @@ Optional x402-on-Hedera metering is **not** the prize backbone if facilitator is
 
 | Item | Env | Where |
 |---|---|---|
-| MCP endpoint | `BOOKER_MCP_URL` | https://flexrep.xyz/mcp_travel/mcp |
-| Auth / session | `BOOKER_API_KEY` or session header | **ask whoever runs flexrep** (team / service docs) |
+| MCP endpoint | `LISBON2026_BOOKER_MCP_URL` | https://flexrep.xyz/mcp_travel/mcp |
+| Auth / session | `LISBON2026_BOOKER_TOKEN` or session header | **ask whoever runs flexrep** (team / service docs) |
 | Session header | — | `mcp-session-id` after init (per ARCHITECTURE-EXEC) |
 
 RateHawk-backed. Prebook/book may themselves require x402 — confirm with service owner Fri.
@@ -151,12 +151,12 @@ Disclose in README as external deployed API.
 
 | Item | Env | Where |
 |---|---|---|
-| Base URL | `CONTEXT_API_URL` | your production REP public API base |
-| API key (if any) | `CONTEXT_API_KEY` | team / service dashboard |
+| Base URL | `LISBON2026_CONTEXT_API_URL` | your production REP public API base |
+| API key (if any) | `LISBON2026_CONTEXT_API_KEY` | team / service dashboard |
 
-**Naming:** in code/env use `CONTEXT_API_*`. In README disclose vendor as "REP public
-API" only if required; describe as activity/achievement bands — never "reputation API"
-(see `FINAL-PLAN.md` §A).
+**Naming:** in code/env use `LISBON2026_CONTEXT_API_*`. In README disclose vendor as
+"REP public API" only if required; describe as activity/achievement bands — never
+"reputation API" (see `FINAL-PLAN.md` §A).
 
 ---
 
@@ -174,27 +174,27 @@ API" only if required; describe as activity/achievement bands — never "reputat
 
 ```bash
 # World
-WORLD_APP_ID=
-WORLD_RP_ID=
-WORLD_SIGNING_KEY=
-AGENT_PRIVATE_KEY=
+LISBON2026_WORLD_APP_ID=
+LISBON2026_WORLD_RP_ID=
+LISBON2026_WORLD_SIGNING_KEY=
+LISBON2026_AGENT_PRIVATE_KEY=
 
 # Graph
-GRAPH_API_KEY=
+LISBON2026_GRAPH_API_KEY=
 # Optional keyless: Base MAINNET wallet with $2-5 USDC (not testnet gateway)
-GRAPH_X402_PRIVATE_KEY=
+LISBON2026_GRAPH_USDC_KEY=
 
 # Hedera Scheduled Tx backbone (prize)
-HEDERA_ACCOUNT_ID=
-HEDERA_PRIVATE_KEY=
+LISBON2026_HEDERA_ACCOUNT_ID=
+LISBON2026_HEDERA_PRIVATE_KEY=
 
 # Inventory (ownership must be disclosed — see FINAL-PLAN §A.7)
-BOOKER_MCP_URL=https://flexrep.xyz/mcp_travel/mcp
-BOOKER_API_KEY=
+LISBON2026_BOOKER_MCP_URL=https://flexrep.xyz/mcp_travel/mcp
+LISBON2026_BOOKER_TOKEN=
 
 # Optional disclosed context bands API
-CONTEXT_API_URL=
-CONTEXT_API_KEY=
+LISBON2026_CONTEXT_API_URL=
+LISBON2026_CONTEXT_API_KEY=
 ```
 
 Add `.env` to `.gitignore` on repo init (step 1).

@@ -53,7 +53,7 @@ function fillMetadata(result: InventoryResult): InventoryResult {
 }
 
 export interface Inventory {
-  /** Search, pick, and hold a rate. Falls back per INVENTORY_SOURCE. */
+  /** Search, pick, and hold a rate. Falls back per LISBON2026_INVENTORY_SOURCE. */
   findAndPrebook(query: InventoryQuery): Promise<InventoryResult>;
   /** Seam for real bookings; refuses while the service is prebook-only. */
   book(): Promise<never>;
@@ -76,7 +76,7 @@ export function createInventory(): Inventory {
 
         if (mode === "live") {
           throw new InventoryUnavailableError(
-            "live inventory failed and INVENTORY_SOURCE=live forbids the snapshot",
+            "live inventory failed and LISBON2026_INVENTORY_SOURCE=live forbids the snapshot",
             [reason],
           );
         }

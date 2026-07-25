@@ -83,9 +83,9 @@ T2-T3 (calibrated against the 3 showcase addresses Fri night).
 
 `src/x402.ts`: pays The Graph per query on Base MAINNET (testnet gateway is
 NXDOMAIN, verified). `POST https://gateway.thegraph.com/api/x402/subgraphs/id/{id}`
--> 402 -> pay ~$0.01 USDC (EIP-3009, gasless) -> data. Wallet: GRAPH_USDC_KEY with
+-> 402 -> pay ~$0.01 USDC (EIP-3009, gasless) -> data. Wallet: LISBON2026_GRAPH_USDC_KEY with
 $2-5 USDC. Package: `@graphprotocol/client-x402` (createGraphQuery) or manual 402
-handling via `@x402/fetch`. Fallback: GRAPH_API_KEY (Studio) with the pitch degraded;
+handling via `@x402/fetch`. Fallback: LISBON2026_GRAPH_API_KEY (Studio) with the pitch degraded;
 kill decision Sat 01:00 per CUT-ORDER.
 Optional inbound charging (first thing cut): x402 on the http transport.
 

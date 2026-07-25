@@ -77,7 +77,7 @@ const server = new x402ResourceServer(facilitator)
 app.use(paymentMiddleware({
   "GET /offers": {
     accepts: [{ scheme: "exact", price: "$0.01",
-                network: "eip155:84532", payTo: process.env.PAYTO_ADDRESS }],
+                network: "eip155:84532", payTo: process.env.LISBON2026_PAYTO_ADDRESS }],
     description: "hotel offers", mimeType: "application/json",
   },
 }, server));
@@ -120,7 +120,7 @@ interface Inventory { search(city): Offer[]; rates(hotelId): Rate[];
 - `booker.ts`: MCP client to `https://flexrep.xyz/mcp_travel/mcp` EXACTLY (bare
   paths 301/405; clients do not replay POST through 301). Sessions are in-memory on
   a single Fly instance: treat `mcp-session-id` as disposable, retry-once-and-reinit
-  on any failure. Token via `.env` BOOKER_TOKEN, never committed.
+  on any failure. Token via `.env` LISBON2026_BOOKER_TOKEN, never committed.
 - `fixtures.ts`: serves `fixtures/lisbon.json` (captured Fri night) on any error or
   2s timeout; response tagged `source: "cached"` for the UI badge.
 - Pinned demo hotel id lives in `demo.config.ts`, verified Fri night.
@@ -151,12 +151,12 @@ Delivered with the /offers response (and SSE if cheap). Degrades to static capti
 ## .env (never committed; .env.example committed)
 
 ```
-PAYTO_ADDRESS=            # x402 receiver (fresh EVM)
-DEMO_PAYER_KEY=           # bot wallet, Circle-faucet funded
-AGENT_PRIVATE_KEY=        # AgentBook-registered agent wallet
-GRAPH_USDC_KEY=           # Base MAINNET wallet, $2-5 USDC (Graph x402)
-GRAPH_API_KEY=            # Studio backup only
-BOOKER_TOKEN=
-HEDERA_ACCOUNT_ID= HEDERA_PRIVATE_KEY=
-WORLD_APP_ID= WORLD_RP_ID= WORLD_SIGNING_KEY=
+LISBON2026_PAYTO_ADDRESS=            # x402 receiver (fresh EVM)
+LISBON2026_DEMO_PAYER_KEY=           # bot wallet, Circle-faucet funded
+LISBON2026_AGENT_PRIVATE_KEY=        # AgentBook-registered agent wallet
+LISBON2026_GRAPH_USDC_KEY=           # Base MAINNET wallet, $2-5 USDC (Graph x402)
+LISBON2026_GRAPH_API_KEY=            # Studio backup only
+LISBON2026_BOOKER_TOKEN=
+LISBON2026_HEDERA_ACCOUNT_ID= LISBON2026_HEDERA_PRIVATE_KEY=
+LISBON2026_WORLD_APP_ID= LISBON2026_WORLD_RP_ID= LISBON2026_WORLD_SIGNING_KEY=
 ```

@@ -2,10 +2,10 @@
 // port so the fallback is exercised for real without touching the network.
 // Shell env wins over .env, so these settings hold even on a configured machine.
 
-process.env.BOOKER_MCP_URL = "http://127.0.0.1:1/mcp";
-process.env.BOOKER_TOKEN = "not-a-real-token";
-process.env.INVENTORY_SOURCE = "auto";
-process.env.BOOKER_BOOKING_ENABLED = "false";
+process.env.LISBON2026_BOOKER_MCP_URL = "http://127.0.0.1:1/mcp";
+process.env.LISBON2026_BOOKER_TOKEN = "not-a-real-token";
+process.env.LISBON2026_INVENTORY_SOURCE = "auto";
+process.env.LISBON2026_BOOKER_BOOKING_ENABLED = "false";
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -37,7 +37,7 @@ test("booking is refused and never reaches the network", async () => {
   try {
     await assert.rejects(
       () => createInventory().book(),
-      /prebook-only|BOOKER_BOOKING_ENABLED/,
+      /prebook-only|LISBON2026_BOOKER_BOOKING_ENABLED/,
     );
   } finally {
     globalThis.fetch = realFetch;

@@ -1,7 +1,7 @@
 import type { OffersResponse, Tier } from "./types";
 
 const GATEWAY =
-  (import.meta.env.VITE_GATEWAY_URL as string | undefined) ??
+  (import.meta.env.VITE_LISBON2026_GATEWAY_URL as string | undefined) ??
   "http://localhost:3000";
 
 export class OffersError extends Error {}
