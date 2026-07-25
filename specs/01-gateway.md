@@ -12,8 +12,13 @@
 ```
 
 Verified traps:
-- `createAgentBookVerifier` is exported from `@worldcoin/agentkit-core`, NOT from
-  `@worldcoin/agentkit`. Import accordingly.
+- ~~`createAgentBookVerifier` is exported from `@worldcoin/agentkit-core`, NOT from
+  `@worldcoin/agentkit`.~~ **Wrong for 0.2.0, corrected 2026-07-25.**
+  `@worldcoin/agentkit` does `export * from '@worldcoin/agentkit-core'`, so the
+  function is available from either and one dependency is enough. The real traps
+  found while integrating are in `docs/FEEDBACK-world.md`: `declareAgentkitExtension`
+  omits `nonce`/`issuedAt` that `createHeader` requires, and `domain` must be the
+  hostname **without** the port.
 - agentkit hooks are `{ requestHook(ctx), verifyFailureHook(ctx) }`; @x402/core 2.19
   expects `onProtectedRequest(declaration, context, routeConfig)` and
   `onVerifyFailure(declaration, context)`. If using extension mode, glue:

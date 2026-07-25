@@ -17,6 +17,7 @@ import {
   narrateTerms,
 } from "../narration.js";
 import { scheduleForHold } from "../settlement.js";
+import { type Credential, NO_CREDENTIAL, verifierFromEnv } from "../world.js";
 import {
   debugSignals,
   decide,
@@ -35,25 +36,59 @@ function parseCredential(raw: string | undefined): boolean | null {
   return null;
 }
 
+const verifier = verifierFromEnv();
+
+/**
+ * What the credential was issued for. A header signed for this endpoint is not a
+ * credential for /book, so the resource is the path without the query.
+ */
+function resourceUri(c: Context): string {
+  const url = new URL(c.req.url);
+  return `${url.origin}${url.pathname}`;
+}
+
 export async function offersHandler(c: Context) {
   const city = c.req.query("city")?.trim() || demo.city;
   const debugTier = c.req.query("tier")?.trim();
   const address = c.req.query("address")?.trim();
   const credentialFlag = parseCredential(c.req.query("credential") ?? undefined);
 
+  // Only a verified AgentKit header may say "world". The browser flag and the
+  // dev verifier are both stand-ins, permanently, and the response keeps them
+  // distinguishable so nothing on screen can claim a partner integration that
+  // has not run.
+  const header = c.req.header("agentkit");
+  const presented = header
+    ? await verifier.verify(header, resourceUri(c))
+    : NO_CREDENTIAL;
+
+  // Logged, never returned: the reason a credential did not check out is
+  // operator information, and telling a caller exactly which check it failed is
+  // free help for forging the next one.
+  if (header && presented.status === "missing" && presented.detail) {
+    console.warn(`credential rejected (${verifier.kind}): ${presented.detail}`);
+  }
+
+  const credential: Credential =
+    presented.status !== "missing"
+      ? presented
+      : credentialFlag === true
+        ? { status: "stand_in" }
+        : presented;
+
   // Debug tier = canned signals for tests. Product path = credential + address.
   // Real address always overrides synthetic context below.
   const debug = debugSignals(debugTier);
+  const hasCredential =
+    credential.status !== "missing"
+      ? true
+      : credentialFlag !== null
+        ? credentialFlag
+        : (debug?.hasCredential ?? false);
+
   const base: TermsSignals = debug
-    ? {
-        ...debug,
-        hasCredential:
-          credentialFlag !== null ? credentialFlag : debug.hasCredential,
-      }
-    : {
-        hasCredential: credentialFlag === true,
-        context: null,
-      };
+    ? { ...debug, hasCredential }
+    : { hasCredential, context: null };
 
   const lookup = address ? await lookupContext(address) : null;
   const signals: TermsSignals = lookup
@@ -100,6 +135,12 @@ export async function offersHandler(c: Context) {
     return c.json({
       terms,
       reason,
+      // Status and source only. humanId stays on the server: it is anonymous,
+      // but it is still somebody's identifier and has no business on a screen.
+      credential:
+        credential.status === "verified"
+          ? { status: "verified", source: credential.source }
+          : { status: credential.status },
       city: result.city,
       checkin: result.checkin,
       checkout: result.checkout,

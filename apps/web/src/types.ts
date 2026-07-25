@@ -69,6 +69,12 @@ export interface OffersResponse {
   matchingCount: number | null;
   offers: Offer[];
   hold: PrebookHold | null;
+  /**
+   * What the gateway made of the credential. `verified` with `source: "world"`
+   * only ever comes from a real AgentKit header the server checked against the
+   * AgentBook; the browser flag and the dev verifier are `stand_in` forever.
+   */
+  credential: { status: "missing" | "stand_in" | "verified"; source?: "world" };
   /** Hedera HashScan schedule URL when pay-later / pay-at-checkout. */
   scheduleUrl: string | null;
   scheduleId: string | null;

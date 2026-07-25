@@ -79,7 +79,18 @@ export function App() {
   const [backed, setBacked] = useState<PaneState>(IDLE);
   const [address, setAddress] = useState("");
   // Product race uses stand-in until World wires verified.
-  const [credential] = useState<CredentialState>(STAND_IN);
+  // The server owns this. The browser may ask with a stand-in, but only the
+  // gateway can say the credential was verified by World, because only it saw
+  // the signed header and the AgentBook answer.
+  const [asked] = useState<CredentialState>(STAND_IN);
+  const credential: CredentialState = useMemo(() => {
+    const said = backed.data?.credential;
+    if (said?.status === "verified" && said.source === "world") {
+      return { status: "verified", source: "world" };
+    }
+    if (said?.status === "missing") return { status: "missing" };
+    return asked;
+  }, [backed.data, asked]);
   const reducedMotion = usePrefersReducedMotion();
   const running = bot.status === "working" || backed.status === "working";
 

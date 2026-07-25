@@ -43,6 +43,12 @@ export const env = {
   fixturesPath: str("LISBON2026_FIXTURES_PATH"),
 
   /**
+   * Real World verification needs a registered agent wallet. Without the key the
+   * gateway runs the stand-in verifier, which can never claim World.
+   */
+  agentKeyPresent: str("LISBON2026_AGENT_PRIVATE_KEY").length > 0,
+
+  /**
    * auto   live first, captured snapshot on failure (default)
    * live   live only, surface the failure
    * cached snapshot only — for rehearsals and the safety take, no live calls

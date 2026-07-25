@@ -68,3 +68,38 @@ system marks only. Links stay on the accent; the rule wins over the sheet.
 One new optional display-only prop was agreed for the red anchor square that
 marks the room appearing in both lanes, since that comparison is the argument and
 it needs cross-lane knowledge.
+
+---
+
+# Step 4 addendum — World AgentKit (same session)
+
+```
+ок давай world начинать работать, я получу agentid позже сам хэш и т.п. найду
+ментора с verified human так что это не блокер, начинаем
+```
+
+The agent key turned out to be in `.env` already and the wallet **was** registered,
+so the path went further than planned: World is a working integration, verified by
+falsification rather than by hope.
+
+| Input | Credential | Terms |
+|---|---|---|
+| registered agent wallet signing a real header | `verified` + `source: world` | elite, pay at checkout |
+| freshly generated wallet signing | `missing` (`agent wallet is not registered`) | bot, prepay |
+| browser `?credential=1` | `stand_in`, permanently | elite |
+| nothing | `missing` | bot |
+
+The control matters: the same code path in the same second refuses an
+unregistered wallet and accepts the registered one, so the AgentBook lookup is
+doing real work.
+
+Three findings, all in `docs/FEEDBACK-world.md` with the exact error strings:
+`createAgentBookVerifier` is exported from both packages (the spec's §E trap is
+wrong for 0.2.0, corrected in place); `declareAgentkitExtension` is the server
+half and omits the `nonce`/`issuedAt` that `createHeader` requires; and `domain`
+must be the hostname **without** the port while `uri` keeps it.
+
+And one worth stating plainly: `AgentkitMode` offers `{ type: "discount",
+percent }`, so the SDK's shortest path from "a human is behind this agent" to
+"do something about it" is the exact pattern the prize rules disqualify. We use
+no `mode` at all.

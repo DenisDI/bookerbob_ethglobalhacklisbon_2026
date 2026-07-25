@@ -29,6 +29,8 @@ Known departures so far, all measured rather than assumed:
 | `02`: one `defi_activity` band | four independent bands plus a repayment signal, because one total reads as a scoreboard |
 | `02`: `--http :3001` | now real; it was exiting with code 2 while the README advertised it |
 | `02`: keyless x402 to The Graph | **not built.** It needs a funded Base wallet to run even once, and nothing unverified gets named |
+| `01`: `createAgentBookVerifier` only in `agentkit-core` | wrong for 0.2.0: `agentkit` re-exports core in full, one dependency is enough |
+| `01`: AgentKit as an x402 extension | header-only verification in front of the route (Plan A), which needs no paywall in the middle |
 
 ## specs/research — archive, do not build from it
 
