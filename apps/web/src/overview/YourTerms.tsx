@@ -72,7 +72,23 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
         ) : null}
       </header>
 
-      {error && !data ? (
+      {/* A 402 is not a failure and it is not the desk being unreachable. It is
+        * the desk charging for an anonymous question, which is the product's own
+        * argument arriving before the page has said it. Read as a dead end it
+        * looks broken; read correctly it is the first rung explaining itself. */}
+      {error && !data && error.includes("402") ? (
+        <>
+          <p className="yourterms__term">an anonymous question is metered here</p>
+          <p className="yourterms__why reason">
+            the desk charges a stranger to ask, and asks for the whole stay before
+            it holds anything
+          </p>
+          <p className="yourterms__move">
+            stop paying to ask and stop paying the stay up front: prove a person is
+            behind the booking
+          </p>
+        </>
+      ) : error && !data ? (
         <p className="yourterms__term">
           i cannot reach the desk and i have nothing written down
         </p>

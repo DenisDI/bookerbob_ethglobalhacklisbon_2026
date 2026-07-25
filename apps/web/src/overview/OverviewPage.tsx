@@ -208,9 +208,10 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
           />
         </section>
         <p className="kicker">who is behind a booking changes the terms it gets</p>
-        <h1 className="thesis">
-          book a hotel in seconds, for yourself or for your agent
-        </h1>
+        {/* "for your agent" read as booking the agent a room, which is not what
+          * happens: the agent is who does the booking, not who sleeps in it. The
+          * line is about who holds the pen. */}
+        <h1 className="thesis">book a hotel yourself, or send your agent to do it</h1>
         <p className="thesis__plain">
           one desk, the same rooms at the same nightly rate for people and ai
           agents. what changes is when you pay.

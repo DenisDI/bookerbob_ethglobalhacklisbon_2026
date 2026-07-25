@@ -808,18 +808,26 @@ body {
   max-width: 62ch;
 }
 
-/* The personhood control is fixed to a corner by worldid/selfie.css, which is
- * right for the race tabs, where it is a floating affordance. Inside a step it is
- * part of the flow and has to sit where the step is. Overridden from here rather
- * than in that file, which says in its own header that the design layer should
- * move it without untangling anything. */
-.step .selfie {
+/* Both proof controls are fixed to a corner by their own stylesheets, which is
+ * right on the race tabs where they float. Inside a step they are the step: the
+ * card says what the reward is and the control has to be right there under it,
+ * not parked in the opposite corner of the page. Overridden from the design layer
+ * rather than in those files, which is what selfie.css asks for in its header. */
+.step .selfie,
+.step .cw-btn {
   position: static;
   z-index: auto;
   max-width: none;
   align-items: flex-start;
   text-align: left;
   margin: 0;
+}
+
+/* The wallet button is an inline control here, so it stops being full width and
+ * starts looking like the button beside it in the personhood step. */
+.step .cw-btn {
+  display: inline-flex;
+  width: auto;
 }
 
 /* A step that cannot run says so and stops. Never styled as a failure: an
