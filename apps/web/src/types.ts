@@ -60,6 +60,8 @@ export interface ContextBands {
 
 export interface OffersResponse {
   terms: Terms;
+  /** The one fact that decided these terms, in plain words. */
+  reason: string;
   city: string;
   checkin: string;
   checkout: string;

@@ -385,6 +385,20 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* Sits directly under the term, quiet, so the outcome reads first and the
+ * reason reads second. Never a threshold, always a fact. */
+.pane__because {
+  margin: -0.9rem 0 0;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.pane--accent .pane__because {
+  border-left-color: rgb(59 91 255 / 0.45);
+}
+
 .pane__count {
   margin: 0 0 0.7rem;
   font-family: var(--font-mono);

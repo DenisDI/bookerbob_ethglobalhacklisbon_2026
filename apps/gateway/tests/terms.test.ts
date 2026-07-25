@@ -7,6 +7,7 @@ import { test } from "node:test";
 import {
   bandAtLeast,
   debugSignals,
+  decide,
   decideTerms,
   earnsRateLock,
   offerLimit,
@@ -199,6 +200,60 @@ test("every debug tier really produces its tier through the engine", () => {
     assert.ok(signals);
     assert.equal(decideTerms(signals).tier, tier, `${tier} must not be a label only`);
   }
+});
+
+test("the reason names the fact that actually decided, not a threshold", () => {
+  const blockers: Array<{ repayment: RepaymentSignal; says: RegExp }> = [
+    { repayment: "liquidated", says: /caught short/ },
+    { repayment: "borrowing_open", says: /owes/ },
+  ];
+
+  for (const { repayment, says } of blockers) {
+    const { terms, reason } = decide({
+      hasCredential: true,
+      context: ctx(STRONG, repayment),
+    });
+    assert.equal(terms.payment, "rate_lock_pay_later");
+    assert.match(reason, says);
+    // A rubric on screen would turn this back into a scoreboard.
+    assert.doesNotMatch(reason, /T[0-4]|\d/, "a reason must not quote a threshold");
+  }
+
+  const small = decide({
+    hasCredential: true,
+    context: ctx({ ...STRONG, scale: "T2" }, "clean"),
+  });
+  assert.match(small.reason, /at stake/);
+
+  const young = decide({
+    hasCredential: true,
+    context: ctx({ activity: "T4", tenure: "T1" }, "clean"),
+  });
+  assert.equal(young.terms.tier, "human");
+  assert.match(young.reason, /too new/);
+
+  const stale = decide({
+    hasCredential: true,
+    context: ctx(
+      {
+        activity: "unavailable",
+        tenure: "unavailable",
+        breadth: "unavailable",
+        scale: "unavailable",
+      },
+      "no_credit_history",
+    ),
+  });
+  assert.match(stale.reason, /could not be read/);
+
+  assert.match(
+    decide({ hasCredential: false, context: ctx(STRONG, "clean") }).reason,
+    /accountable/,
+  );
+  assert.match(
+    decide({ hasCredential: true, context: ctx(STRONG, "clean") }).reason,
+    /nothing outstanding/,
+  );
 });
 
 test("an unknown debug tier is ignored rather than guessed", () => {

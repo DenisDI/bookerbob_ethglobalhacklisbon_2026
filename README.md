@@ -28,6 +28,39 @@ underwriting.
    the settlement is a Hedera Scheduled Transaction, visible on HashScan.
 5. Selfie Check (World ID Sandbox) gates eligibility for deferred settlement.
 
+## How the terms are decided
+
+Identity moves risk, never price. Everyone is quoted the same supplier rate; what
+changes is who carries the exposure between booking and the stay. The engine asks
+four questions in the order an underwriter would, and the answers are allowed to
+disagree with each other.
+
+**Is anyone accountable?** Without a credential, nothing is extended on trust,
+however rich the history behind the wallet. Context without an accountable person
+is not underwritable.
+
+**Is this an established counterparty?** A held price needs age, plus either depth
+or breadth of use. Time is the one input nobody can buy retroactively, and a
+dormant address that merely happens to be old does not qualify.
+
+**Did borrowed money come back?** A held price survives a liquidation or an open
+loan. Settling nothing until arrival does not: being caught short before is
+evidence about this exact risk, and money already committed elsewhere is exposure.
+Never having borrowed is neutral, not negative.
+
+**Is enough at stake to defer?** The last step also asks for size and a longer
+record, because it hands over the most.
+
+So the busiest wallet does not automatically get the best terms. One of our test
+addresses borrowed and repaid tens of thousands of dollars and was still
+liquidated twice: it earns a held price, not a room on credit. Every decision
+shows the single fact that produced it, and the demo never prints a threshold —
+the bands and their reasoning live in
+[`packages/context-bands-mcp/SKILL.md`](packages/context-bands-mcp/SKILL.md).
+
+This is underwriting, not a score. There is no ranking, no points, and no
+percentage anywhere in the product.
+
 ## Disclosures
 
 **Hotel inventory.** Rooms, rates and prebook holds come from **RateHawk**, a

@@ -44,6 +44,8 @@ export function RacePane({ label, accent, state, reducedMotion }: Props) {
             accent={accent}
           />
           <p className="pane__term">{paymentLine(data.terms.payment)}</p>
+          {/* Why, not how it was scored. One fact, attached to the outcome. */}
+          <p className="pane__because">{data.reason}</p>
           {data.context ? <ContextFile context={data.context} /> : null}
         </>
       ) : (

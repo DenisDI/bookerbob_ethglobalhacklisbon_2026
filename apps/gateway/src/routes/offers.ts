@@ -17,7 +17,7 @@ import {
 } from "../narration.js";
 import {
   debugSignals,
-  decideTerms,
+  decide,
   earnsRateLock,
   offerLimit,
   type TermsSignals,
@@ -43,7 +43,7 @@ export async function offersHandler(c: Context) {
     : base;
   const lookupFailed = lookup?.status === "failed";
 
-  const terms = decideTerms(signals);
+  const { terms, reason } = decide(signals);
   const limit = offerLimit(terms.inventory);
 
   const narrator = new Narrator();
@@ -69,6 +69,8 @@ export async function offersHandler(c: Context) {
 
     return c.json({
       terms,
+      // The deciding fact, so the screen can say why without printing a rubric.
+      reason,
       city: result.city,
       checkin: result.checkin,
       checkout: result.checkout,

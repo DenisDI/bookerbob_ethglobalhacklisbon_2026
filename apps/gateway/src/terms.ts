@@ -84,31 +84,80 @@ const CHECKOUT_BLOCKED_BY: readonly ContextSnapshot["signals"]["repayment"][] = 
   "borrowing_open",
 ];
 
-export function decideTerms(signals: TermsSignals): Terms {
+/**
+ * Terms plus the one fact that decided them.
+ *
+ * The reason is produced here rather than reconstructed later, so what a viewer
+ * reads on screen cannot drift from what the engine actually did. It names a
+ * fact, never a threshold: "liquidated before" explains a decision, while
+ * "activity below T3" only explains a rubric, and a rubric on screen would turn
+ * this back into the scoreboard it is deliberately not.
+ */
+export interface Decision {
+  terms: Terms;
+  reason: string;
+}
+
+const BOT: Terms = { tier: "bot", inventory: "basic", payment: "prepay_100" };
+const HUMAN: Terms = { tier: "human", inventory: "full", payment: "deposit" };
+const VERIFIED: Terms = {
+  tier: "verified",
+  inventory: "member",
+  payment: "rate_lock_pay_later",
+};
+const ELITE: Terms = { tier: "elite", inventory: "elite", payment: "pay_at_checkout" };
+
+function unreadable(context: ContextSnapshot | null): boolean {
+  if (!context) return false;
+  return Object.values(context.bands).every((band) => band === "unavailable");
+}
+
+export function decide(signals: TermsSignals): Decision {
   if (!signals.hasCredential) {
     // Nobody is accountable for this request, so nothing is extended on trust,
     // however rich the onchain history behind the address happens to be.
-    return { tier: "bot", inventory: "basic", payment: "prepay_100" };
+    return { terms: BOT, reason: "no one is accountable for this request" };
   }
 
   const context = signals.context;
-  const humanTerms: Terms = { tier: "human", inventory: "full", payment: "deposit" };
 
-  const established =
-    bandAtLeast(context, "tenure", RATE_LOCK_TENURE) &&
-    (bandAtLeast(context, "activity", "T2") || bandAtLeast(context, "breadth", "T3"));
+  if (!context) {
+    return { terms: HUMAN, reason: "no wallet shared, so the credential carries it alone" };
+  }
+  if (unreadable(context)) {
+    return { terms: HUMAN, reason: "their history could not be read just now" };
+  }
 
-  if (!established) return humanTerms;
+  if (!bandAtLeast(context, "tenure", RATE_LOCK_TENURE)) {
+    return { terms: HUMAN, reason: "too new to hold a price against" };
+  }
+  if (
+    !bandAtLeast(context, "activity", "T2") &&
+    !bandAtLeast(context, "breadth", "T3")
+  ) {
+    return { terms: HUMAN, reason: "barely used, so there is little to go on" };
+  }
 
-  const repayment = context?.signals.repayment;
-  const earnsCheckout =
-    bandAtLeast(context, "tenure", CHECKOUT_TENURE) &&
-    bandAtLeast(context, "scale", CHECKOUT_SCALE) &&
-    !(repayment && CHECKOUT_BLOCKED_BY.includes(repayment));
+  const repayment = context.signals.repayment;
 
-  return earnsCheckout
-    ? { tier: "elite", inventory: "elite", payment: "pay_at_checkout" }
-    : { tier: "verified", inventory: "member", payment: "rate_lock_pay_later" };
+  if (repayment === "liquidated") {
+    return { terms: VERIFIED, reason: "held, not deferred: caught short before" };
+  }
+  if (repayment === "borrowing_open") {
+    return { terms: VERIFIED, reason: "held, not deferred: still owes elsewhere" };
+  }
+  if (!bandAtLeast(context, "tenure", CHECKOUT_TENURE)) {
+    return { terms: VERIFIED, reason: "held, not deferred: not established long enough" };
+  }
+  if (!bandAtLeast(context, "scale", CHECKOUT_SCALE)) {
+    return { terms: VERIFIED, reason: "held, not deferred: little at stake so far" };
+  }
+
+  return { terms: ELITE, reason: "long record, nothing outstanding" };
+}
+
+export function decideTerms(signals: TermsSignals): Terms {
+  return decide(signals).terms;
 }
 
 /**
