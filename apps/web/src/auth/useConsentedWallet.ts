@@ -10,14 +10,18 @@ export type ConsentedWallet = {
 };
 
 export function shortAddress(address: string): string {
+  if (address.length < 10) return address;
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
 /** Call only under <PrivyRoot> when privyConfigured. */
 export function useConsentedWallet(): ConsentedWallet {
-  const { ready, authenticated, login, logout, getAccessToken } = usePrivy();
+  const { ready, authenticated, login, logout, getAccessToken, user } =
+    usePrivy();
   const { wallets } = useWallets();
-  const address = wallets[0]?.address ?? null;
+
+  // Prefer live connected wallet; fall back to the linked wallet on the user.
+  const address = wallets[0]?.address ?? user?.wallet?.address ?? null;
 
   return {
     ready,

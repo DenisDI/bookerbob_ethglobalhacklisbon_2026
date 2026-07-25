@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { privyConfigured } from "./PrivyRoot";
 import { shortAddress, useConsentedWallet } from "./useConsentedWallet";
 import "./connect-wallet.css";
@@ -9,7 +10,12 @@ import "./connect-wallet.css";
 export function ConnectWalletButton() {
   if (!privyConfigured) {
     return (
-      <button type="button" className="cw-btn cw-btn--missing" disabled title="Set VITE_LISBON2026_PRIVY_APP_ID">
+      <button
+        type="button"
+        className="cw-btn cw-btn--missing"
+        disabled
+        title="Set VITE_LISBON2026_PRIVY_APP_ID"
+      >
         wallet off
       </button>
     );
@@ -19,19 +25,25 @@ export function ConnectWalletButton() {
 
 function ConnectWalletButtonLive() {
   const { ready, authenticated, address, login, logout } = useConsentedWallet();
-
-  if (!ready) {
-    return (
-      <button type="button" className="cw-btn" disabled>
-        …
-      </button>
-    );
-  }
+  // Don't leave the control disabled forever if Privy init hangs.
+  const [waited, setWaited] = useState(false);
+  useEffect(() => {
+    if (ready) return;
+    const t = window.setTimeout(() => setWaited(true), 2500);
+    return () => window.clearTimeout(t);
+  }, [ready]);
 
   if (!authenticated || !address) {
+    const loading = !ready && !waited;
     return (
-      <button type="button" className="cw-btn" onClick={login}>
-        connect wallet
+      <button
+        type="button"
+        className="cw-btn"
+        disabled={loading}
+        onClick={() => login()}
+        title={loading ? "Privy starting…" : undefined}
+      >
+        {loading ? "…" : "connect wallet"}
       </button>
     );
   }

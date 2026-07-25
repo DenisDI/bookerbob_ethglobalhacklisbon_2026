@@ -4,7 +4,8 @@
   position: fixed;
   top: 1rem;
   right: 1rem;
-  z-index: 50;
+  /* Below Privy modal (~999999); still above page chrome. */
+  z-index: 40;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;

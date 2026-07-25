@@ -17,6 +17,8 @@ export function PrivyRoot({ children }: { children: ReactNode }) {
     <PrivyProvider
       appId={APP_ID}
       config={{
+        // External wallet only — we need a consented address for Graph, not
+        // an embedded key. createOnLogin iframe was leaving ready stuck on "…".
         loginMethods: ["wallet"],
         appearance: {
           theme: "dark",
@@ -25,7 +27,7 @@ export function PrivyRoot({ children }: { children: ReactNode }) {
         },
         embeddedWallets: {
           ethereum: {
-            createOnLogin: "users-without-wallets",
+            createOnLogin: "off",
           },
         },
         defaultChain: base,
