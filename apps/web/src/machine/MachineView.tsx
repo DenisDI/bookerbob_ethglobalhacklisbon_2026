@@ -373,7 +373,13 @@ export function MachineView({
             direction="in"
             title="PAYMENT REQUIRED"
             status="402"
-            provenance={path === "bot" && lane.status === "done" ? "live" : "declared"}
+            // Declared on both paths, including the metered one. The browser
+            // never sees this 402: paid-offers settles server side and hands
+            // back a 200, so the challenge is a shape we know from the spec and
+            // not a response this page received. Tagging it live because a
+            // payment really happened somewhere would be exactly the claim this
+            // view exists to refuse.
+            provenance="declared"
             partner="x402"
           >
             <p className="frame__note">

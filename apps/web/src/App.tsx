@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddressBands } from "./AddressBands";
-import { fetchOffers } from "./api";
+import { fetchOffers, fetchSpent } from "./api";
 import { HotelFinaleCard } from "./HotelFinaleCard";
 import {
   ConnectWalletButton,
@@ -165,6 +165,9 @@ export function App() {
   const reducedMotion = usePrefersReducedMotion();
   const running = bot.status === "working" || backed.status === "working";
   const accessTokenRef = useRef<() => Promise<string | null>>(async () => null);
+  /** Cumulative ledger reading taken before the last race, so the counter can
+   * show this race's share of it rather than the server's whole history. */
+  const ledgerBaseline = useRef<number | null>(null);
 
   // The one room both lanes were quoted. Marked in both lists so the comparison
   // is traceable on a single line: same room, same rate, different term.
@@ -176,17 +179,36 @@ export function App() {
   const run = useCallback(
     async (overrideAddress?: string) => {
       const consented = overrideAddress ?? address;
+      // Both counters start this race at zero. The lane shows what THIS race
+      // spent, so carrying the previous race's number into the next one would be
+      // the same lie in a smaller form.
       const start = (set: React.Dispatch<React.SetStateAction<PaneState>>) =>
-        set((prev) => ({
+        set(() => ({
           status: "working",
           data: null,
           error: null,
-          spentUsd: prev.spentUsd,
-          paymentTxUrl: prev.paymentTxUrl,
+          spentUsd: 0,
+          paymentTxUrl: null,
         }));
 
       start(setBot);
       start(setBacked);
+
+      // The gateway's ledger is cumulative for the life of the process, so the
+      // number it returns is every query anyone has ever paid for on this demo
+      // wallet. Rendered as this race's spend it read "$0.37 · 37 QUERIES" on a
+      // visitor's first run, which says a single search cost thirty-seven cents
+      // and breaks the one claim the lane exists to make. Take a reading before
+      // the race and show the difference.
+      try {
+        const before = await fetchSpent();
+        ledgerBaseline.current = before.totalUsd;
+      } catch {
+        // Keep the last reading we trusted. On a first run with /spent down
+        // there is nothing to subtract, which lands on today's behaviour rather
+        // than on a worse one.
+      }
+      const baseline = ledgerBaseline.current ?? 0;
 
       const settle = async (
         set: React.Dispatch<React.SetStateAction<PaneState>>,
@@ -210,16 +232,18 @@ export function App() {
               !opts.credential &&
               typeof data.spentUsd === "number" &&
               Boolean(data.paymentTxUrl);
+            // The response carries the running total; what this race spent is
+            // the part of it that was not there a moment ago. Floored at zero
+            // because a restarted gateway resets the ledger under us.
+            if (paid) ledgerBaseline.current = data.spentUsd!;
             return {
               ...prev,
               status: "done",
               data,
               error: null,
               spentUsd: paid
-                ? data.spentUsd!
-                : opts.credential
-                  ? prev.spentUsd
-                  : prev.spentUsd,
+                ? Math.max(0, Number((data.spentUsd! - baseline).toFixed(4)))
+                : prev.spentUsd,
               paymentTxUrl: data.paymentTxUrl ?? prev.paymentTxUrl,
             };
           });
