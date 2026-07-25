@@ -591,6 +591,10 @@ body {
  * The reward is the big line and the cost is the small one under it, on every
  * rung, including the ones not yet earned. A locked prize that cannot be read is
  * not a reason to do anything.
+ *
+ * Rungs arrive one at a time as the ladder comes into view, so a reader meets
+ * each reward on its own rather than a wall of four, and then they settle into
+ * the stack. The animation is an introduction, not a state: once in, they stay.
  */
 
 .ladder {
@@ -602,53 +606,107 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .rung {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
   min-width: 0;
-  padding: var(--space-3);
   border: 1px solid var(--color-line);
   background: var(--color-surface-3);
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--duration-beat2) ease,
+    transform var(--duration-beat2) cubic-bezier(0.16, 1, 0.3, 1),
+    border-color var(--duration-beat1) ease;
+  /* Staggered off the index, so they land in the order they are climbed. */
+  transition-delay: calc(var(--i) * 110ms);
+}
+
+.ladder.is-in .rung {
+  opacity: 1;
+  transform: none;
+}
+
+/* Nothing moves and nothing waits: every rung is simply there. */
+.ladder.is-still .rung {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  transition-delay: 0s;
+}
+
+/* The whole head is the control, so the reward itself is what you press. */
+.rung__head {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* The partner mark at the size a partner should be seen at, and given room by
+ * the layout rather than by shouting. */
+.rung__mark {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  color: var(--color-ash);
+}
+
+/* The Graph draws its glyph into about half of its own viewBox, so at the size
+ * the other two use it reads half as big. Scaled in the box rather than sized
+ * up, which would have shrunk again inside a flex container of fixed width. */
+.rung__mark--hold svg {
+  transform: scale(1.75);
+}
+
+.rung__body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  flex: 1;
 }
 
 .rung__perk {
-  margin: 0;
   font: var(--weight-semi) var(--size-ui-lg) / 1.25 var(--font-ui);
   letter-spacing: var(--tracking-tight);
   color: var(--color-ink);
 }
 
 .rung__ask {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin: 0;
   font: var(--weight-reg) var(--size-ui-sm) / 1.45 var(--font-ui);
   color: var(--color-muted);
 }
 
-.rung__mark {
-  color: var(--color-ash);
-}
-
 .rung__opens {
-  margin: auto 0 0;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-hairline);
   font: var(--weight-med) var(--size-ui-sm) / 1.4 var(--font-ui);
   color: var(--color-faint);
 }
 
 .rung__flag {
-  margin: auto 0 0;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-hairline);
+  color: var(--color-accent);
+}
+
+.rung__more {
+  flex: none;
+  align-self: center;
+  padding: 5px 8px;
+  border: 1px solid var(--color-line-strong);
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+  text-transform: uppercase;
 }
 
 /* Where you are standing. The only rung that gets the accent, and it gets it
@@ -662,11 +720,10 @@ body {
   color: var(--color-accent);
 }
 
-.rung--here .rung__flag {
+.rung--here .rung__mark {
   color: var(--color-accent);
 }
 
-/* Passed and kept. */
 .rung--reached {
   border-color: var(--color-line-strong);
 }
@@ -675,7 +732,8 @@ body {
   color: var(--color-muted);
 }
 
-/* Not yours yet, and fully readable anyway. */
+/* Not yours yet, and fully readable anyway. The mark stays legible: a partner
+ * whose moment has not arrived is still the partner of that moment. */
 .rung--locked .rung__perk,
 .rung--blocked .rung__perk {
   color: var(--color-faint);
@@ -688,7 +746,102 @@ body {
 
 .rung--locked .rung__mark,
 .rung--blocked .rung__mark {
+  opacity: 0.55;
+}
+
+.rung.is-open {
+  border-color: var(--color-ash);
+}
+
+/* ---------- an opened rung ---------- */
+
+.rung__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-3) var(--space-3) calc(var(--space-3) + 34px + var(--space-3));
+  border-top: 1px solid var(--color-hairline);
+  padding-top: var(--space-3);
+}
+
+.rung__partner {
+  margin: 0;
+  color: var(--color-ash);
+}
+
+.rung__text {
+  margin: 0;
+  max-width: 74ch;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.55 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.rung__text--quiet {
   color: var(--color-faint);
+}
+
+.rung__link {
+  margin: 0;
+  font: var(--weight-med) var(--size-ui-sm) / 1.3 var(--font-ui);
+}
+
+/* Two ways to prove a person: a person doing it, or a person behind an agent. */
+.rung__ways {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.rung__ways li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-line);
+}
+
+.rung__way {
+  font: var(--weight-semi) var(--size-ui-md) / 1.2 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.rung__waynote {
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+/* Bands and what each one buys. Never a plan chooser: these are readings of a
+ * history, not products, and there is no number and no price anywhere in them. */
+.rung__bands {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+.rung__bands > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: 9px 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.rung__bands dt {
+  font: var(--weight-reg) var(--size-ui-sm) / 1.4 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.rung__bands dd {
+  margin: 0;
+  font: var(--weight-semi) var(--size-ui-sm) / 1.4 var(--font-ui);
+  color: var(--color-ink);
 }
 
 /* ---------- your booking ---------- */
@@ -2794,18 +2947,19 @@ body {
     grid-template-columns: 1fr;
   }
 
-  /* The ladder stacks bottom rung first, which is the order it is climbed and
-   * the order the rewards get better. Three columns at this width leaves each
-   * reward two words wide, which is the one thing on this page that has to be
-   * readable at a glance. */
-  .ladder__rows {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
+  /* An opened rung indents past the partner mark, which is most of the screen
+   * at this width. The details come back to the edge, and the two ways to prove
+   * a person stack instead of splitting a phone in half. */
+  .rung__details {
+    padding-left: var(--space-3);
   }
 
-  .rung__opens,
-  .rung__flag {
-    margin-top: 0;
+  .rung__ways {
+    grid-template-columns: 1fr;
+  }
+
+  .rung__more {
+    display: none;
   }
 
   .doors {

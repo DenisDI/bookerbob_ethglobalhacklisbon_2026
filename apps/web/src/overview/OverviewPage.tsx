@@ -259,6 +259,7 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
         wallet={Boolean(address)}
         contextRead={contextRead}
         reason={data?.reason ?? null}
+        scheduleUrl={data?.scheduleUrl ?? null}
       />
 
       <section className="ov__flow">
