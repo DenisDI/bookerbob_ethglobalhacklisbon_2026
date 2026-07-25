@@ -251,6 +251,12 @@ export function PerksLadder(props: Props) {
   const steps = buildRungs(props);
   /** Which rung is open. Scroll drives it; a click can take it over. */
   const [open, setOpen] = useState<number | null>(null);
+  /**
+   * The run happens once. Scrolling back up through a tour you have already
+   * watched should not replay it: you came back for the stack, not the show.
+   */
+  const [toured, setToured] = useState(false);
+  const sawLast = useRef(false);
   const [shown, setShown] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLElement>(null);
@@ -296,7 +302,18 @@ export function PerksLadder(props: Props) {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
+        if (toured) return;
+
         const next = phaseFromScroll(track);
+        if (next === TOURED[TOURED.length - 1]) sawLast.current = true;
+
+        // Seen all three and scrolled past the last one: the run is spent. It
+        // folds up, and from here the ladder is just the stack.
+        if (next === -1 && sawLast.current) {
+          setToured(true);
+          setOpen(null);
+          return;
+        }
         setOpen((prev) => (prev === next ? prev : next));
       });
     };
@@ -307,7 +324,7 @@ export function PerksLadder(props: Props) {
       window.removeEventListener("scroll", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [pinned]);
+  }, [pinned, toured]);
 
   return (
     <div
@@ -379,6 +396,16 @@ export function PerksLadder(props: Props) {
             );
           })}
         </ol>
+
+        {/* Told once, at the moment the section takes the scroll: a reader who
+          * does not know the page has grabbed the wheel will try to scroll and
+          * think it is stuck. Gone as soon as they move. */}
+        {pinned && !toured && open === TOURED[0] ? (
+          <p className="ladder__hint" aria-hidden="true">
+            <span className="ladder__hintarrow" />
+            keep scrolling
+          </p>
+        ) : null}
       </section>
     </div>
   );

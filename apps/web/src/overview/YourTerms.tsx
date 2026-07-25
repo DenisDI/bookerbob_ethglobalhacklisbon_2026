@@ -14,7 +14,7 @@
 // the exposure glyph, which is the same rule the race lanes follow.
 
 import { SettlementRail } from "../SettlementRail";
-import { paymentLine } from "../terms-copy";
+import { yourExposureLine, yourTermsLine } from "../terms-copy";
 import type { OffersResponse } from "../types";
 
 /**
@@ -94,22 +94,40 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
         </p>
       ) : data ? (
         <>
-          <p className="yourterms__term">{paymentLine(data.terms.payment)}</p>
+          <p className="yourterms__term">{yourTermsLine(data.terms.payment)}</p>
           <p className="yourterms__why reason">{data.reason}</p>
 
-          <SettlementRail
-            checkin={data.checkin}
-            checkout={data.checkout}
-            freeCancellationBefore={
-              data.hold?.freeCancellationBefore ??
-              data.offers[0]?.freeCancellationBefore ??
-              null
-            }
-            payment={data.terms.payment}
-            accent={data.terms.payment !== "prepay_100"}
-          />
+          {/* The rail is the signature glyph and it is not self-explanatory. A
+            * hatched bar over a timeline says nothing on its own about whose
+            * money it is, how much of it, or when: those are three questions the
+            * caption above and the line below now answer outright. */}
+          <div className="yourterms__rail">
+            <p className="yourterms__railcap label">
+              your money, from today to checkout
+            </p>
+            <SettlementRail
+              checkin={data.checkin}
+              checkout={data.checkout}
+              freeCancellationBefore={
+                data.hold?.freeCancellationBefore ??
+                data.offers[0]?.freeCancellationBefore ??
+                null
+              }
+              payment={data.terms.payment}
+              accent={data.terms.payment !== "prepay_100"}
+            />
+            <p className="yourterms__held">
+              <span className="yourterms__hatch" aria-hidden="true" />
+              {yourExposureLine(data.terms.payment)}
+            </p>
+          </div>
 
-          {move ? <p className="yourterms__move">{move}</p> : null}
+          {move ? (
+            <p className="yourterms__move">
+              <span className="yourterms__next label">next</span>
+              {move}
+            </p>
+          ) : null}
         </>
       ) : (
         <p className="yourterms__term yourterms__term--waiting">

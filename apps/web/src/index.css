@@ -809,6 +809,41 @@ body {
 }
 
 
+/* Shown once, while the section is holding the scroll and the reader has not
+ * moved yet. Without it a pinned page reads as a page that has frozen. */
+.ladder__hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+  text-transform: uppercase;
+}
+
+.ladder__hintarrow {
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  animation: hint-nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes hint-nudge {
+  0%,
+  100% {
+    transform: rotate(45deg) translate(0, 0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: rotate(45deg) translate(3px, 3px);
+    opacity: 1;
+  }
+}
+
 /* ---------- an opened rung ---------- */
 
 @keyframes rung-open {
@@ -1117,6 +1152,43 @@ body {
 
 .yourterms__why {
   margin: 0;
+}
+
+/* The rail says when money is tied up. It cannot say whose or how much on its
+ * own, so it is captioned above and read out below. */
+.yourterms__rail {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.yourterms__railcap {
+  margin: 0;
+}
+
+.yourterms__held {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: var(--weight-med) var(--size-ui-sm) / 1.35 var(--font-ui);
+  color: var(--color-ink);
+}
+
+/* A swatch of the same hatching that is on the rail, so the sentence and the
+ * glyph are visibly about the same thing. */
+.yourterms__hatch {
+  flex: none;
+  width: 22px;
+  height: 11px;
+  border: 1px solid var(--color-line-strong);
+  background: var(--texture-hatch-ash);
+}
+
+.yourterms__next {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-accent);
 }
 
 /* What would move it, and why it has not moved. The most useful sentence on the

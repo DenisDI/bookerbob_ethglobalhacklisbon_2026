@@ -64,6 +64,46 @@ export function idleBrief(accent: boolean): string {
 }
 
 /**
+ * The same term, said to the person it happens to.
+ *
+ * paymentLine() describes an agent in a lane, so it is written in the third
+ * person: "pays the whole stay". On the overview the subject is the reader, and
+ * a panel headed "your terms right now" that then talks about somebody else is
+ * the reason people said they could not tell what it was showing them.
+ */
+export function yourTermsLine(payment: Payment): string {
+  switch (payment) {
+    case "prepay_100":
+      return "you pay the whole stay before anyone holds a room";
+    case "deposit":
+      return "you leave a deposit, and the rest waits";
+    case "rate_lock_pay_later":
+      return "your price is held now, and settled later";
+    case "pay_at_checkout":
+      return "nothing moves until you check out";
+  }
+}
+
+/**
+ * What the hatched stretch on the rail actually means, in money.
+ *
+ * The glyph is good and it is not self-explanatory: a hatched bar over a
+ * timeline says nothing on its own about whose money it is or how much of it.
+ */
+export function yourExposureLine(payment: Payment): string {
+  switch (payment) {
+    case "prepay_100":
+      return "all of it, tied up from today";
+    case "deposit":
+      return "part of it, and only once free cancellation ends";
+    case "rate_lock_pay_later":
+      return "none of it, until the day it settles";
+    case "pay_at_checkout":
+      return "none of it, until you arrive";
+  }
+}
+
+/**
  * Whether these terms let the money wait, which is the only reason a settlement
  * gets scheduled. Mirrors the gateway's earnsRateLock, kept here so the copy
  * layer can ask the question without importing the underwriting engine.
