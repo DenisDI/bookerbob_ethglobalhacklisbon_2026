@@ -10,11 +10,7 @@ import {
   pickHotels,
 } from "./cityCatalog";
 import { HotelFinaleCard } from "./HotelFinaleCard";
-import {
-  ConnectWalletButton,
-  privyConfigured,
-  useConsentedWallet,
-} from "./auth";
+import { privyConfigured, useConsentedWallet } from "./auth";
 import { hasCredential, type CredentialState } from "./credential";
 import { MachineView } from "./machine";
 import { OverviewPage } from "./overview";
@@ -23,7 +19,6 @@ import { RacePane, type PaneState } from "./RacePane";
 import { RaceLeadIn } from "./RaceLeadIn";
 import { PANE_LABEL } from "./terms-copy";
 import { readView, ViewSwitch, writeView, type View } from "./ViewSwitch";
-import { SelfieCheck } from "./worldid";
 import { SCENARIOS, WhoIsAsking } from "./WhoIsAsking";
 
 /** Until World AgentKit/Selfie lands — not a prize-complete PoH. */
@@ -324,10 +319,16 @@ export function App() {
           accessTokenRef={accessTokenRef}
         />
       ) : null}
-      <ConnectWalletButton onAddress={setAddress} />
-      {/* The overview carries its own personhood step inside the flow, where it
-        * has a job and an explanation. Two of these would both mount. */}
-      {view === "overview" ? null : <SelfieCheck />}
+      {/* No floating wallet chip and no floating personhood widget. Both belong
+        * to the overview's self-serve flow and the overview renders them itself,
+        * inside the steps where they have a job and an explanation. Pinned to
+        * the corner of every surface they were an overlay: on the demo they sat
+        * on top of the race with nothing to do, and they landed in the middle of
+        * a screen recording.
+        *
+        * The session bridge above stays. It is not a control and it is what
+        * actually feeds the address and the access token, so a wallet connected
+        * on the overview keeps working after switching to the race. */}
 
       {/* Every surface hangs off this bar, so the switch is in the same place in
         * all of them and the product is named once. */}
