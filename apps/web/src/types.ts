@@ -2,6 +2,8 @@
 // than a shared package: the demo is one repo away from the source of truth and
 // a build-time coupling would slow the loop down for no benefit.
 
+import type { CredentialSource } from "./credential/types";
+
 export type Tier = "bot" | "human" | "verified" | "elite";
 
 export type Payment =
@@ -70,11 +72,15 @@ export interface OffersResponse {
   offers: Offer[];
   hold: PrebookHold | null;
   /**
-   * What the gateway made of the credential. `verified` with `source: "world"`
-   * only ever comes from a real AgentKit header the server checked against the
-   * AgentBook; the browser flag and the dev verifier are `stand_in` forever.
+   * What the gateway made of the credential. `verified` only ever comes from a
+   * real check on the server: `agentkit` from a signed header verified against
+   * the AgentBook, `world-id` from a nullifier the Developer Portal confirmed.
+   * The browser flag and the dev verifier are `stand_in` forever.
    */
-  credential: { status: "missing" | "stand_in" | "verified"; source?: "world" };
+  credential: {
+    status: "missing" | "stand_in" | "verified";
+    source?: CredentialSource;
+  };
   /** Hedera HashScan schedule URL when pay-later / pay-at-checkout. */
   scheduleUrl: string | null;
   scheduleId: string | null;

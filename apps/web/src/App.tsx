@@ -88,8 +88,8 @@ export function App() {
   const [asked] = useState<CredentialState>(STAND_IN);
   const credential: CredentialState = useMemo(() => {
     const said = backed.data?.credential;
-    if (said?.status === "verified" && said.source === "world") {
-      return { status: "verified", source: "world" };
+    if (said?.status === "verified" && said.source) {
+      return { status: "verified", source: said.source };
     }
     if (said?.status === "missing") return { status: "missing" };
     return asked;

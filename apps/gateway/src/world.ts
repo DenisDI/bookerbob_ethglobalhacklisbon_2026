@@ -25,12 +25,23 @@ import {
   validateAgentkitMessage,
   verifyAgentkitSignature,
 } from "@worldcoin/agentkit";
+import type { Context, MiddlewareHandler } from "hono";
 import { env } from "./env.js";
+import { publicResource } from "./public-url.js";
+
+/**
+ * Where the personhood came from. Two different mechanisms answer two different
+ * questions and must not collapse into one word: AgentKit proves an AGENT is
+ * registered to a human, World ID proves a HUMAN is one. 00-final-plan D.1 wants
+ * both combined in a single term decision, so the distinction is in the type
+ * before there is a second source to distinguish.
+ */
+export type CredentialSource = "agentkit" | "world-id";
 
 export type Credential =
   | { status: "missing"; detail?: string }
   | { status: "stand_in" }
-  | { status: "verified"; source: "world"; humanId: string };
+  | { status: "verified"; source: CredentialSource; humanId: string };
 
 export const NO_CREDENTIAL: Credential = { status: "missing" };
 
@@ -49,6 +60,13 @@ export interface CredentialVerifier {
  * ever hit it on stage.
  */
 const QUOTA_PER_HUMAN = 500;
+
+/**
+ * In memory, so per process: with auto_stop_machines the gateway sleeps when
+ * idle, and both the quota and the spent-nonce set start empty on the next wake.
+ * Stated rather than implied. A shared store is the fix if this ever outgrows a
+ * demo, and the SDK's own type comment warns about the same class of problem.
+ */
 const storage = new InMemoryAgentKitStorage();
 
 async function withinQuota(endpoint: string, humanId: string): Promise<boolean> {
@@ -115,7 +133,7 @@ export function createWorldVerifier(): CredentialVerifier {
           return { status: "missing", detail: "this human is asking too often" };
         }
 
-        return { status: "verified", source: "world", humanId };
+        return { status: "verified", source: "agentkit", humanId };
       } catch (err) {
         return { status: "missing", detail: (err as Error).message };
       }
@@ -163,4 +181,72 @@ export function credentialLabel(credential: Credential): string {
     case "verified":
       return "verified by World";
   }
+}
+
+/**
+ * Credential resolution as middleware, deliberately, not inside a handler.
+ *
+ * specs/01-gateway.md puts this in front of the x402 paywall so a credentialed
+ * request skips metering. If the decision lived in the offers handler, the
+ * paywall and the handler would each have to work it out and agree. Now every
+ * route reads one answer, and the routes that create a hold or move money can
+ * refuse an anonymous caller without repeating the verification.
+ *
+ * No header means no work: nothing is parsed, nothing is looked up.
+ */
+const CREDENTIAL_KEY = "credential";
+
+export function credentialMiddleware(
+  verifier: CredentialVerifier = verifierFromEnv(),
+): MiddlewareHandler {
+  return async (c, next) => {
+    const header = c.req.header("agentkit");
+
+    if (header) {
+      const presented = await verifier.verify(header, publicResource(c));
+
+      // Logged, never returned: the reason a credential did not check out is
+      // operator information, and telling a caller exactly which check it failed
+      // is free help for forging the next one.
+      if (presented.status === "missing" && presented.detail) {
+        console.warn(`credential rejected (${verifier.kind}): ${presented.detail}`);
+      }
+      c.set(CREDENTIAL_KEY, presented);
+    } else {
+      c.set(CREDENTIAL_KEY, NO_CREDENTIAL);
+    }
+
+    await next();
+  };
+}
+
+export function getCredential(c: Context): Credential {
+  return (c.get(CREDENTIAL_KEY) as Credential | undefined) ?? NO_CREDENTIAL;
+}
+
+/**
+ * Deferred settlement is the thing a credential underwrites, so the routes that
+ * hold a room or move money refuse a caller nobody is accountable for. A
+ * stand-in passes: it is the browser demo, and it is labelled as such everywhere.
+ */
+export function mayDeferSettlement(credential: Credential): boolean {
+  return credential.status !== "missing";
+}
+
+/**
+ * The only shape a credential may take on its way out of the gateway.
+ *
+ * Two things stay behind. `humanId` is anonymous but it is still somebody's
+ * identifier and has no business on a screen. `detail` says which check failed,
+ * which is operator information and free help for forging the next attempt: it
+ * is logged instead. One function owns this so no route can leak either by
+ * spreading the object.
+ */
+export function publicCredential(credential: Credential): {
+  status: Credential["status"];
+  source?: CredentialSource;
+} {
+  return credential.status === "verified"
+    ? { status: "verified", source: credential.source }
+    : { status: credential.status };
 }

@@ -2,8 +2,21 @@
 
 import type { Context } from "hono";
 import { getSettlementByOrder, settleSchedule } from "../settlement.js";
+import { getCredential, mayDeferSettlement } from "../world.js";
 
 export async function bookHandler(c: Context) {
+  // Same gate as /prebook: executing a deferred settlement is exactly what an
+  // anonymous caller has not earned.
+  if (!mayDeferSettlement(getCredential(c))) {
+    return c.json(
+      {
+        error: "credential_required",
+        message: "no one is accountable for this request, so nothing is settled",
+      },
+      403,
+    );
+  }
+
   const body = (await c.req.json().catch(() => ({}))) as {
     partnerOrderId?: string;
     scheduleId?: string;

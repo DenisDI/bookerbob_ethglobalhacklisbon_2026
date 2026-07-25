@@ -17,7 +17,7 @@ import {
   narrateTerms,
 } from "../narration.js";
 import { scheduleForHold } from "../settlement.js";
-import { type Credential, NO_CREDENTIAL, verifierFromEnv } from "../world.js";
+import { type Credential, getCredential, publicCredential } from "../world.js";
 import {
   debugSignals,
   decide,
@@ -36,17 +36,6 @@ function parseCredential(raw: string | undefined): boolean | null {
   return null;
 }
 
-const verifier = verifierFromEnv();
-
-/**
- * What the credential was issued for. A header signed for this endpoint is not a
- * credential for /book, so the resource is the path without the query.
- */
-function resourceUri(c: Context): string {
-  const url = new URL(c.req.url);
-  return `${url.origin}${url.pathname}`;
-}
-
 export async function offersHandler(c: Context) {
   const city = c.req.query("city")?.trim() || demo.city;
   const debugTier = c.req.query("tier")?.trim();
@@ -57,17 +46,9 @@ export async function offersHandler(c: Context) {
   // dev verifier are both stand-ins, permanently, and the response keeps them
   // distinguishable so nothing on screen can claim a partner integration that
   // has not run.
-  const header = c.req.header("agentkit");
-  const presented = header
-    ? await verifier.verify(header, resourceUri(c))
-    : NO_CREDENTIAL;
-
-  // Logged, never returned: the reason a credential did not check out is
-  // operator information, and telling a caller exactly which check it failed is
-  // free help for forging the next one.
-  if (header && presented.status === "missing" && presented.detail) {
-    console.warn(`credential rejected (${verifier.kind}): ${presented.detail}`);
-  }
+  // Resolved by the middleware, so the future paywall and this handler read one
+  // answer instead of each working it out.
+  const presented = getCredential(c);
 
   const credential: Credential =
     presented.status !== "missing"
@@ -135,12 +116,9 @@ export async function offersHandler(c: Context) {
     return c.json({
       terms,
       reason,
-      // Status and source only. humanId stays on the server: it is anonymous,
-      // but it is still somebody's identifier and has no business on a screen.
-      credential:
-        credential.status === "verified"
-          ? { status: "verified", source: credential.source }
-          : { status: credential.status },
+      // One function owns what a credential looks like on the wire, so no route
+      // can leak a humanId or a rejection reason by spreading the object.
+      credential: publicCredential(credential),
       city: result.city,
       checkin: result.checkin,
       checkout: result.checkout,

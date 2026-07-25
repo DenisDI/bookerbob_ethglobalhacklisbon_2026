@@ -9,6 +9,13 @@ primary_region = "ams"
 
 [build]
 
+[env]
+  # Not a secret. An AgentKit credential is bound to the resource it was issued
+  # for, and TLS terminates at the Fly edge, so the socket says http while every
+  # agent signs https. Without this the gateway would compare against the wrong
+  # string and refuse credentials that are perfectly good.
+  LISBON2026_PUBLIC_URL = "https://lisbonhack.world"
+
 [http_service]
   internal_port = 3000
   force_https = true

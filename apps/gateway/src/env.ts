@@ -49,6 +49,14 @@ export const env = {
   agentKeyPresent: str("LISBON2026_AGENT_PRIVATE_KEY").length > 0,
 
   /**
+   * The origin callers actually reach, e.g. https://lisbonhack.world. Set it in
+   * production: an AgentKit credential is bound to the resource it was issued
+   * for, and behind a TLS-terminating proxy the server cannot work that out from
+   * the socket. See src/public-url.ts.
+   */
+  publicUrl: str("LISBON2026_PUBLIC_URL"),
+
+  /**
    * auto   live first, captured snapshot on failure (default)
    * live   live only, surface the failure
    * cached snapshot only — for rehearsals and the safety take, no live calls

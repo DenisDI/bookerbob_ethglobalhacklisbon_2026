@@ -4,11 +4,16 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { Hono } from "hono";
 import {
   createMockVerifier,
   credentialLabel,
+  credentialMiddleware,
+  getCredential,
+  mayDeferSettlement,
   NO_CREDENTIAL,
   pickVerifier,
+  publicCredential,
 } from "../src/world.js";
 
 const RESOURCE = "http://localhost:3000/offers";
@@ -49,16 +54,66 @@ test("labels never promise World for a stand-in", () => {
   assert.doesNotMatch(credentialLabel({ status: "stand_in" }), /^verified/i);
   assert.match(credentialLabel({ status: "stand_in" }), /not World yet/i);
   assert.match(
-    credentialLabel({ status: "verified", source: "world", humanId: "h" }),
+    credentialLabel({ status: "verified", source: "agentkit", humanId: "h" }),
     /verified by World/i,
   );
   assert.match(credentialLabel({ status: "missing" }), /no credential/i);
 });
 
+/**
+ * The gate on /prebook and /book. Deferred settlement is what the credential
+ * underwrites, so the routes that hold a room or move money have to refuse a
+ * caller nobody is accountable for. Before this the terms were enforced only
+ * where they were displayed.
+ */
+test("nobody accountable means nothing is deferred", () => {
+  assert.equal(mayDeferSettlement({ status: "missing" }), false);
+  assert.equal(mayDeferSettlement({ status: "stand_in" }), true);
+  assert.equal(
+    mayDeferSettlement({ status: "verified", source: "agentkit", humanId: "h" }),
+    true,
+  );
+});
+
+// The middleware is where every route reads its one answer, so the properties
+// below are about the pipeline, not the verifier.
+function middlewareApp() {
+  const app = new Hono();
+  app.use("*", credentialMiddleware(createMockVerifier()));
+  app.get("/offers", (c) => c.json(getCredential(c)));
+  return app;
+}
+
+test("no header means no credential and no verification work", async () => {
+  const res = await middlewareApp().request("http://localhost/offers");
+  assert.deepEqual(await res.json(), { status: "missing" });
+});
+
+test("a presented header is resolved once, before the handler runs", async () => {
+  const res = await middlewareApp().request("http://localhost/offers", {
+    headers: { agentkit: "dev:human-1" },
+  });
+  assert.deepEqual(await res.json(), { status: "stand_in" });
+});
+
+test("what leaves the gateway is status and source, nothing else", () => {
+  assert.deepEqual(
+    publicCredential({ status: "verified", source: "agentkit", humanId: "h" }),
+    { status: "verified", source: "agentkit" },
+  );
+  // The reason a check failed is logged, not returned: it is free help for
+  // forging the next attempt.
+  assert.deepEqual(
+    publicCredential({ status: "missing", detail: "signature did not verify" }),
+    { status: "missing" },
+  );
+  assert.deepEqual(publicCredential({ status: "stand_in" }), { status: "stand_in" });
+});
+
 test("a humanId is never part of a label", () => {
   const label = credentialLabel({
     status: "verified",
-    source: "world",
+    source: "agentkit",
     humanId: "human-secret-id",
   });
   assert.doesNotMatch(label, /human-secret-id/);

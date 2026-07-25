@@ -3,8 +3,23 @@
 
 import type { Context } from "hono";
 import { scheduleForHold } from "../settlement.js";
+import { getCredential, mayDeferSettlement } from "../world.js";
 
 export async function prebookHandler(c: Context) {
+  // Deferring settlement is the thing the credential underwrites, so the route
+  // that schedules it refuses a caller nobody is accountable for. Without this
+  // the terms were only enforced where they were displayed.
+  const credential = getCredential(c);
+  if (!mayDeferSettlement(credential)) {
+    return c.json(
+      {
+        error: "credential_required",
+        message: "no one is accountable for this request, so nothing is deferred",
+      },
+      403,
+    );
+  }
+
   const body = (await c.req.json().catch(() => ({}))) as {
     partnerOrderId?: string;
   };

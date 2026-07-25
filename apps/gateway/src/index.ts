@@ -8,6 +8,7 @@ import { env } from "./env.js";
 import { bookHandler } from "./routes/book.js";
 import { offersHandler } from "./routes/offers.js";
 import { prebookHandler } from "./routes/prebook.js";
+import { credentialMiddleware } from "./world.js";
 
 // Route surface per specs/01-gateway.md:
 //   GET  /offers?city=&address=   identity -> Graph context -> terms -> inventory
@@ -19,6 +20,12 @@ import { prebookHandler } from "./routes/prebook.js";
 const app = new Hono();
 
 app.use("*", cors());
+
+// Ahead of the routes on purpose. specs/01-gateway.md puts credential resolution
+// in front of the x402 paywall so a credentialed request skips metering; keeping
+// it here means the paywall, /offers and the settlement routes all read one
+// answer. A request without the header costs nothing: nothing is parsed.
+app.use("*", credentialMiddleware());
 
 app.get("/offers", offersHandler);
 app.post("/prebook", prebookHandler);
