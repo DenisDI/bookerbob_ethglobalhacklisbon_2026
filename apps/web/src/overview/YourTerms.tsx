@@ -80,10 +80,13 @@ interface Props {
 function Inputs({
   personhood,
   wallet,
+  walletProved,
   contextRead,
 }: {
   personhood: boolean;
   wallet: boolean;
+  /** The gateway checked a Privy token against the linked wallets, and it matched. */
+  walletProved: boolean;
   contextRead: boolean;
 }) {
   const rows = [
@@ -102,7 +105,11 @@ function Inputs({
       mark: null,
       name: "a wallet",
       on: wallet,
-      state: wallet ? "connected" : "not yet",
+      // An address can arrive by being typed, which is a supported way to look
+      // somebody up and not the same claim as connecting one. Only the gateway
+      // can tell them apart, so the word comes from its answer and not from the
+      // field being non-empty.
+      state: wallet ? (walletProved ? "connected" : "typed") : "not yet",
     },
     {
       key: "standing",
@@ -196,6 +203,7 @@ export function YourTerms({ data, refreshing, error, personhood, wallet }: Props
           <Inputs
             personhood={personhood}
             wallet={wallet}
+            walletProved={data?.wallet?.status === "verified"}
             contextRead={contextRead}
           />
 
