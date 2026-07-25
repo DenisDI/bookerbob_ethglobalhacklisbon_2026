@@ -10,6 +10,7 @@ import { offersHandler } from "./routes/offers.js";
 import { prebookHandler } from "./routes/prebook.js";
 import { publicOrigin } from "./public-url.js";
 import { credentialMiddleware, verifierFromEnv } from "./world.js";
+import { worldChainStatus, worldRpcUrl } from "./world-chain.js";
 
 // Route surface per specs/01-gateway.md:
 //   GET  /offers?city=&address=   identity -> Graph context -> terms -> inventory
@@ -49,6 +50,10 @@ app.get("/health", (c) =>
     inventorySource: env.inventorySource,
     credentialVerifier: verifier.kind,
     resource: `${publicOrigin(c)}/offers`,
+    // Cached and refreshed off the request path, so this never delays the check
+    // Fly polls. null means the first probe has not answered yet.
+    worldChain: worldChainStatus(),
+    worldRpc: worldRpcUrl(),
   }),
 );
 

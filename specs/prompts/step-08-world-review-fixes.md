@@ -72,3 +72,21 @@ Two changes came out of it:
   were invisible from outside: a stand-in verifier looks exactly like a rejected
   signature, and a mismatched resource looks exactly like an unregistered wallet.
   Neither field is a secret.
+
+## Third cause: the SDK cannot tell "unreachable" from "unregistered"
+
+With the origin fixed and the real verifier running, production still answered
+`missing` for a wallet that verifies locally. `createAgentBookVerifier().lookupHuman`
+catches every error and returns `null`, so a rate-limited RPC, a blocked egress
+and a genuinely unregistered wallet are one and the same answer. The default
+endpoint is viem's chain default for World Chain, a shared public one: it answers
+a laptop and may not answer a datacentre.
+
+So the gateway now asks the chain a question of its own, a raw `eth_blockNumber`,
+and reports it in `/health` as `worldChain` plus the `worldRpc` in use. The probe
+is cached and refreshed off the request path, because `/health` is what Fly polls
+every 15 seconds with a 2 second timeout and must never wait on the very thing
+being questioned. `LISBON2026_WORLD_RPC_URL` overrides the endpoint.
+
+This also decides who owns the problem: `world chain unreachable from this
+machine` is ours, `agent wallet is not registered` is the caller's.

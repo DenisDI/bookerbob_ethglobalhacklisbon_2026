@@ -56,6 +56,13 @@ export const env = {
   credentialMode: str("LISBON2026_CREDENTIAL_MODE"),
 
   /**
+   * World Chain RPC for the AgentBook lookup. Empty means viem's chain default,
+   * which is a shared public endpoint: fine from a laptop, not something to rely
+   * on from a datacentre IP. See src/world-chain.ts.
+   */
+  worldRpcUrl: str("LISBON2026_WORLD_RPC_URL"),
+
+  /**
    * The origin callers actually reach, e.g. https://lisbonhack.world. Set it in
    * production: an AgentKit credential is bound to the resource it was issued
    * for, and behind a TLS-terminating proxy the server cannot work that out from

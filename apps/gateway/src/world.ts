@@ -28,6 +28,7 @@ import {
 import type { Context, MiddlewareHandler } from "hono";
 import { env } from "./env.js";
 import { publicResource } from "./public-url.js";
+import { probeWorldChain, worldRpcUrl } from "./world-chain.js";
 
 /**
  * Where the personhood came from. Two different mechanisms answer two different
@@ -98,7 +99,9 @@ async function checkNonce(nonce: string): Promise<boolean> {
 }
 
 export function createWorldVerifier(): CredentialVerifier {
-  const agentBook = createAgentBookVerifier();
+  // Our own RPC when configured. The SDK default is a shared public endpoint, and
+  // lookupHuman turns any failure against it into a plain null.
+  const agentBook = createAgentBookVerifier({ rpcUrl: worldRpcUrl() });
 
   return {
     kind: "world",
@@ -125,8 +128,17 @@ export function createWorldVerifier(): CredentialVerifier {
 
         const humanId = await agentBook.lookupHuman(signature.address);
         if (!humanId) {
-          // Not an error: the wallet simply is not registered in the AgentBook.
-          return { status: "missing", detail: "agent wallet is not registered" };
+          // lookupHuman returns null for an unregistered wallet AND for every
+          // failure on the way to asking, so the two get told apart here. One is
+          // the caller's problem, the other is ours, and they were reported as
+          // the same sentence until this check existed.
+          const chain = await probeWorldChain();
+          return {
+            status: "missing",
+            detail: chain.ok
+              ? "agent wallet is not registered"
+              : `world chain unreachable from this machine: ${chain.detail}`,
+          };
         }
 
         if (!(await withinQuota(resourceUri, humanId))) {
