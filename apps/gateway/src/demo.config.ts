@@ -16,12 +16,9 @@ export const demo = {
    */
   captureTopN: 10,
 
-  /**
-   * Preferred hotel for the finale card: 4 stars and 6 photos, which reads far
-   * better on camera than the cheapest match. The one-shot call picks the best
-   * price, so this is the id to enrich and feature, not to force.
-   */
-  finaleHotelId: "neya_lisboa_hotel",
+  // No hotel is pinned for the finale on purpose. The card shows whichever
+  // property the supplier actually held, because featuring a nicer hotel than
+  // the one under the hold would put a booking on screen that does not exist.
 } as const;
 
 /** Checkout is the date the scheduled settlement targets. */

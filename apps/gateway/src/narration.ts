@@ -5,6 +5,7 @@
 // no jargon on this surface — those belong in a dev pane, not the story. Lines
 // describe what actually happened, so they stay true when a step fails.
 
+import { env } from "./env.js";
 import type {
   ContextSnapshot,
   InventoryResult,
@@ -42,7 +43,13 @@ export function narrateSearch(n: Narrator, city: string, result: InventoryResult
   );
 
   if (result.source === "cached") {
-    n.say("the desk is not answering right now. going with the prices i wrote down earlier");
+    // Two different truths wear the same tag. Saying the desk is silent while
+    // we deliberately chose not to call it would be a lie on camera.
+    n.say(
+      env.inventorySource === "cached"
+        ? "running on the prices i wrote down earlier"
+        : "the desk is not answering right now. going with the prices i wrote down earlier",
+    );
   }
 
   if (result.matchingCount !== null) {

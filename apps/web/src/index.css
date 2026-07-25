@@ -1,8 +1,32 @@
+/* FairTerms race.
+ *
+ * Two rules carry the whole look:
+ *
+ * 1. Colour means accountability. The unbacked pane is drawn in greys only.
+ *    Blue appears where a real person stands behind the request, so the palette
+ *    itself states the thesis before a word is read.
+ * 2. Monospace is for machine facts, sans is for the agent's sentences. Prices,
+ *    dates and hold ids are ledger entries; narration is speech.
+ *
+ * System faces only, deliberately: a conference network must never be able to
+ * take the typography down mid demo.
+ */
+
 :root {
   color-scheme: dark;
+
   --canvas: #0a0a0f;
+  --surface: #101017;
+  --line: #23232f;
   --ink: #f2f3f7;
-  --muted: #7a7f92;
+  --muted: #767c90;
+  --blue: #3b5bff;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --gap: clamp(1rem, 2.4vw, 2rem);
+  --hatch: repeating-linear-gradient(-45deg, #14141c 0 1px, transparent 1px 9px);
 }
 
 * {
@@ -12,13 +36,572 @@
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
   background: var(--canvas);
   color: var(--ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+:where(a) {
+  color: var(--blue);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+:where(button, a):focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* ---------- page ---------- */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding-bottom: var(--gap);
+  border-bottom: 1px solid var(--line);
+}
+
+.thesis {
+  margin: 0;
+  max-width: 18ch;
+  font-size: clamp(1.65rem, 4.4vw, 3.1rem);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+}
+
+.ask {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ask__prompt {
+  margin: 0;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.ask__run {
+  padding: 0.6rem 1.15rem;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--canvas);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.ask__run:hover:not(:disabled) {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--ink);
+}
+
+.ask__run:disabled {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: progress;
+}
+
+/* ---------- race ---------- */
+
+.race {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  /* Grid and flex children default to min-width auto, which lets a long hotel
+   * name push the whole page wider than the viewport. */
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.75rem);
+  background: var(--canvas);
+}
+
+.pane--accent {
+  background: var(--surface);
+}
+
+.pane__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  min-width: 0;
+}
+
+.pane__label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pane--accent .pane__label {
+  color: var(--blue);
+}
+
+.pane__term {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.pane__count {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pane__feed {
+  min-height: 8.5rem;
+}
+
+.pane__error {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 2px solid var(--muted);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Content packs to the top. The shorter pane simply ends, which reads as a
+ * smaller result rather than a hole punched in the middle of a column. */
+.pane__rooms {
+  margin-top: 0;
+}
+
+/* ---------- settlement rail (the signature) ---------- */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rail__track {
+  position: relative;
+  height: 3.5rem;
+  border: 1px solid var(--line);
+  background: #0d0d14;
+  overflow: hidden;
+}
+
+/* Hatching reads as encumbered, the way a struck-through column does on paper. */
+.rail__held {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #3a3a49 0 1px,
+    transparent 1px 7px
+  );
+  border-top: 1px solid #4a4a5c;
+  transform-origin: left center;
+  animation: rail-fill 620ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+.rail__settle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 4px;
+  background: var(--blue);
+  box-shadow: 0 0 22px 2px rgb(59 91 255 / 0.5);
+  animation: rail-settle 620ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+/* Deadlines sit above the hatching, otherwise the encumbered stretch swallows
+ * the one date the guest actually cares about. */
+.rail__tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #6d7288 0 3px,
+    transparent 3px 6px
+  );
+}
+
+.rail__marks {
+  position: relative;
+  height: 0.9rem;
+}
+
+.rail__mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.rail__scale {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.rail__caption {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.rail--accent .rail__caption {
+  color: var(--ink);
+}
+
+.rail--empty .rail__track {
+  background: repeating-linear-gradient(
+    -45deg,
+    #14141c 0 1px,
+    transparent 1px 9px
+  );
+}
+
+@keyframes rail-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rail-settle {
+  from {
+    opacity: 0;
+    transform: translateX(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------- spent ---------- */
+
+.spent {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.spent__label {
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.spent__value {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.spent__tail {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* ---------- narration ---------- */
+
+.feed {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.feed__line {
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--line);
+  font-size: 0.95rem;
+  color: #c7cad6;
+  animation: line-in 260ms ease both;
+}
+
+.pane--accent .feed__line {
+  border-left-color: rgb(59 91 255 / 0.45);
+}
+
+.feed__idle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+@keyframes line-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- rooms ---------- */
+
+.rooms {
+  display: flex;
+  flex-direction: column;
+}
+
+.rooms__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.rooms__name {
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rooms__stars {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.rooms__price {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+}
+
+.rooms__rest {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ---------- finale ---------- */
+
+.finale {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr);
+  gap: 1rem;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--blue);
+  background: #0d0d14;
+}
+
+.finale__photo {
+  width: 100%;
+  height: 100%;
+  min-height: 9rem;
+  object-fit: cover;
+  display: block;
+}
+
+.finale__photo--none {
+  background: repeating-linear-gradient(
+    -45deg,
+    #14141c 0 1px,
+    transparent 1px 9px
+  );
+}
+
+.finale__body {
+  padding: 0.9rem 1rem 1rem 0;
+}
+
+.finale__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.finale__name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.finale__stars {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.finale__address {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.finale__rate {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin: 0.7rem 0 0.9rem;
+}
+
+.finale__amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.finale__per {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.badge {
+  margin-left: auto;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.finale__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.finale__facts div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.finale__facts dt {
+  min-width: 11ch;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.finale__facts dd {
+  margin: 0;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.pending {
+  color: var(--muted);
+}
+
+/* ---------- foot ---------- */
+
+.foot {
+  padding-top: var(--gap);
+  border-top: 1px solid var(--line);
+}
+
+.foot p {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* ---------- narrow ---------- */
+
+@media (max-width: 860px) {
+  .race {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .finale {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .finale__body {
+    padding: 0 1rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail__held,
+  .rail__settle,
+  .feed__line {
+    animation: none;
+  }
+
+  .ask__run {
+    transition: none;
+  }
 }
