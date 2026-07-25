@@ -1332,6 +1332,63 @@ body {
   color: var(--color-muted);
 }
 
+/* ---------- top bar and the view switch ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  /* Clears the fixed wallet control in the corner. */
+  padding: var(--space-3) 172px var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.wordmark {
+  font: var(--weight-bold) var(--size-ui-sm) / 1 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
+}
+
+.topbar__note {
+  font: var(--weight-reg) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+  text-transform: uppercase;
+}
+
+.viewswitch {
+  display: flex;
+  border: 1px solid var(--color-line-strong);
+}
+
+.viewswitch__btn {
+  padding: 7px 11px;
+  border: 0;
+  background: none;
+  color: var(--color-muted);
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--duration-tap) ease;
+}
+
+.viewswitch__btn + .viewswitch__btn {
+  border-left: 1px solid var(--color-line-strong);
+}
+
+.viewswitch__btn:hover:not(.is-on) {
+  color: var(--color-ink);
+}
+
+/* The selected view is inverted rather than tinted: this is a mode, and a mode
+ * should be unmistakable at a glance in a screen recording. */
+.viewswitch__btn.is-on {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+
 /* ---------- what is taking part ---------- */
 
 .taking-part {
@@ -1439,6 +1496,550 @@ body {
  * struck through, never red. */
 .part--aside .part__who,
 .part--aside .part__line {
+  color: var(--color-faint);
+}
+
+/* ---------- machine view: the handshake ----------
+ *
+ * Mono for everything, because on this screen everything is a machine fact. The
+ * accountability rule is unchanged: the path where a real person stands behind
+ * the request carries the accent, the metered path stays in greys, so the fork in
+ * the handshake is visible before a field is read.
+ */
+
+.machine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.machine__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.machine__lede {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.machine__title {
+  margin: 0;
+  font: var(--weight-bold) var(--size-ui-xl) / 1.1 var(--font-mono);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
+}
+
+.machine__sub {
+  margin: 0;
+  max-width: 62ch;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+/* Provenance is explained once here so every tag in the thread reads without a
+ * caption of its own. */
+.machine__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  max-width: 46ch;
+}
+
+.legend__item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.legend__item dd {
+  margin: 0;
+  font: var(--weight-reg) 12px / 1.4 var(--font-ui);
+  color: var(--color-faint);
+}
+
+.pathsel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.pathsel__btn {
+  padding: 6px 10px;
+  border: 1px solid var(--color-line-strong);
+  background: none;
+  color: var(--color-muted);
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.pathsel__btn.is-on {
+  color: var(--color-ink-bright);
+  border-color: var(--color-ash);
+}
+
+/* Selecting the answerable path is the only place colour enters this control. */
+.pathsel__btn--accountable.is-on {
+  color: var(--color-accent);
+  border-color: var(--color-accent-soft);
+}
+
+/* ---------- the thread ---------- */
+
+.thread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.frame {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+/* One vertical line down the gutter with numbered nodes on it, so the frames read
+ * as a single conversation rather than a stack of panels. */
+.frame__gutter {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 14px;
+}
+
+.frame__gutter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--color-line);
+}
+
+.frame:first-child .frame__gutter::before {
+  top: 14px;
+}
+
+.frame:last-child .frame__gutter::before {
+  bottom: auto;
+  height: 14px;
+}
+
+.frame__no {
+  position: relative;
+  z-index: 1;
+  padding: 2px 0;
+  background: var(--color-canvas);
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+}
+
+.frame--accountable .frame__no {
+  color: var(--color-accent);
+}
+
+.frame__box {
+  min-width: 0;
+  margin: 0 0 var(--space-3);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-3);
+}
+
+.frame--accountable .frame__box {
+  border-left: 2px solid var(--color-accent);
+}
+
+.frame__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: 9px var(--space-3);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface-2);
+}
+
+.frame__dir {
+  font: var(--weight-bold) var(--size-ui-sm) / 1 var(--font-mono);
+  color: var(--color-ash);
+}
+
+.frame--accountable .frame__dir {
+  color: var(--color-accent);
+}
+
+.frame__title {
+  margin: 0;
+  font: var(--weight-bold) 11px / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-ink-bright);
+  text-transform: uppercase;
+}
+
+/* A status is a fact, not a verdict: 402 is a normal branch in this product and
+ * is never coloured like a failure. Only 5xx takes the system mark. */
+.frame__status {
+  padding: 3px 5px;
+  border: 1px solid var(--color-line-strong);
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-ash);
+}
+
+.frame__actor,
+.frame__prov {
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.frame__actor {
+  color: var(--color-faint);
+}
+
+.frame__prov {
+  padding: 3px 5px;
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-faint);
+}
+
+.frame__prov--live {
+  color: var(--color-ash);
+  border-color: var(--color-ash);
+}
+
+/* Dashed, the same language the participants strip uses for provisional: this is
+ * the shape of a leg, not a capture of one. */
+.frame__prov--declared {
+  border-style: dashed;
+}
+
+.frame__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.frame__note {
+  margin: 0;
+  max-width: 76ch;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.frame__link {
+  margin: 0;
+  font: var(--weight-med) var(--size-ui-sm) / 1.2 var(--font-ui);
+}
+
+/* The literal line on the wire. Inverted block: it is the one thing in the frame
+ * that was transmitted verbatim. */
+.wire {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--color-line-strong);
+  background: var(--color-canvas);
+  font: var(--weight-med) var(--size-mono-fact) / 1.4 var(--font-mono);
+  color: var(--color-ink-bright);
+  overflow-wrap: anywhere;
+}
+
+.frame--accountable .wire {
+  border-left-color: var(--color-accent);
+}
+
+/* ---------- typed rows ---------- */
+
+.fields {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+}
+
+.fld {
+  display: grid;
+  grid-template-columns: minmax(9rem, 15rem) minmax(6rem, auto) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+}
+
+.fld__k,
+.fld__v,
+.fld__d {
+  margin: 0;
+  font: var(--weight-reg) 13px / 1.5 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.fld__k {
+  color: var(--color-faint);
+}
+
+.fld__v {
+  color: var(--color-ink);
+  font-weight: var(--weight-med);
+}
+
+.fld__v--accent {
+  color: var(--color-accent);
+}
+
+/* Not sent, and not empty either. Withheld reads as a deliberate absence, which
+ * is what it is: bands never become zeros and identifiers never become strings. */
+.fld__v--withheld {
+  color: var(--color-faint);
+}
+
+/* The domain of the field, as a comment. What a machine may expect in the slot,
+ * which is what turns a sample into a schema. */
+.fld__d {
+  color: rgba(233, 229, 220, 0.3);
+}
+
+.fields__cap,
+.fields__none {
+  margin: 0;
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-faint);
+  text-transform: uppercase;
+}
+
+.fields__cap {
+  margin-bottom: 6px;
+}
+
+/* ---------- sections inside one response ---------- */
+
+.msection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-hairline);
+}
+
+.msection:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.msection__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-ash);
+}
+
+.msection__title {
+  margin: 0;
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-ink);
+  text-transform: uppercase;
+}
+
+/* ---------- the fork ---------- */
+
+.branch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.branch__opt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  background: var(--color-canvas);
+}
+
+/* The answerable option is the only one that gets colour. Same rule as the lanes:
+ * this is where a real person is on the hook. */
+.branch__opt--accountable {
+  border-color: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.branch__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.branch__label {
+  margin: 0;
+  font: var(--weight-bold) 11px / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.branch__note {
+  margin: 0;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.45 var(--font-ui);
+  color: var(--color-muted);
+}
+
+/* x402 has no mark in the package, so its name in mono is its mark. On an
+ * all-mono screen the protocol's own token reads as native, and a drawn logo we
+ * invented would not. */
+.mark-x402 {
+  padding: 2px 4px;
+  border: 1px solid currentColor;
+  font: var(--weight-bold) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+/* ---------- offers table ---------- */
+
+.otable {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--weight-reg) 13px / 1.5 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Left as written, not uppercased: these are the response's real field names, and
+ * PERNIGHTUSD is not a field anyone can look up. */
+.otable th {
+  text-align: left;
+  padding: 0 var(--space-3) 6px 0;
+  border-bottom: 1px solid var(--color-line);
+  font: var(--weight-med) 11px / 1 var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--color-faint);
+  white-space: nowrap;
+}
+
+.otable td {
+  padding: 5px var(--space-3) 5px 0;
+  border-bottom: 1px solid var(--color-hairline);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+.otable__num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ---------- empty state and the tool surface ---------- */
+
+.machine__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-line-strong);
+}
+
+.machine__emptyline {
+  margin: 0;
+  max-width: 64ch;
+  font: var(--weight-reg) var(--size-ui-md) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.tools__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tools__title {
+  margin: 0;
+  font: var(--weight-bold) var(--size-ui-lg) / 1.2 var(--font-mono);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
+}
+
+.tools__sub {
+  margin: 0;
+  max-width: 66ch;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.tools__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-3);
+}
+
+.tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-3);
+}
+
+.tool__name {
+  margin: 0;
+  font: var(--weight-bold) var(--size-mono-fact) / 1.2 var(--font-mono);
+  color: var(--color-ink-bright);
+}
+
+/* A tool card is far narrower than a frame, so the three-column schema row would
+ * crush the domain into a one-word column. Key beside value, domain under it. */
+.tool .fld {
+  grid-template-columns: minmax(5rem, 8rem) minmax(0, 1fr);
+  gap: 0 var(--space-2);
+}
+
+.tool .fld__k {
+  grid-area: 1 / 1;
+}
+
+.tool .fld__v {
+  grid-area: 1 / 2;
+}
+
+.tool .fld__d {
+  grid-area: 2 / 2;
+}
+
+.tool__summary,
+.tool__returns {
+  margin: 0;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.45 var(--font-ui);
+  color: var(--color-muted);
+}
+
+.machine__foot {
+  margin: 0;
+  max-width: 76ch;
+  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
   color: var(--color-faint);
 }
 

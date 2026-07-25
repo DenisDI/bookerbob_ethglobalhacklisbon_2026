@@ -11,10 +11,12 @@ import {
   useConsentedWallet,
 } from "./auth";
 import { hasCredential, type CredentialState } from "./credential";
+import { MachineView } from "./machine";
 import { ParticipantsBand, ParticipantsBandGuest } from "./ParticipantsBand";
 import { RacePane, type PaneState } from "./RacePane";
 import { SaidOnce } from "./SaidOnce";
 import { PANE_LABEL } from "./terms-copy";
+import { readView, ViewSwitch, writeView, type View } from "./ViewSwitch";
 
 /**
  * Where the demo starts, not where it is stuck. The field is editable and the
@@ -81,6 +83,8 @@ export function App() {
   const [backed, setBacked] = useState<PaneState>(IDLE);
   const [address, setAddress] = useState("");
   const [city, setCity] = useState(DEFAULT_CITY);
+  // Read from the URL on first paint so a machine-view link opens on it.
+  const [view, setView] = useState<View>(() => readView(window.location.search));
   // Product race uses stand-in until World wires verified.
   // The server owns this. The browser may ask with a stand-in, but only the
   // gateway can say the credential was verified by World, because only it saw
@@ -154,6 +158,8 @@ export function App() {
     [address, city, credential],
   );
 
+  useEffect(() => writeView(view), [view]);
+
   const autorun = useRef(false);
   useEffect(() => {
     if (autorun.current) return;
@@ -169,18 +175,32 @@ export function App() {
     <main className="page">
       {privyConfigured ? <PrivyAddressBridge onAddress={setAddress} /> : null}
       <ConnectWalletButton />
-      <header className="masthead">
-        <div className="masthead__lede">
-          <h1 className="thesis">who is behind an agent changes the terms it gets</h1>
-          {/* The thesis is the claim. This is the same claim in the words a
-            * guest would use, so a stranger who reads only these two blocks
-            * knows what the product does. */}
-          <p className="thesis__plain">
-            an ai agent books the hotel room for you. same room, same nightly
-            rate for everyone. what changes is when the money leaves your
-            pocket, and that depends on who is standing behind the agent.
-          </p>
-        </div>
+
+      {/* Both views hang off this bar, so the switch is in the same place in
+        * either one and the product is named once. */}
+      <div className="topbar">
+        <span className="wordmark">BookerBob</span>
+        <ViewSwitch view={view} onChange={setView} />
+        <span className="topbar__note">the same request, told twice</span>
+      </div>
+
+      {/* The ask is shared: the machine view runs the same request, so it needs
+        * the same controls. The human pitch above it is not, because the machine
+        * view carries its own title and does not argue. */}
+      <header className={`masthead ${view === "machine" ? "masthead--machine" : ""}`}>
+        {view === "human" ? (
+          <div className="masthead__lede">
+            <h1 className="thesis">who is behind an agent changes the terms it gets</h1>
+            {/* The thesis is the claim. This is the same claim in the words a
+              * guest would use, so a stranger who reads only these two blocks
+              * knows what the product does. */}
+            <p className="thesis__plain">
+              an ai agent books the hotel room for you. same room, same nightly
+              rate for everyone. what changes is when the money leaves your
+              pocket, and that depends on who is standing behind the agent.
+            </p>
+          </div>
+        ) : null}
         <div className="ask">
           {/* The request itself, and it is a real field: the city travels to the
             * desk. Enter runs the race, the same as the button below. */}
@@ -214,6 +234,18 @@ export function App() {
         </div>
       </header>
 
+      {view === "machine" ? (
+        <MachineView
+          city={city}
+          address={address}
+          credential={credential}
+          bot={bot}
+          backed={backed}
+          running={running}
+          onRun={() => void run()}
+        />
+      ) : (
+        <>
       {privyConfigured ? (
         <ParticipantsWithWallet
           credential={credential}
@@ -288,6 +320,8 @@ export function App() {
           between booking and the stay.
         </p>
       </footer>
+        </>
+      )}
     </main>
   );
 }
