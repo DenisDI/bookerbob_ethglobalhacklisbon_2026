@@ -71,8 +71,13 @@ export const env = {
   worldRpId: str("LISBON2026_WORLD_RP_ID"),
   worldSigningKey: str("LISBON2026_WORLD_SIGNING_KEY"),
 
-  /** What the person is proving uniqueness for. One action, so one nullifier. */
-  worldAction: str("LISBON2026_WORLD_ACTION", "bookerbob-terms"),
+  /**
+   * What the person is proving uniqueness for. One action, so one nullifier.
+   * Matches the action registered in the Developer Portal: a name the Portal has
+   * not seen is created on the fly, which works but leaves the settings for it
+   * somewhere nobody is looking.
+   */
+  worldAction: str("LISBON2026_WORLD_ACTION", "selfie-verify"),
 
   /**
    * Which credentials are accepted, in the order they are offered.

@@ -52,7 +52,7 @@ type WorldIdConfig = {
  */
 const FAILURE_COPY: Record<string, string> = {
   credential_unavailable:
-    "this world id has no selfie check or orb credential yet. set one up in world app, or use the simulator",
+    "world app has no face credential yet, it is still coming soon there. an orb verified world id works, otherwise use the simulator",
   credential_missing: "the proof carried no credential this desk accepts",
   portal_refused: "world could not verify that proof",
   stale: "the request went stale, press the button again",
@@ -195,7 +195,7 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
       ) : (
         <p className="selfie__reason reason">
           {config
-            ? `world id ${config.credentials[0]!.replace(/_/g, " ")} (${config.environment})`
+            ? `world id, ${config.credentials.map((c) => c.replace(/_/g, " ")).join(" or ")} (${config.environment})`
             : "world id"}
         </p>
       )}

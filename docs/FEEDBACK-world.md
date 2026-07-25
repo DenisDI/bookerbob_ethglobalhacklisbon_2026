@@ -266,6 +266,47 @@ Also worth reconciling: `docs.world.org/world-id/idkit/verification-flows` says
 enrollment first". What we observed was `credential_unavailable` with no
 enrollment offered. Whichever is right, the other one is misleading.
 
+## 12. Selfie Check is documented, requestable, and not yet issuable to anyone
+
+This is the finding that ends the thread, and it is the one we would most like
+back as an hour of our lives.
+
+Selfie Check has a credential id (11), a documentation page, a sandbox testing
+page, and a place in `constraints: { type: "selfie" }`. Our Portal app reports
+`enable_face_check: true`. Everything an integrator can see says build it.
+
+Then a real World App opens "Add credential" and shows:
+
+```
+Proof of human    Prove you're a unique human
+Official ID       Prove your age, nationality, or gender
+
+Coming soon
+Face credential   Proves your liveness and uniqueness      (greyed out)
+```
+
+Nobody can hold the credential yet. Every request for it must fail, and it fails
+as `credential_unavailable`, rendered to the user as "Something went wrong". We
+went through four environments, two protocol versions, the Portal API and a
+debugger before reaching the one screen that says it plainly, on a phone.
+
+The gap is not the timeline, betas ship when they ship. The gap is that nothing
+on the developer surface reflects it: docs, credential id, Portal flag and SDK
+all behave as though the credential exists, and the only honest signal lives in
+the consumer app.
+
+**Asks:**
+- mark not-yet-issuable credentials on the docs page and in the Portal. One line,
+  "Face credential is coming soon in World App", saves every integrator this
+  entire evening;
+- have the Portal's `enable_face_check` reflect issuability rather than intent;
+- return a distinct error, `credential_not_yet_available`, so an integrator can
+  tell "this person does not have it" from "nobody can have it". Those are
+  different problems with different fixes and today they are one string.
+
+What we do meanwhile: ask for either credential, so an orb verified World ID
+passes today and Face credential works the day it ships, with no code change.
+
 ## What we shipped against this
 
 `apps/gateway/src/world.ts`: verification behind a `CredentialVerifier`

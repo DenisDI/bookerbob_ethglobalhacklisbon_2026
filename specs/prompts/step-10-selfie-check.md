@@ -178,3 +178,28 @@ proved by proof of human".
 One thing stays open and only a human can close it: whether a World ID holds a
 Selfie Check credential at all, which is not the same as having Face Auth turned
 on in World App.
+
+## Why Selfie Check cannot be the demo
+
+The thread ends at a screen in World App, not in our code. "Add credential"
+offers Proof of human and Official ID, and lists **Face credential** under
+**Coming soon**, greyed out. Nobody can hold credential 11 yet, so every request
+for it fails, and it fails as `credential_unavailable` rendered as "Something
+went wrong".
+
+Everything on the developer surface said otherwise: a credential id, a docs page,
+a sandbox testing page, `constraints: { type: "selfie" }` in the SDK, and
+`enable_face_check: true` on our own app in the Portal. Four environments, two
+protocol versions, the Portal API and a debugger later, the honest signal turned
+out to live only in the consumer app.
+
+So the ask stays a list, `any: [selfie, proof_of_human]`, and nothing is thrown
+away: an orb verified World ID passes today, Face credential works the day it
+ships with no code change, and a person with no phone takes the simulator link
+that is offered in the step itself. The screen says which of them ran.
+
+This is written up in `docs/FEEDBACK-world.md` as the strongest of the World
+findings, with three asks: mark not-yet-issuable credentials in docs and Portal,
+make `enable_face_check` reflect issuability rather than intent, and return
+`credential_not_yet_available` so an integrator can tell "this person lacks it"
+from "nobody can have it".
