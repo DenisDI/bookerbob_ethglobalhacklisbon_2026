@@ -130,6 +130,28 @@ export function App() {
   /** Privy-authenticated wallet only — null when disconnected. */
   const [myWallet, setMyWallet] = useState<string | null>(null);
   const [city, setCity] = useState<string>(DEFAULT_CITY);
+  // Same draw both lanes share; refreshed whenever the city select changes so
+  // the lists do not stay stuck on the previous city's rooms until re-run.
+  const cityHotels = useMemo(() => pickHotels(city, 5), [city]);
+  useEffect(() => {
+    const patch = (set: React.Dispatch<React.SetStateAction<PaneState>>) => {
+      set((prev) => {
+        if (!prev.data) return prev;
+        const limit = prev.data.terms.inventory === "basic" ? 3 : 5;
+        return {
+          ...prev,
+          data: {
+            ...prev.data,
+            city,
+            offers: cityHotels.slice(0, limit),
+            matchingCount: cityHotels.length,
+          },
+        };
+      });
+    };
+    patch(setBot);
+    patch(setBacked);
+  }, [city, cityHotels]);
   // Read from the URL on first paint so a machine-view link opens on it.
   const [view, setView] = useState<View>(() => readView(window.location.search));
   // Product race uses stand-in until World wires verified.
@@ -200,9 +222,9 @@ export function App() {
         // than on a worse one.
       }
       const baseline = ledgerBaseline.current ?? 0;
-      // Same random five-star draw for both lanes so the race still compares
-      // terms on identical rooms, not two different supplier snapshots.
-      const catalogOffers = pickHotels(city, 5);
+      // Prefer the live cityHotels draw so a mid-race city change and this
+      // settle land on the same five rooms.
+      const catalogOffers = cityHotels;
 
       const settle = async (
         set: React.Dispatch<React.SetStateAction<PaneState>>,
@@ -268,7 +290,7 @@ export function App() {
         }),
       ]);
     },
-    [address, city, credential],
+    [address, city, cityHotels, credential],
   );
 
   useEffect(() => writeView(view), [view]);

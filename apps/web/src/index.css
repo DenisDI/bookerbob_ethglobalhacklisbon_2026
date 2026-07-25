@@ -702,6 +702,14 @@ body {
   border-top: 1px solid var(--color-line);
 }
 
+/* Sit under the city select inside the hero — no top rule, tighter pad. */
+.ov__rooms--inline {
+  width: 100%;
+  max-width: 40rem;
+  padding: var(--space-3) 0 0;
+  border-top: 0;
+}
+
 .ov__flowhead {
   display: flex;
   flex-direction: column;

@@ -42,7 +42,7 @@ import {
 } from "../cityCatalog";
 import { ContextFile } from "../ContextFile";
 import { HotelFinaleCard } from "../HotelFinaleCard";
-import { OfferList, OfferSkeleton } from "../OfferList";
+import { OfferList } from "../OfferList";
 import { WorldMark } from "../PartnerMarks";
 import type { OffersResponse } from "../types";
 import { SelfieCheck } from "../worldid";
@@ -193,6 +193,20 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
             </select>
           </form>
         </div>
+        {/* Right under the city select so a change is visible without scrolling. */}
+        <section className="ov__rooms ov__rooms--inline" aria-live="polite">
+          <div className="ov__flowhead">
+            <h2 className="ov__h2">rooms in {cityLabel(city)}</h2>
+            <p className="ov__flowlede">
+              five random five-star rooms from the local catalog
+            </p>
+          </div>
+          <OfferList
+            offers={cityHotels}
+            limit={5}
+            accent={Boolean(data && data.terms.payment !== "prepay_100")}
+          />
+        </section>
         <p className="kicker">who is behind a booking changes the terms it gets</p>
         <h1 className="thesis">
           book a hotel in seconds, for yourself or for your agent
@@ -302,24 +316,6 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
             />
           </div>
         </div>
-      </section>
-
-      <section className="ov__rooms">
-        <div className="ov__flowhead">
-          <h2 className="ov__h2">rooms in {cityLabel(city)}</h2>
-          <p className="ov__flowlede">
-            five random five-star rooms from the local catalog
-            {data?.source === "cached" ? " · terms still from the live desk" : ""}
-          </p>
-        </div>
-
-        {!data && refreshing ? <OfferSkeleton rows={5} /> : null}
-
-        <OfferList
-          offers={cityHotels}
-          limit={5}
-          accent={Boolean(data && data.terms.payment !== "prepay_100")}
-        />
       </section>
 
       {data?.hold && data.offers[0] ? (
