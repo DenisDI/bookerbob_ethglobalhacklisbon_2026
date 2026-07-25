@@ -7,10 +7,12 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
+    "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
+    "@modelcontextprotocol/sdk": "^1.13.0",
     "hono": "^4.6.14"
   },
   "devDependencies": {

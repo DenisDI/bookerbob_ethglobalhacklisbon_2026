@@ -1,0 +1,139 @@
+{
+  "capturedAt": "2026-07-25T10:52:22.083Z",
+  "capturedFrom": "flexrep booker MCP find_and_prebook_hotel + get_hotel_info",
+  "note": "Real supplier response captured during ETHGlobal Lisbon 2026. Prices and the prebook hold were valid at capture time; the hold itself expires in minutes upstream. Hotel metadata (get_hotel_info) captured at 10:45 UTC before that tool started failing server-side.",
+  "query": {
+    "city": "Lisbon",
+    "checkin": "2026-08-14",
+    "checkout": "2026-08-17",
+    "adults": 2,
+    "topN": 3
+  },
+  "response": {
+    "status": "ok",
+    "request": {
+      "city": "Lisbon",
+      "checkin": "2026-08-14",
+      "checkout": "2026-08-17",
+      "nights": 3,
+      "guests": [
+        {
+          "adults": 2,
+          "children": []
+        }
+      ],
+      "residency": "us",
+      "refundable_only": true,
+      "max_per_night_usd": null
+    },
+    "search_destinations": {
+      "region_id": 2080,
+      "name": "Lisbon"
+    },
+    "search_hotels": {
+      "count_matching": 10,
+      "top": [
+        {
+          "hotel_id": "hotel_dom_sancho_i",
+          "lead_price_usd": 284.97,
+          "per_night_usd": 94.99,
+          "free_cancellation_before": "2026-07-28T16:00:00",
+          "refundable_rate_count": 3,
+          "rate_count": 6
+        },
+        {
+          "hotel_id": "neya_lisboa_hotel",
+          "lead_price_usd": 434.35,
+          "per_night_usd": 144.78,
+          "free_cancellation_before": "2026-08-11T13:00:00",
+          "refundable_rate_count": 8,
+          "rate_count": 16
+        },
+        {
+          "hotel_id": "lisbon_serviced_apartments_madalena",
+          "lead_price_usd": 436.65,
+          "per_night_usd": 145.55,
+          "free_cancellation_before": "2026-08-10T16:00:00",
+          "refundable_rate_count": 6,
+          "rate_count": 12
+        }
+      ]
+    },
+    "hotel": {
+      "hotel_id": "hotel_dom_sancho_i",
+      "name": "Hotel Dom Sancho I",
+      "address": "Avenida Liberdade 202, 2nd Floor, Lisbon",
+      "star_rating": 2
+    },
+    "rates": {
+      "matching_count": 1,
+      "options": [
+        {
+          "book_hash": "h-ef3cf7fc-d0bf-5271-9302-f812d848a3f3",
+          "room_name": "Double room (full double bed) (bed type is subject to availability)",
+          "meal": "breakfast",
+          "amount_usd": 284.97,
+          "per_night_usd": 94.99,
+          "amount_native": 248,
+          "native_currency": "EUR",
+          "free_cancellation_before": "2026-07-28T16:00:00"
+        }
+      ]
+    },
+    "prebook": {
+      "partner_order_id": "mcp_booking_bcf043ea-1619-4c41-83a7-9e1920594078",
+      "room_name": "Double room (full double bed) (bed type is subject to availability)",
+      "meal": "breakfast",
+      "amount_usd": 284.97,
+      "per_night_usd": 94.99,
+      "supplier_amount": 218,
+      "supplier_currency": "EUR",
+      "free_cancellation_before": "2026-07-28T16:00:00",
+      "hold_expires_hint": "Prebook hold is short-lived (minutes). Re-run if expired."
+    },
+    "book_hotel": {
+      "status": "not_called",
+      "reason": "prebook-only flow"
+    },
+    "summary": "Prebooked Hotel Dom Sancho I (Double room (full double bed) (bed type is subject to availability)) $284.97 total ($94.99/night), refundable until 2026-07-28T16:00:00. Prebook hold only — book_hotel disabled on this server."
+  },
+  "hotelInfo": {
+    "hotel_dom_sancho_i": {
+      "id": "hotel_dom_sancho_i",
+      "name": "Hotel Dom Sancho I",
+      "address": "Avenida Liberdade 202, 2nd Floor, Lisbon",
+      "star_rating": 2,
+      "rating": null,
+      "latitude": 38.72157,
+      "longitude": -9.146051,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/07/3b/073b9b8d73c211a931744896465f6b2935e0e534.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/a0/9e/a09effc270b61b2edfc85fc2f7b0c551a5f90918.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/b9/f4/b9f453c0934ef1c928680131babedcf640274d28.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/41/65/4165133b23171b8f2292e795f88185d1fc5d6ccc.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/34/92/3492ca285f795832b3bf8ff3fba89f80f505d38c.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/00/94/0094acda4585ba3a34c9de7d63637383803a39d0.JPEG"
+      ],
+      "description": "Want to save money while travelling? It’s easy! Hotel «Hotel Dom Sancho I» is located in Lisbon. This hotel is located in walking distance from the city center. You can take a walk and explore the neighbourhood area of the hotel — Cinemateca Portuguesa Museum, Medeiros e Almeida Museum and Avenida."
+    },
+    "neya_lisboa_hotel": {
+      "id": "neya_lisboa_hotel",
+      "name": "Neya Lisboa Hotel",
+      "address": "Rua Dona Estefânia, 71-77, Lisbon",
+      "star_rating": 4,
+      "rating": null,
+      "latitude": 38.72947,
+      "longitude": -9.14042,
+      "images": [
+        "https://cdn.worldota.net/t/1024x768/content/e6/0f/e60fc59ad7026fc7cf3c57c3845a9b80a638d7f2.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/32/55/325584a463fc296b752f908085f28dd7803172c9.jpeg",
+        "https://cdn.worldota.net/t/1024x768/content/23/6c/236c7158d98707b56fa7be0fdface0539a244b26.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/de/b8/deb869f5614f0a26024ea6f4f56a8dbcfa5b98ec.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/f8/26/f826014d05cdbb04fb7098ff52938f284a5597b0.JPEG",
+        "https://cdn.worldota.net/t/1024x768/content/54/ee/54eeb9f34637674059f10f0bc750320ab1b12ffa.JPEG"
+      ],
+      "description": "Want to take a rest and explore the city? Hotel «Neya Lisboa Hotel» is located in Lisbon. This hotel is located nearby from the city center. You can take a walk and explore the neighbourhood area of the hotel — Picoas, Dolce Vita Shopping Monumental Mall and Sagrado Coração de Jesus."
+    },
+    "lisbon_serviced_apartments_madalena": {}
+  }
+}
