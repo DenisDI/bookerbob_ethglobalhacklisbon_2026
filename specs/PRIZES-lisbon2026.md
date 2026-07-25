@@ -249,8 +249,10 @@ Links:
 | Autonomous On-Chain Automation (Continuity) | $1,000 | Continuity only |
 
 ### Our Hedera artifact
-Bot-tier `/offers` x402 `accepts` entry `hedera:testnet` + `@x402/hedera`; settle on
-testnet; show tx id in payment-response. Same gateway, second rail.
+**Scheduled Transaction** at prebook for pay-later tiers (`packages/hedera-schedule`),
+HashScan schedule URL on the finale card, `POST /book` executes. Autonomous
+`npm run demo -w @bookerbob/hedera-schedule`. x402-on-Hedera is cuttable garnish,
+not the headline.
 
 ---
 

@@ -5,20 +5,24 @@ import { cors } from "hono/cors";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { env } from "./env.js";
+import { bookHandler } from "./routes/book.js";
 import { offersHandler } from "./routes/offers.js";
+import { prebookHandler } from "./routes/prebook.js";
 
 // Route surface per specs/01-gateway.md:
-//   GET  /offers?city=&address=   identity -> context -> terms -> inventory
-//   POST /prebook                 rate lock + Hedera ScheduleCreate
-//   POST /book                    settlement executes
+//   GET  /offers?city=&address=   identity -> Graph context -> terms -> inventory
+//                                 (+ Hedera schedule when earnsRateLock)
+//   POST /prebook                 Hedera ScheduleCreate for an existing hold
+//   POST /book                    schedule executes (checkout settlement)
 //   GET  /spent                   per-payer x402 totals for the UI counters
-// /offers currently covers the inventory leg only; the rest land in later steps.
 
 const app = new Hono();
 
 app.use("*", cors());
 
 app.get("/offers", offersHandler);
+app.post("/prebook", prebookHandler);
+app.post("/book", bookHandler);
 
 app.get("/health", (c) =>
   c.json({

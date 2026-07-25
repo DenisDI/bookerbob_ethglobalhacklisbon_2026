@@ -78,6 +78,7 @@ export function RacePane({ label, accent, state, reducedMotion }: Props) {
               hold={data.hold}
               checkout={data.checkout}
               cached={data.source === "cached"}
+              scheduleUrl={data.scheduleUrl ?? undefined}
             />
           ) : (
             <OfferList offers={data.offers} />

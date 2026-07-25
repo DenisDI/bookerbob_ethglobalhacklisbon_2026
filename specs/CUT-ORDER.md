@@ -46,6 +46,24 @@ If step 8 shrinks:
 | Finale safety take | Sat 23:00 | Record hotel card beat even if rough |
 | Freeze | Sun 04:00 | Not 06:00 |
 
+## Sat track — Hedera (isolated puzzle)
+
+Owner: Hedera Agentic Payments. **Do not wait on layout/Graph/World.**
+
+| Piece | Path |
+|---|---|
+| Package | `packages/hedera-schedule` (`@bookerbob/hedera-schedule`) |
+| Glue | `apps/gateway/src/settlement.ts` + `POST /prebook` + `POST /book` |
+| UI contract | `scheduleUrl` on `/offers` → `HotelFinaleCard` |
+| Graph stitch | `/offers?address=` → context MCP → `decide()` → schedule only if `earnsRateLock` |
+
+Who pays: **guest carries settlement risk**; agent asks/locks; demo operator signs the HBAR schedule for HashScan. No Base in this track.
+
+```bash
+npm run smoke -w @bookerbob/hedera-schedule
+npm run demo -w @bookerbob/hedera-schedule
+```
+
 ## Video rule (DEMO-IMPROVEMENTS v2)
 
 **One video only**, max **3:00**, structure = **race not tour**.

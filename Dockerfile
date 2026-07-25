@@ -5,6 +5,7 @@ COPY package.json package-lock.json ./
 COPY apps/gateway/package.json apps/gateway/
 COPY apps/web/package.json apps/web/
 COPY packages/context-bands-mcp/package.json packages/context-bands-mcp/
+COPY packages/hedera-schedule/package.json packages/hedera-schedule/
 RUN npm ci
 
 FROM deps AS build

@@ -15,6 +15,7 @@ import {
   narrateSearch,
   narrateTerms,
 } from "../narration.js";
+import { scheduleForHold } from "../settlement.js";
 import {
   debugSignals,
   decide,
@@ -31,6 +32,7 @@ const UNBACKED: TermsSignals = { hasCredential: false, context: null };
 export async function offersHandler(c: Context) {
   const city = c.req.query("city")?.trim() || demo.city;
   const debugTier = c.req.query("tier")?.trim();
+  // Consented wallet for Graph context bands (Privy / teammate wiring).
   const address = c.req.query("address")?.trim();
 
   // The two axes stay separate. ?tier= stands in for the credential until
@@ -63,9 +65,24 @@ export async function offersHandler(c: Context) {
     // even though the supplier's one-shot call creates one.
     const hold = earnsRateLock(terms) ? result.hold : null;
 
+    // Guest settlement risk → Hedera schedule. Agent only triggered the ask.
+    // Graph already influenced `terms` via `address` + lookupContext above.
+    let scheduleUrl: string | null = null;
+    let scheduleId: string | null = null;
     narrateSearch(narrator, city, result);
     narrateTerms(narrator, terms, offers.length, signals.context, lookupFailed);
     narrateHold(narrator, hold);
+
+    if (hold && earnsRateLock(terms)) {
+      const settlement = await scheduleForHold({
+        partnerOrderId: hold.partnerOrderId,
+      });
+      if (settlement) {
+        scheduleUrl = settlement.scheduleUrl;
+        scheduleId = settlement.scheduleId;
+        narrator.say("rate locked. settlement scheduled for checkout day");
+      }
+    }
 
     return c.json({
       terms,
@@ -78,6 +95,8 @@ export async function offersHandler(c: Context) {
       matchingCount: result.matchingCount,
       offers,
       hold,
+      scheduleId,
+      scheduleUrl,
       source: result.source,
       capturedAt: result.capturedAt,
       // Bands and categories only, never the counts behind them.

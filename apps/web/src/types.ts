@@ -69,8 +69,12 @@ export interface OffersResponse {
   matchingCount: number | null;
   offers: Offer[];
   hold: PrebookHold | null;
+  /** Hedera HashScan schedule URL when pay-later / pay-at-checkout. */
+  scheduleUrl: string | null;
+  scheduleId: string | null;
   source: "live" | "cached";
   capturedAt: string | null;
+  /** Graph context bands for the consented address (null if none / failed). */
   context: ContextBands | null;
   narration: NarrationLine[];
 }

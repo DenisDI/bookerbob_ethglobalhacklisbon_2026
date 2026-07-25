@@ -19,14 +19,23 @@ underwriting.
 1. Agent hits `/offers`. No credential: x402 paywall, pay per query (Base Sepolia
    USDC, gasless). AgentKit credential: verified against the AgentBook on World
    Chain, paywall waived (per-humanId quota as sybil-resistant rate limiting).
-2. Consented wallet address goes to our open-source `context-bands-mcp`: live
-   queries to Messari standardized subgraphs on The Graph, paid per query over x402
-   on Base mainnet, zero API keys end to end. Output is coarse bands (T1..T4),
-   never raw values.
-3. Terms engine maps credential + bands to underwriting terms.
-4. Inventory: real hotels and rates. Prebook locks a real rate; for verified tiers
-   the settlement is a Hedera Scheduled Transaction, visible on HashScan.
+2. Consented wallet address (`?address=` / Privy) goes to `context-bands-mcp`:
+   Messari standardized subgraphs on The Graph → coarse bands (T1..T4), never raw
+   values.
+3. Terms engine maps credential + bands to underwriting terms (who carries risk).
+4. Inventory locks a real rate. For pay-later tiers, `@bookerbob/hedera-schedule`
+   creates a Hedera testnet Scheduled Transaction; HashScan opens from the finale
+   card. **The guest carries settlement risk; the agent only asks and locks.**
 5. Selfie Check (World ID Sandbox) gates eligibility for deferred settlement.
+
+### Hedera payment flow (Agentic Payments)
+
+```bash
+npm run smoke -w @bookerbob/hedera-schedule
+npm run demo -w @bookerbob/hedera-schedule   # create + execute + HashScan URLs
+```
+
+See `packages/hedera-schedule/README.md`. Routes: `POST /prebook`, `POST /book`.
 
 ## How the terms are decided
 

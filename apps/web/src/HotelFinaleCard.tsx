@@ -2,8 +2,7 @@
 // nightly rate, then the two facts that make it a BookerBob booking: the price
 // is held, and the settlement is scheduled.
 //
-// The scheduled-settlement line is deliberately present before Hedera is wired,
-// so the layout is already correct when the HashScan link arrives.
+// scheduleUrl comes from /offers when earnsRateLock → Hedera ScheduleCreate.
 
 import { displayName, starsLabel } from "./offer-display";
 import type { Offer, PrebookHold } from "./types";

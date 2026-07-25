@@ -4,10 +4,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AddressBands } from "./AddressBands";
 import { fetchOffers } from "./api";
+import {
+  ConnectWalletButton,
+  privyConfigured,
+  useConsentedWallet,
+} from "./auth";
 import { RacePane, type PaneState } from "./RacePane";
 import { PANE_LABEL } from "./terms-copy";
 import type { Tier } from "./types";
-import { ConnectWalletButton } from "./auth";
 
 const PROMPT = "book me a hotel in lisbon";
 
@@ -28,6 +32,15 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
+/** When Privy connects, fill the Graph context address field. */
+function PrivyAddressBridge({ onAddress }: { onAddress: (a: string) => void }) {
+  const { address, authenticated } = useConsentedWallet();
+  useEffect(() => {
+    if (authenticated && address) onAddress(address);
+  }, [authenticated, address, onAddress]);
+  return null;
+}
+
 export function App() {
   const [bot, setBot] = useState<PaneState>(IDLE);
   const [backed, setBacked] = useState<PaneState>(IDLE);
@@ -35,54 +48,51 @@ export function App() {
   const reducedMotion = usePrefersReducedMotion();
   const running = bot.status === "working" || backed.status === "working";
 
-  const run = useCallback(async (overrideAddress?: string) => {
-    // Only the backed side carries an address. The unbacked agent has nobody to
-    // consent on its behalf, so asking about a wallet there would be theatre.
-    const consented = overrideAddress ?? address;
-    const start = (
-      set: React.Dispatch<React.SetStateAction<PaneState>>,
-      charge: boolean,
-    ) =>
-      set((prev) => ({
-        status: "working",
-        data: null,
-        error: null,
-        spentUsd: charge ? prev.spentUsd + QUERY_PRICE_USD : prev.spentUsd,
-      }));
-
-    start(setBot, true);
-    start(setBacked, false);
-
-    const settle = async (
-      tier: Tier,
-      set: React.Dispatch<React.SetStateAction<PaneState>>,
-      consentedAddress?: string,
-    ) => {
-      try {
-        const data = await fetchOffers(tier, consentedAddress);
-        set((prev) => ({ ...prev, status: "done", data, error: null }));
-      } catch (err) {
+  const run = useCallback(
+    async (overrideAddress?: string) => {
+      // Only the backed side carries an address. The unbacked agent has nobody
+      // to consent on its behalf, so asking about a wallet there would be theatre.
+      const consented = overrideAddress ?? address;
+      const start = (
+        set: React.Dispatch<React.SetStateAction<PaneState>>,
+        charge: boolean,
+      ) =>
         set((prev) => ({
-          ...prev,
-          status: "failed",
-          error: (err as Error).message,
+          status: "working",
+          data: null,
+          error: null,
+          spentUsd: charge ? prev.spentUsd + QUERY_PRICE_USD : prev.spentUsd,
         }));
-      }
-    };
 
-    // Fired together on purpose: the race is the point. The backed side asks as
-    // a credentialed human and lets the real bands decide whether that becomes
-    // verified or elite; the tier is derived, never asserted.
-    await Promise.all([
-      settle("bot", setBot),
-      settle("human", setBacked, consented),
-    ]);
-  }, [address]);
+      start(setBot, true);
+      start(setBacked, false);
 
-  // ?autorun starts the race on load and ?address= preloads the consented
-  // wallet, so every beat of the demo is reachable in one step without setting it
-  // up by hand between takes (specs/03-web-demo.md). Guarded because a
-  // double-invoked effect would bill the metered agent twice.
+      const settle = async (
+        tier: Tier,
+        set: React.Dispatch<React.SetStateAction<PaneState>>,
+        consentedAddress?: string,
+      ) => {
+        try {
+          const data = await fetchOffers(tier, consentedAddress);
+          set((prev) => ({ ...prev, status: "done", data, error: null }));
+        } catch (err) {
+          set((prev) => ({
+            ...prev,
+            status: "failed",
+            error: (err as Error).message,
+          }));
+        }
+      };
+
+      // Backed side: credential stand-in + Graph address → terms → maybe Hedera.
+      await Promise.all([
+        settle("bot", setBot),
+        settle("human", setBacked, consented),
+      ]);
+    },
+    [address],
+  );
+
   const autorun = useRef(false);
   useEffect(() => {
     if (autorun.current) return;
@@ -96,6 +106,7 @@ export function App() {
 
   return (
     <main className="page">
+      {privyConfigured ? <PrivyAddressBridge onAddress={setAddress} /> : null}
       <ConnectWalletButton />
       <header className="masthead">
         <h1 className="thesis">who is behind an agent changes the terms it gets</h1>

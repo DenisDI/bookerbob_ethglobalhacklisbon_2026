@@ -1,0 +1,23 @@
+{
+  "name": "@bookerbob/hedera-schedule",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Hedera testnet Scheduled Transaction helpers for BookerBob deferred hotel settlement.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "smoke": "tsx src/smoke.ts",
+    "demo": "tsx src/demo.ts"
+  },
+  "dependencies": {
+    "@hashgraph/sdk": "^2.69.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
