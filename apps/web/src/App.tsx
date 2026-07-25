@@ -165,7 +165,17 @@ export function App() {
       {privyConfigured ? <PrivyAddressBridge onAddress={setAddress} /> : null}
       <ConnectWalletButton />
       <header className="masthead">
-        <h1 className="thesis">who is behind an agent changes the terms it gets</h1>
+        <div className="masthead__lede">
+          <h1 className="thesis">who is behind an agent changes the terms it gets</h1>
+          {/* The thesis is the claim. This is the same claim in the words a
+            * guest would use, so a stranger who reads only these two blocks
+            * knows what the product does. */}
+          <p className="thesis__plain">
+            an ai agent books the hotel room for you. same room, same nightly
+            rate for everyone. what changes is when the money leaves your
+            pocket, and that depends on who is standing behind the agent.
+          </p>
+        </div>
         <div className="ask">
           <p className="ask__prompt">{PROMPT}</p>
           <AddressBands

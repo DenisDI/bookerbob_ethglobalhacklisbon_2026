@@ -261,11 +261,29 @@ body {
   padding: var(--space-5) var(--space-4) var(--space-4);
 }
 
+.masthead__lede {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
 .thesis {
   margin: 0;
   max-width: 20ch;
   font: var(--weight-black) clamp(40px, 7vw, var(--size-ui-hero)) / 0.98 var(--font-ui);
   letter-spacing: -0.03em;
+}
+
+/* The thesis states the claim in the product's own words; this says the same
+ * thing the way a guest would. Proportional and quiet: it is speech, not a
+ * record, and it must never compete with the headline it explains. */
+.thesis__plain {
+  margin: 0;
+  max-width: 54ch;
+  font: var(--weight-reg) var(--size-ui-lg) / 1.45 var(--font-ui);
+  letter-spacing: -0.004em;
+  color: var(--color-muted);
 }
 
 .ask {
