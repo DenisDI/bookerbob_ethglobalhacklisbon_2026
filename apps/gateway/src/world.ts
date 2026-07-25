@@ -158,18 +158,24 @@ export function createMockVerifier(): CredentialVerifier {
 }
 
 /**
- * Real verification needs a registered agent wallet. Until the key is present
- * the stand-in is used, and nothing upgrades itself silently.
+ * Real verification by default; the stand-in only when asked for by name.
+ *
+ * This used to switch on whether LISBON2026_AGENT_PRIVATE_KEY was set, which was
+ * wrong in a way that only production showed: that key belongs to the agent doing
+ * the asking, not to the server doing the checking. It is in a local .env and
+ * nowhere else, so the deployed gateway ran the stand-in and refused every real
+ * credential while local runs verified fine. Checking a credential needs no
+ * secret, so there is nothing to be missing.
  *
  * Split from the environment read so the choice itself is testable without a
  * .env on disk deciding the outcome.
  */
-export function pickVerifier(hasAgentKey: boolean): CredentialVerifier {
-  return hasAgentKey ? createWorldVerifier() : createMockVerifier();
+export function pickVerifier(mode: string): CredentialVerifier {
+  return mode.trim() === "stand_in" ? createMockVerifier() : createWorldVerifier();
 }
 
 export function verifierFromEnv(): CredentialVerifier {
-  return pickVerifier(env.agentKeyPresent);
+  return pickVerifier(env.credentialMode);
 }
 
 export function credentialLabel(credential: Credential): string {

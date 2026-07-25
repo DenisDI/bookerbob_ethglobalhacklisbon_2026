@@ -43,10 +43,17 @@ export const env = {
   fixturesPath: str("LISBON2026_FIXTURES_PATH"),
 
   /**
-   * Real World verification needs a registered agent wallet. Without the key the
-   * gateway runs the stand-in verifier, which can never claim World.
+   * "stand_in" runs the dev verifier, which can never claim World. Anything else,
+   * including empty, runs real verification.
+   *
+   * Deliberately opt-out rather than opt-in. The first version keyed this off the
+   * presence of LISBON2026_AGENT_PRIVATE_KEY, which is the AGENT's signing key: it
+   * lives on the machine that makes requests and has no business on the server.
+   * In production it was absent, so the gateway silently ran the stand-in and
+   * refused every real credential. Verification itself needs no secret at all, so
+   * the default is now the real thing and the stand-in has to be asked for.
    */
-  agentKeyPresent: str("LISBON2026_AGENT_PRIVATE_KEY").length > 0,
+  credentialMode: str("LISBON2026_CREDENTIAL_MODE"),
 
   /**
    * The origin callers actually reach, e.g. https://lisbonhack.world. Set it in

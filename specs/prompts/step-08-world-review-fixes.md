@@ -52,3 +52,23 @@ curl -s -X POST localhost:3000/prebook -H 'content-type: application/json' -d '{
 npx tsx scripts/agent-with-credential.ts
 # credential: {"status":"verified","source":"agentkit"} · elite · pay_at_checkout
 ```
+
+## Follow-up: the origin fix was not the whole story
+
+After deploying, production still answered `credential: {"status":"missing"}` for
+the same wallet that verifies locally. The cause was a second bug in the same
+file, and it was mine: `pickVerifier` switched on whether
+`LISBON2026_AGENT_PRIVATE_KEY` was set. That key belongs to the **agent** doing
+the asking, not to the server doing the checking. It lives in a local `.env` and
+nowhere else, so the deployed gateway ran the stand-in verifier and refused every
+real credential, while every local run passed.
+
+Two changes came out of it:
+
+- The switch is now opt-out: `LISBON2026_CREDENTIAL_MODE=stand_in` asks for the
+  dev verifier, and anything else, including empty, verifies for real. Checking a
+  credential needs no secret, so nothing can be missing.
+- `/health` reports `credentialVerifier` and `resource`. Both credential bugs
+  were invisible from outside: a stand-in verifier looks exactly like a rejected
+  signature, and a mismatched resource looks exactly like an unregistered wallet.
+  Neither field is a secret.

@@ -41,9 +41,16 @@ test("the mock refuses anything that is not a dev header", async () => {
   assert.match(result.detail ?? "", /dev:/);
 });
 
-test("no agent key means the stand-in, a key means real verification", () => {
-  assert.equal(pickVerifier(false).kind, "mock");
-  assert.equal(pickVerifier(true).kind, "world");
+// The switch is opt-out on purpose. Keying it off a present secret is how the
+// deployed gateway ended up running the stand-in and refusing real credentials:
+// the secret in question was the agent's, and servers do not have it.
+test("real verification is the default and the stand-in must be asked for", () => {
+  assert.equal(pickVerifier("stand_in").kind, "mock");
+  assert.equal(pickVerifier("").kind, "world");
+  assert.equal(pickVerifier("world").kind, "world");
+  assert.equal(pickVerifier("  stand_in  ").kind, "mock");
+  // A typo must not quietly downgrade verification.
+  assert.equal(pickVerifier("standin").kind, "world");
 });
 
 test("a missing credential is the default, and it is not an error", () => {
