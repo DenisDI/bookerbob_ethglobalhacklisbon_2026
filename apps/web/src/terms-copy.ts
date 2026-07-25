@@ -49,6 +49,21 @@ export function paymentLine(payment: Payment): string {
 }
 
 /**
+ * What a lane is about to do, before anything has been asked.
+ *
+ * An empty lane reading "not asked" teaches nothing, and both lanes idle
+ * identically, so a first-time viewer cannot tell what is about to differ. This
+ * says it in the agent's own voice, as a sentence and not as a list of what each
+ * lane gets: two feature lists side by side is exactly the plan-chooser this
+ * product must never become.
+ */
+export function idleBrief(accent: boolean): string {
+  return accent
+    ? "a real person will be standing behind this one. it pays nothing to ask, and the money can wait."
+    : "nobody will be standing behind this one. it pays a cent for every answer, and whatever it takes has to be paid for in full, up front.";
+}
+
+/**
  * Whether these terms let the money wait, which is the only reason a settlement
  * gets scheduled. Mirrors the gateway's earnsRateLock, kept here so the copy
  * layer can ask the question without importing the underwriting engine.
@@ -69,6 +84,20 @@ export function moneyMovesLabel(payment: Payment): string {
       return "money stays put until checkout";
   }
 }
+
+/**
+ * The metering strip's tag.
+ *
+ * It read "x402", the protocol that does this work, in both lanes. That is the
+ * developer vocabulary the story surface bans by name: a guest reads about their
+ * money, and the name of the payment rail is not their money. Identical in both
+ * lanes on purpose, so the row stays comparable and only the line under it
+ * differs, the same way the rate stays put and only the term moves.
+ *
+ * The protocol name is not lost, it is just not here: it lives in the specs, the
+ * gateway, and the package description.
+ */
+export const METER_TAG = "PER QUERY";
 
 /**
  * The metering strip.

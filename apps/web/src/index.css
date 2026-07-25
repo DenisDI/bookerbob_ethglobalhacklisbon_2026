@@ -479,6 +479,10 @@ body {
   color: var(--color-faint);
 }
 
+.saidonce__hint {
+  max-width: 74ch;
+}
+
 .race {
   display: flex;
   position: relative;
@@ -824,6 +828,19 @@ body {
 
 .pane--accent .feed__caret {
   background: var(--color-accent);
+}
+
+/* Sits in the feed's place before a run, so the strip does not change height when
+ * the narration replaces it. Quiet: it is a preview, not something the agent has
+ * said yet. */
+.pane__brief {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--color-muted);
+}
+
+.pane--accent .pane__brief {
+  color: var(--color-ink);
 }
 
 .feed__idle {

@@ -67,7 +67,15 @@ export function SaidOnce({ asked, answered }: Props) {
             .filter(Boolean)
             .join(" · ")}
         </p>
-      ) : null}
+      ) : (
+        // Nothing has been asked yet, so this says how to ask. It names the real
+        // control rather than describing one, and it goes away for good once the
+        // race has run.
+        <p className="saidonce__hint reason">
+          nothing asked yet. press run both, and this same request goes to two
+          agents at once: one with nobody behind it, one with a person behind it.
+        </p>
+      )}
       {swapped ? (
         <p className="saidonce__swap reason">
           {answered.source === "cached"

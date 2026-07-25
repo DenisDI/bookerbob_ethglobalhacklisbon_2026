@@ -16,7 +16,9 @@ import { EmptyRail, SettlementRail } from "./SettlementRail";
 import { SpentCounter } from "./SpentCounter";
 import {
   earnsSchedule,
+  idleBrief,
   inventoryLine,
+  METER_TAG,
   meterLine,
   paymentLine,
   roomsFootnote,
@@ -152,7 +154,7 @@ export function RacePane({
       </header>
 
       <div className={`meter ${accent ? "meter--accent" : ""}`}>
-        <span className="meter__tag">x402</span>
+        <span className="meter__tag">{METER_TAG}</span>
         <span className="meter__line">{meterLine(accent)}</span>
         <span className="pane__spacer" />
         <span className="label">
@@ -160,8 +162,15 @@ export function RacePane({
         </span>
       </div>
 
+      {/* Before anything is asked this strip says what this lane is about to do.
+        * The feed's own empty state is "waiting for the desk", which is true while
+        * a request is in flight and false before one exists. */}
       <div className="pane__feed">
-        <NarrationFeed lines={data?.narration ?? []} instant={reducedMotion} />
+        {state.status === "idle" ? (
+          <p className="pane__brief speech">{idleBrief(accent)}</p>
+        ) : (
+          <NarrationFeed lines={data?.narration ?? []} instant={reducedMotion} />
+        )}
       </div>
 
       <div className="pane__rooms">
