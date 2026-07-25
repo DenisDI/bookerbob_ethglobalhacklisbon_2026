@@ -702,14 +702,18 @@ body {
   flex: 1;
 }
 
+/* Type does the ranking here. The reward is the biggest thing on the rung, the
+ * cost sits under it at reading size, and nothing is set at a size that says
+ * "skip me". The whole block was one grey whisper before. */
 .rung__perk {
-  font: var(--weight-semi) var(--size-ui-lg) / 1.25 var(--font-ui);
-  letter-spacing: var(--tracking-tight);
+  font: var(--weight-bold) 23px / 1.2 var(--font-ui);
+  letter-spacing: -0.02em;
   color: var(--color-ink);
+  transition: color var(--duration-beat1) ease, font-size var(--duration-beat1) ease;
 }
 
 .rung__ask {
-  font: var(--weight-reg) var(--size-ui-sm) / 1.45 var(--font-ui);
+  font: var(--weight-reg) var(--size-ui-md) / 1.45 var(--font-ui);
   color: var(--color-muted);
 }
 
@@ -733,10 +737,9 @@ body {
   text-transform: uppercase;
 }
 
-/* Where you are standing. The only rung that gets the accent, and it gets it
- * because these are the terms a real answer came back with. */
+/* Where you are standing, by the gateway's answer. */
 .rung--here {
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-soft);
   background: var(--color-accent-wash);
 }
 
@@ -748,34 +751,63 @@ body {
   color: var(--color-accent);
 }
 
-.rung--reached {
-  border-color: var(--color-line-strong);
-}
-
 .rung--reached .rung__perk {
   color: var(--color-muted);
 }
 
-/* Not yours yet, and fully readable anyway. The mark stays legible: a partner
- * whose moment has not arrived is still the partner of that moment. */
+/* Not yours yet, and still worth reading. Faint enough to rank below the rest,
+ * never so faint that the prize is unreadable, because an unreadable prize is
+ * not a reason to do anything. */
 .rung--locked .rung__perk,
 .rung--blocked .rung__perk {
-  color: var(--color-faint);
-}
-
-.rung--locked .rung__ask,
-.rung--blocked .rung__ask {
-  color: var(--color-faint);
+  color: var(--color-ash);
 }
 
 .rung--locked .rung__mark,
 .rung--blocked .rung__mark {
-  opacity: 0.55;
+  opacity: 0.7;
+}
+
+/* ---------- the spotlight ----------
+ *
+ * The rung being introduced comes forward and the others step back. This is the
+ * change the reader feels as they scroll: not a new colour scheme per partner,
+ * which would spend the one accent five times over, but a real difference in
+ * light between the thing being explained and the things waiting their turn.
+ */
+.ladder.is-touring .rung {
+  opacity: 0.4;
+  transition:
+    opacity var(--duration-beat1) ease,
+    border-color var(--duration-beat1) ease,
+    background var(--duration-beat1) ease;
+}
+
+.ladder.is-touring .rung.is-open {
+  opacity: 1;
 }
 
 .rung.is-open {
-  border-color: var(--color-ash);
+  border-color: var(--color-accent);
+  background: var(--color-surface-2);
+  box-shadow: var(--shadow-panel);
 }
+
+.rung.is-open .rung__perk {
+  font-size: 30px;
+  color: var(--color-ink-bright);
+}
+
+.rung.is-open .rung__ask {
+  color: var(--color-ink);
+}
+
+/* The partner takes the accent for the moment it is being introduced. */
+.rung.is-open .rung__mark {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
 
 /* ---------- an opened rung ---------- */
 
@@ -800,16 +832,18 @@ body {
   padding-top: var(--space-3);
 }
 
+/* The partner's name, said once, at the top of its own panel. */
 .rung__partner {
   margin: 0;
-  color: var(--color-ash);
+  font-size: 11px;
+  color: var(--color-accent);
 }
 
 .rung__text {
   margin: 0;
-  max-width: 74ch;
-  font: var(--weight-reg) var(--size-ui-sm) / 1.55 var(--font-ui);
-  color: var(--color-muted);
+  max-width: 68ch;
+  font: var(--weight-reg) var(--size-ui-md) / 1.6 var(--font-ui);
+  color: var(--color-ink);
 }
 
 .rung__text--quiet {
@@ -840,14 +874,21 @@ body {
   border-left: 1px solid var(--color-line);
 }
 
+/* The two ways to prove a person are the headline of this panel, so they are set
+ * like headings rather than like list items. */
 .rung__way {
-  font: var(--weight-semi) var(--size-ui-md) / 1.2 var(--font-ui);
-  color: var(--color-ink);
+  font: var(--weight-bold) var(--size-ui-lg) / 1.2 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink-bright);
 }
 
 .rung__waynote {
-  font: var(--weight-reg) var(--size-ui-sm) / 1.5 var(--font-ui);
+  font: var(--weight-reg) var(--size-ui-sm) / 1.55 var(--font-ui);
   color: var(--color-muted);
+}
+
+.rung__ways li {
+  border-left-color: var(--color-accent-soft);
 }
 
 /* Bands and what each one buys. Never a plan chooser: these are readings of a
@@ -870,14 +911,17 @@ body {
 }
 
 .rung__bands dt {
-  font: var(--weight-reg) var(--size-ui-sm) / 1.4 var(--font-ui);
+  font: var(--weight-reg) var(--size-ui-md) / 1.4 var(--font-ui);
   color: var(--color-muted);
 }
 
+/* What the band actually buys. This is the payoff of the row, so it is the bold
+ * half and it is the one that takes the accent. */
 .rung__bands dd {
   margin: 0;
-  font: var(--weight-semi) var(--size-ui-sm) / 1.4 var(--font-ui);
-  color: var(--color-ink);
+  font: var(--weight-bold) var(--size-ui-md) / 1.4 var(--font-ui);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-accent);
 }
 
 /* ---------- your booking ---------- */
@@ -2981,6 +3025,19 @@ body {
   /* Both ways out of the 402 still read, one under the other. */
   .branch {
     grid-template-columns: 1fr;
+  }
+
+  /* The room row's fixed columns ate the whole phone: the name got 57px and
+   * ellipsed away to nothing, so the list read as photos and prices with no
+   * hotels in it. The rate column narrows and the term chip, which only ever
+   * appears on the anchored row of the race, steps aside entirely. */
+  .offer,
+  .skel {
+    grid-template-columns: 40px minmax(0, 1fr) 72px 0;
+  }
+
+  .offer__term {
+    display: none;
   }
 
   /* An opened rung indents past the partner mark, which is most of the screen

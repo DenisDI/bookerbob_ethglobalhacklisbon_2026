@@ -319,7 +319,11 @@ export function PerksLadder(props: Props) {
     >
       <section
         ref={stageRef}
-        className={`ladder ${shown ? "is-in" : ""}`}
+        // While one rung is being introduced the others step back, so the
+        // spotlight is a change the eye reads without being told.
+        className={`ladder ${shown ? "is-in" : ""} ${
+          pinned && open !== null ? "is-touring" : ""
+        }`}
         aria-label="what you get"
       >
         <ol className="ladder__rows">
