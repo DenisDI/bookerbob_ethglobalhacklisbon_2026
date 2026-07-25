@@ -3,6 +3,7 @@
   "schemaType": "uniswap-v3",
   "subgraphId": "5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV",
   "network": "mainnet",
+  "role": "activity",
   "category": "dex",
   "countStrategy": "entities",
   "verifiedAt": "2026-07-25",

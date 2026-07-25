@@ -3,6 +3,7 @@
   "schemaType": "messari-lending",
   "subgraphId": "JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk",
   "network": "mainnet",
+  "role": "activity",
   "category": "lending",
   "countStrategy": "entities",
   "verifiedAt": "2026-07-25",

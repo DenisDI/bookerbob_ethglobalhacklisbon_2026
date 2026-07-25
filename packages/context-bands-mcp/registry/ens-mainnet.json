@@ -1,0 +1,10 @@
+{
+  "name": "ens-mainnet",
+  "schemaType": "ens",
+  "subgraphId": "5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH",
+  "network": "mainnet",
+  "role": "naming",
+  "countStrategy": "entities",
+  "verifiedAt": "2026-07-25",
+  "note": "Resolves names both ways: vitalik.eth -> 0xd8da6b..., and an address back to a name for display. A name's createdAt also feeds tenure, because a 2017 registration cannot be manufactured later."
+}

@@ -1,17 +1,29 @@
 {
-  "capturedAt": "2026-07-25T12:08:14.599Z",
+  "capturedAt": "2026-07-25T12:32:28.476Z",
   "note": "Real gateway responses. Entity ids are trimmed to keep the file readable; only list lengths matter to the band engine.",
   "address": "0x561c75466c1568c2b581c5538b84039a44d186e7",
   "responses": {
     "aave-v3-arbitrum": {
       "account": {
         "id": "0x561c75466c1568c2b581c5538b84039a44d186e7",
+        "firstDeposit": [
+          {
+            "timestamp": "1652068663"
+          }
+        ],
+        "lastDeposit": [
+          {
+            "timestamp": "1652840370"
+          }
+        ],
+        "firstBorrow": [],
+        "lastBorrow": [],
         "deposits": [
           {
-            "id": "0xaff100427040d1d731818ecf6c8e51fa7fb1b0b17a40e6d6797e924e93acea8c0700000000000000"
+            "amountUSD": "678.62458121005782"
           },
           {
-            "id": "0xea00c5aa6039135641a748303252620b68115736c9062e7650ec508dba482eed0700000000000000"
+            "amountUSD": "1134.68579783400835"
           }
         ],
         "withdraws": [
@@ -28,12 +40,24 @@
         "borrows": [],
         "repays": [],
         "liquidates": [],
-        "liquidations": []
+        "liquidations": [],
+        "positions": [
+          {
+            "market": {
+              "id": "0x625e7708f30ca75bfd92586e17077590c60eb4cd"
+            }
+          },
+          {
+            "market": {
+              "id": "0x6ab707aca953edaefbc4fd23ba73294241490620"
+            }
+          }
+        ]
       },
       "_meta": {
         "block": {
-          "number": 487559814,
-          "timestamp": 1784981286
+          "number": 487565616,
+          "timestamp": 1784982738
         }
       }
     },
@@ -41,8 +65,8 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 49095970,
-          "timestamp": 1784981287
+          "number": 49096699,
+          "timestamp": 1784982745
         }
       }
     },
@@ -50,8 +74,22 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 25609680,
-          "timestamp": 1784981279
+          "number": 25609800,
+          "timestamp": 1784982719
+        }
+      }
+    },
+    "ens-mainnet": {
+      "domains": [
+        {
+          "name": "57168.eth",
+          "createdAt": "1651493389"
+        }
+      ],
+      "_meta": {
+        "block": {
+          "number": 25609802,
+          "timestamp": 1784982743
         }
       }
     },
@@ -68,254 +106,570 @@
       },
       "_meta": {
         "block": {
-          "number": 487559814,
-          "timestamp": 1784981286
+          "number": 487565653,
+          "timestamp": 1784982747
         }
       }
     },
     "uniswap-v3-ethereum": {
+      "first": [
+        {
+          "timestamp": "1663563239"
+        }
+      ],
       "swaps": [
         {
-          "id": "0x117d8ecb039ca8a7937be76b45c85091d80a7b7cf81ffc504254e732cc91929d#68149"
+          "timestamp": "1784980799",
+          "amountUSD": "3.655496857241452679901468630235267",
+          "pool": {
+            "id": "0xfaa318479b7755b2dbfdd34dc306cb28b420ad12"
+          }
         },
         {
-          "id": "0xf098576f3c3e7bf28864b1d678723e4835cc7dd819d1093fd5a28d5bd35e8699#9773696"
+          "timestamp": "1784980727",
+          "amountUSD": "548.658051209630059067257811970623",
+          "pool": {
+            "id": "0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b"
+          }
         },
         {
-          "id": "0xf098576f3c3e7bf28864b1d678723e4835cc7dd819d1093fd5a28d5bd35e8699#68145"
+          "timestamp": "1784980727",
+          "amountUSD": "548.3005654192601181345156239412465",
+          "pool": {
+            "id": "0xfaa318479b7755b2dbfdd34dc306cb28b420ad12"
+          }
         },
         {
-          "id": "0x765293607eda74b2a5a19ca20b9081f218f9fb865497fe52b88fe9038d819fc6#7484543"
+          "timestamp": "1780198511",
+          "amountUSD": "1129.467717307473643508138632751031",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0xa3f5d5977b96e0f7d9dc4e56f61ee3f0f3a3bd4ff236cb212e24cd6dd387ca71#40923"
+          "timestamp": "1779930947",
+          "amountUSD": "101.4881090729624403297069293477344",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0xa3f5d5977b96e0f7d9dc4e56f61ee3f0f3a3bd4ff236cb212e24cd6dd387ca71#1422"
+          "timestamp": "1779930947",
+          "amountUSD": "54.750674",
+          "pool": {
+            "id": "0x7059a9f16dd2405aef3dd4f70a89127ce577a890"
+          }
         },
         {
-          "id": "0x49ad6c385c29bd532786d48d0814bc10c0a25678eacade38bdd1dd70ced4b5f8#9052056"
+          "timestamp": "1779520967",
+          "amountUSD": "1001.605310028600126405447045571715",
+          "pool": {
+            "id": "0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b"
+          }
         },
         {
-          "id": "0x795828f195f34194ad67e223687b8e06e9897202ba7d2de1f55e2f9d1adbe145#77404"
+          "timestamp": "1779183527",
+          "amountUSD": "62.60195",
+          "pool": {
+            "id": "0x3198ca64ebff6d008860f2c450cfcbf1faac7677"
+          }
         },
         {
-          "id": "0xcf76a98c3bcb1f493bd6a4677c26c516e04b9bba27b8ff0fcbbaa368351c6c12#8987952"
+          "timestamp": "1779074183",
+          "amountUSD": "400.9999628577688697474479233010637",
+          "pool": {
+            "id": "0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b"
+          }
         },
         {
-          "id": "0xcf76a98c3bcb1f493bd6a4677c26c516e04b9bba27b8ff0fcbbaa368351c6c12#75166"
+          "timestamp": "1779074183",
+          "amountUSD": "164.790833",
+          "pool": {
+            "id": "0x3198ca64ebff6d008860f2c450cfcbf1faac7677"
+          }
         },
         {
-          "id": "0x20fbdf87da9dbdd76e4771a896c3ccd7e25e2245d051926c5b89fc22887154b5#67172"
+          "timestamp": "1778801927",
+          "amountUSD": "292.225464",
+          "pool": {
+            "id": "0x3198ca64ebff6d008860f2c450cfcbf1faac7677"
+          }
         },
         {
-          "id": "0x5f7be52d163e2e7e841942196c2f9848ea16eb105da295ab451139441196cff3#7246925"
+          "timestamp": "1778753567",
+          "amountUSD": "299.8436185334306787193721163187178",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x5f7be52d163e2e7e841942196c2f9848ea16eb105da295ab451139441196cff3#61043"
+          "timestamp": "1778753567",
+          "amountUSD": "400",
+          "pool": {
+            "id": "0x3198ca64ebff6d008860f2c450cfcbf1faac7677"
+          }
         },
         {
-          "id": "0x66c2c8cf78cc0924a3470653a5bcf07b6f7a2e9b054a3f71926b3c43fb5e7b7e#7241241"
+          "timestamp": "1778720111",
+          "amountUSD": "200.215496018532287203984549893943",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0xd5bd13f77e92bcfdf5ba6418a0646d8521207cbe27d1c8c2163ed5b27e9193a1#1144962"
+          "timestamp": "1778646911",
+          "amountUSD": "388.406979616075631272740194423674",
+          "pool": {
+            "id": "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+          }
         },
         {
-          "id": "0xbf6711fc46da40f5882559512c09e7b1ff5f4a2ecddb76d4a11ed6e986604274#34823"
+          "timestamp": "1778546747",
+          "amountUSD": "73.0844784633585470890902288543176",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0x8bc76da0c6bad34ecae10597d6ad43b975f54892accb2ca70de4c8bc824c8e1a#7195251"
+          "timestamp": "1778464115",
+          "amountUSD": "2711.698392214975905888701475906203",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x1b2cce0e380cf48febaeb7049b23541e412772f815fdce6ffb611fa6e1a5c947#11384999"
+          "timestamp": "1778398115",
+          "amountUSD": "2602.472532385374098074838701438211",
+          "pool": {
+            "id": "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
+          }
         },
         {
-          "id": "0x6ea998504ed61caab68a0ddb2326f70122739cc24a74da3632383890f971c6ab#7176874"
+          "timestamp": "1778381291",
+          "amountUSD": "707.506044993571768087609672106772",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0xc1e282c0d08468d7f9b7aacfdbcf1e4d074458cb61932ab3ae5b7e3da54725ff#7089546"
+          "timestamp": "1777949279",
+          "amountUSD": "1018.52301342972162214710672299482",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0xc1e282c0d08468d7f9b7aacfdbcf1e4d074458cb61932ab3ae5b7e3da54725ff#29268"
+          "timestamp": "1777949279",
+          "amountUSD": "339.235912972394176154428438119766",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0xc16ff1366bf7965ab4c368d42b9287556e5be39ae177cb203e1ab2a31a90bb01#8456"
+          "timestamp": "1777900019",
+          "amountUSD": "145.3454456780412474038278512991757",
+          "pool": {
+            "id": "0x8071df1889d60a1c6329ef79976fb1f2e50599af"
+          }
         },
         {
-          "id": "0xc16ff1366bf7965ab4c368d42b9287556e5be39ae177cb203e1ab2a31a90bb01#6186"
+          "timestamp": "1777900019",
+          "amountUSD": "189.2883902637937136701704195793386",
+          "pool": {
+            "id": "0x9c4980635d980611cecdbca74773e240ffa44240"
+          }
         },
         {
-          "id": "0xc16ff1366bf7965ab4c368d42b9287556e5be39ae177cb203e1ab2a31a90bb01#11752"
+          "timestamp": "1777900019",
+          "amountUSD": "348.5955643250998298560294237063115",
+          "pool": {
+            "id": "0x61847189477150832d658d8f34f84c603ac269af"
+          }
         },
         {
-          "id": "0xc16ff1366bf7965ab4c368d42b9287556e5be39ae177cb203e1ab2a31a90bb01#11677"
+          "timestamp": "1777900019",
+          "amountUSD": "145.3841590594601117779177334524752",
+          "pool": {
+            "id": "0xedc5d54b823873f3bb143a06a5ef2d003c29a933"
+          }
         },
         {
-          "id": "0xc16ff1366bf7965ab4c368d42b9287556e5be39ae177cb203e1ab2a31a90bb01#10964"
+          "timestamp": "1777900019",
+          "amountUSD": "619.1188979891489668339233474907665",
+          "pool": {
+            "id": "0x94dd312f6cb52c870aacfeeb8bf5e4e28f6952ff"
+          }
         },
         {
-          "id": "0xbd49e14a6b4b01bf7d2c0e97fcb4c3080792ec7c8bb2ffbfcbb6e42870cb28e6#7060612"
+          "timestamp": "1777807643",
+          "amountUSD": "757.483029100133437340155390222594",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0xbd49e14a6b4b01bf7d2c0e97fcb4c3080792ec7c8bb2ffbfcbb6e42870cb28e6#52421"
+          "timestamp": "1777807643",
+          "amountUSD": "227.2571715600800619413813276205676",
+          "pool": {
+            "id": "0xcbcc3cbad991ec59204be2963b4a87951e4d292b"
+          }
         },
         {
-          "id": "0xbd49e14a6b4b01bf7d2c0e97fcb4c3080792ec7c8bb2ffbfcbb6e42870cb28e6#5054"
+          "timestamp": "1777807643",
+          "amountUSD": "0",
+          "pool": {
+            "id": "0x4384273ccd97a503448ca46b3fd1da31689eb2ef"
+          }
         },
         {
-          "id": "0xbd49e14a6b4b01bf7d2c0e97fcb4c3080792ec7c8bb2ffbfcbb6e42870cb28e6#16558"
+          "timestamp": "1777807643",
+          "amountUSD": "151.5047810400533730852145300370828",
+          "pool": {
+            "id": "0x840faba6f38e28e1494f186990f0f17cb2c7bcac"
+          }
         },
         {
-          "id": "0xbd49e14a6b4b01bf7d2c0e97fcb4c3080792ec7c8bb2ffbfcbb6e42870cb28e6#118926"
+          "timestamp": "1777807643",
+          "amountUSD": "378.7619526001334396537149227875373",
+          "pool": {
+            "id": "0x08a5a1e2671839dadc25e2e20f9206fd33c88092"
+          }
         },
         {
-          "id": "0xddaf7e104d55813a192e11e23ae380191adcef2be31bb920d6e562503bd9d2c3#16870"
+          "timestamp": "1777623575",
+          "amountUSD": "1796.290163188751539324341191725",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0x1c988f5886c74665c5ea484e835a91202610fa3d3140a3873c7c8312828931bc#7031265"
+          "timestamp": "1777621391",
+          "amountUSD": "175.3960384614057383897181866193123",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x1c988f5886c74665c5ea484e835a91202610fa3d3140a3873c7c8312828931bc#16646"
+          "timestamp": "1777621391",
+          "amountUSD": "1579.598126305303291014927359147621",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0x144dfb92619452a059278485b4eda1cfd05d8b6d2dea46bf17c397ea73f240f4#16642"
+          "timestamp": "1777621343",
+          "amountUSD": "1685.210491606597377588576582193573",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0xc489010c46d797a104230bedc5c45b13cd13421af6bbe486e0de8ab6c3b21e18#16601"
+          "timestamp": "1777620683",
+          "amountUSD": "1455.175679150382423870461260548763",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0xf10c222b20017b2ee02f778e14a65a9a67b24824239a1bea05f961cc53582325#7031088"
+          "timestamp": "1777620299",
+          "amountUSD": "1601.154547740099785754870246425447",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0xf10c222b20017b2ee02f778e14a65a9a67b24824239a1bea05f961cc53582325#16566"
+          "timestamp": "1777620299",
+          "amountUSD": "1602.309095480199571509740492850894",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0x9b4d995217c3ca3589ddcf0d8d56baafc2d47f6ee130c2c730ae7b3fb5f23aa5#7031043"
+          "timestamp": "1777620095",
+          "amountUSD": "1155.277304059669254959602487221064",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x9b4d995217c3ca3589ddcf0d8d56baafc2d47f6ee130c2c730ae7b3fb5f23aa5#16552"
+          "timestamp": "1777620095",
+          "amountUSD": "1155.554608119338509919204974442127",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0x6773ed8550103d0dd6d72c49b30652b4573fb606f746036cedfa7e7ab98808e2#7030924"
+          "timestamp": "1777619615",
+          "amountUSD": "10.00175726735840895150165460235127",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x6773ed8550103d0dd6d72c49b30652b4573fb606f746036cedfa7e7ab98808e2#16501"
+          "timestamp": "1777619615",
+          "amountUSD": "10.00351453471681790300330920470254",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0x227af6b20535395809fccc59a855828a4c5949663e1d6fd62b79b544f3bbabcd#7030733"
+          "timestamp": "1777618799",
+          "amountUSD": "39.01698726175595108968962288958533",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x0510b1a7954f4ce42d22f15efab1f07d519fc8f3659786a99780214297b65d6b#7030725"
+          "timestamp": "1777618763",
+          "amountUSD": "920.211575819837439959626518046607",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x0510b1a7954f4ce42d22f15efab1f07d519fc8f3659786a99780214297b65d6b#16422"
+          "timestamp": "1777618763",
+          "amountUSD": "813.3206346937806897302595313959405",
+          "pool": {
+            "id": "0xdc893995d488e5be8ec8ca1db92cbec2a1ab0775"
+          }
         },
         {
-          "id": "0x047f27495ebcd285f6039158d55ca0d18eaeb95e687f7cd62590c0af28a1407e#7456031"
+          "timestamp": "1770958199",
+          "amountUSD": "1194.36648153236765779413228722151",
+          "pool": {
+            "id": "0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b"
+          }
         },
         {
-          "id": "0x047f27495ebcd285f6039158d55ca0d18eaeb95e687f7cd62590c0af28a1407e#5848316"
+          "timestamp": "1770958199",
+          "amountUSD": "556.4636365149389189819072094868505",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x0d623b97a0dbee0e51472af1976296cfc5e0a2bd2bf418a13cf6b938214b825d#5643371"
+          "timestamp": "1769916851",
+          "amountUSD": "22.42394783081334266856232186546098",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x8c5ebad53c40c3636545482a47b541524e39f388bd7b7962230cda43eb996dac#848"
+          "timestamp": "1766100011",
+          "amountUSD": "583.880962343864126946806451194159",
+          "pool": {
+            "id": "0xbb74e44a48b46660a4236572f82c3719cf82b56d"
+          }
         },
         {
-          "id": "0x8c5ebad53c40c3636545482a47b541524e39f388bd7b7962230cda43eb996dac#6427380"
+          "timestamp": "1766100011",
+          "amountUSD": "246.4416411109801701444654713435287",
+          "pool": {
+            "id": "0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b"
+          }
         },
         {
-          "id": "0x8c5ebad53c40c3636545482a47b541524e39f388bd7b7962230cda43eb996dac#5092764"
+          "timestamp": "1766100011",
+          "amountUSD": "830.956222282912233617868696940608",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x1709e324b3bcd697420545e167b043afeda3f14680044d14461d24a779041280#6415381"
+          "timestamp": "1766067815",
+          "amountUSD": "1904.630378769411317155434689298618",
+          "pool": {
+            "id": "0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b"
+          }
         },
         {
-          "id": "0x1709e324b3bcd697420545e167b043afeda3f14680044d14461d24a779041280#167"
+          "timestamp": "1766067815",
+          "amountUSD": "1906.904714538822634310869378597236",
+          "pool": {
+            "id": "0xbb74e44a48b46660a4236572f82c3719cf82b56d"
+          }
         },
         {
-          "id": "0x2bdb5add77d6b8f2e00b38ee87997be26430823805049a448390c66d6f66bba4#1580762"
+          "timestamp": "1763382683",
+          "amountUSD": "279.917821",
+          "pool": {
+            "id": "0x3416cf6c708da44db2624d63ea0aaef7113527c6"
+          }
         },
         {
-          "id": "0x79a3d647a8850b813f38ba8b1b847469e666b02cde982bd6523f79aff49baf0e#1465076"
+          "timestamp": "1757821667",
+          "amountUSD": "27.59674138745744495321955705358297",
+          "pool": {
+            "id": "0x60594a405d53811d3bc4766596efd80fd545a270"
+          }
         },
         {
-          "id": "0x402b8ebe349f746910c82dac476997a435da9ec130fc8525bc66e7cbc2f9e38a#2695862"
+          "timestamp": "1751800247",
+          "amountUSD": "51.36774950847581562660832928374185",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0x32f85b9f0a0b93b8455429ac8658b4bf79fc63a3b92cd62ad45c5598e4249f6c#47332"
+          "timestamp": "1746176435",
+          "amountUSD": "69.19729608213185462727126068431485",
+          "pool": {
+            "id": "0x88051b0eea095007d3bef21ab287be961f3d8598"
+          }
         },
         {
-          "id": "0x45de57475514ad67ded612ddf319aa926be80fd6e5404b2738b15585a905d9b7#1473"
+          "timestamp": "1745123627",
+          "amountUSD": "102.7172030051518222434650700976626",
+          "pool": {
+            "id": "0x77aa13b4614caf041342dcae858860cf47d8a0c2"
+          }
         },
         {
-          "id": "0x8a01a3fee1e8615d46670f856f51e8757eec23227d4f056e67a12007473e7f1e#22607"
+          "timestamp": "1742874875",
+          "amountUSD": "163.166723398693427088462536949704",
+          "pool": {
+            "id": "0x88ada7b1dd1c728ea87404cea7a0780139eb35d1"
+          }
         },
         {
-          "id": "0x180922e396150b756bcbff92a7d7b243646d71843ac8014db3ba21d7ccbfe284#1924"
+          "timestamp": "1741738751",
+          "amountUSD": "160.5080299160641688120252298382434",
+          "pool": {
+            "id": "0x903d82bcd96cac16bd383b33338dc10f8ec77d25"
+          }
         },
         {
-          "id": "0x10d488ff3792b9c4f126d76f64a358b02b5b3f36f9e7d072193d69a28663e189#1206800"
+          "timestamp": "1739500487",
+          "amountUSD": "200.1500291130228938250499462826673",
+          "pool": {
+            "id": "0xe0554a476a092703abdb3ef35c80e0d76d32939f"
+          }
         },
         {
-          "id": "0xbcb9bc84cb94c414f6da624ab35ae0cd79316377728ff82b855afc5475a59301#17938"
+          "timestamp": "1738722527",
+          "amountUSD": "163.5738728082666210945595962615618",
+          "pool": {
+            "id": "0x8a6b88553144c5b0f9243ea92ced31799142c807"
+          }
         },
         {
-          "id": "0xe9ba34b0b73d7a81cb075998639c42ac4d6631e759b20c06a09ca53704b05c28#1722"
+          "timestamp": "1738218623",
+          "amountUSD": "193.7664124903611084958524680539055",
+          "pool": {
+            "id": "0x903d82bcd96cac16bd383b33338dc10f8ec77d25"
+          }
         },
         {
-          "id": "0xc335bc919b109bb681cf7fff83320d8d49cb13625d5c2061ab9175b1f5b740d6#1074185"
+          "timestamp": "1737518879",
+          "amountUSD": "4997.453333",
+          "pool": {
+            "id": "0x3416cf6c708da44db2624d63ea0aaef7113527c6"
+          }
         },
         {
-          "id": "0x582246f8ecd4337d02523ef572bff6efc1d211f49c32352e308a83f4e8eaae48#1074180"
+          "timestamp": "1737518531",
+          "amountUSD": "9997.152908",
+          "pool": {
+            "id": "0x3416cf6c708da44db2624d63ea0aaef7113527c6"
+          }
         },
         {
-          "id": "0x61b68362c1410ad0b3e8bc24f6aafde119747555a10cfeac8ed50b3626ef91c8#605"
+          "timestamp": "1736234915",
+          "amountUSD": "8034.439289770834986985267790887095",
+          "pool": {
+            "id": "0xcd530beead88e30e3b672eb52993bf7760b5bc5a"
+          }
         },
         {
-          "id": "0x484e3ee2bf48488d234cf194655a1eb1bd599b39641ad6976e6bcc9946116dc5#4619"
+          "timestamp": "1709699051",
+          "amountUSD": "10310.77531474764161931254165879324",
+          "pool": {
+            "id": "0xd43e4955b5ea62a87386631b01200dd4dc82283c"
+          }
         },
         {
-          "id": "0xe4beb95bf444e7550b2e583b0a71128f2e21bd6ea0febee99eedc5168e020c95#5672"
+          "timestamp": "1703071151",
+          "amountUSD": "2116.300989190796961556275779440829",
+          "pool": {
+            "id": "0xae790e2a4785298cb18150f3dc4a60bd81fcd274"
+          }
         },
         {
-          "id": "0x233d13c75b9f9a36f63413bc7857e1eaff3c0d614d245be6b94ecfc2cbc372bc#2280"
+          "timestamp": "1703060747",
+          "amountUSD": "2210.629857720033463083515485638261",
+          "pool": {
+            "id": "0xae790e2a4785298cb18150f3dc4a60bd81fcd274"
+          }
         },
         {
-          "id": "0x1e9ab5493a2f928addcb003468e656b957f3451de181489b63e82cfd6bef7fb9#500338"
+          "timestamp": "1702717775",
+          "amountUSD": "2686.828706511675344937963865005927",
+          "pool": {
+            "id": "0x4e68ccd3e89f51c3074ca5072bbac773960dfa36"
+          }
         },
         {
-          "id": "0x1e9ab5493a2f928addcb003468e656b957f3451de181489b63e82cfd6bef7fb9#3826"
+          "timestamp": "1702717775",
+          "amountUSD": "2683.755343",
+          "pool": {
+            "id": "0x84d9b06b335c5270a76ddc4bf4674d238a5b5f8a"
+          }
         },
         {
-          "id": "0xee2a44ed8472f5774139fb269f2d4701ea96b06778705a7225127c3ee9908311#354869"
+          "timestamp": "1673484611",
+          "amountUSD": "1026.84091",
+          "pool": {
+            "id": "0x3416cf6c708da44db2624d63ea0aaef7113527c6"
+          }
         },
         {
-          "id": "0xee2a44ed8472f5774139fb269f2d4701ea96b06778705a7225127c3ee9908311#3"
+          "timestamp": "1673484611",
+          "amountUSD": "1026.828405",
+          "pool": {
+            "id": "0xc4480526e3d64f7ec7d7a6694c52d23aab658ed5"
+          }
         },
         {
-          "id": "0x89200acf0a59cd12fa5a5dc23be55028766808ae68b44990fe1cf156802a20f4#10708"
+          "timestamp": "1671432527",
+          "amountUSD": "11.80925260189768518948040864822482",
+          "pool": {
+            "id": "0x92c7b5ce4cb0e5483f3365c1449f21578ee9f21a"
+          }
         },
         {
-          "id": "0xa9a3f8471ff2588e3ade80165b145c1184eb4337d1e82cbd3be47eacfa08e09d#1832"
+          "timestamp": "1667915003",
+          "amountUSD": "68.6840294105027696364490526388488",
+          "pool": {
+            "id": "0xe67b950f4b84c5b06ee36ded6727a17443fe7493"
+          }
         },
         {
-          "id": "0xe41f465462d2da14c3f084a9d09a671c971657e683321b6a2255983144abd8fa#3033158"
+          "timestamp": "1663572671",
+          "amountUSD": "7.04648405580051191553000411218081",
+          "pool": {
+            "id": "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
+          }
         },
         {
-          "id": "0xe55c35a5bd63d608fe363a121d47f6249220946dc918a247fe4a8cee7c810036#3031459"
+          "timestamp": "1663563239",
+          "amountUSD": "6.69516346022433368149340334630905",
+          "pool": {
+            "id": "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
+          }
         }
       ],
       "positions": [
         {
-          "id": "231270"
+          "id": "231270",
+          "pool": {
+            "id": "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+          }
         }
       ],
       "_meta": {
         "block": {
-          "number": 25609680,
-          "timestamp": 1784981279
+          "number": 25609801,
+          "timestamp": 1784982731
         }
       }
     }

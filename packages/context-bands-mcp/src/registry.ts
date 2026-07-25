@@ -10,16 +10,23 @@ import type { SubgraphManifest } from "./types.js";
 
 const REGISTRY_DIR = fileURLToPath(new URL("../registry", import.meta.url));
 
-function isManifest(value: unknown): value is SubgraphManifest {
+function invalidReason(value: unknown): string | null {
   const m = value as Partial<SubgraphManifest>;
-  return (
-    typeof m?.name === "string" &&
-    typeof m.schemaType === "string" &&
-    typeof m.subgraphId === "string" &&
-    typeof m.network === "string" &&
-    typeof m.category === "string" &&
-    (m.countStrategy === "entities" || m.countStrategy === "counters")
-  );
+  if (typeof m?.name !== "string") return "name must be a string";
+  if (typeof m.schemaType !== "string") return "schemaType must be a string";
+  if (typeof m.subgraphId !== "string") return "subgraphId must be a string";
+  if (typeof m.network !== "string") return "network must be a string";
+  if (m.role !== "activity" && m.role !== "naming") {
+    return "role must be activity or naming";
+  }
+  if (m.countStrategy !== "entities" && m.countStrategy !== "counters") {
+    return "countStrategy must be entities or counters";
+  }
+  // Only an activity source contributes to a band, so only it needs a category.
+  if (m.role === "activity" && typeof m.category !== "string") {
+    return "an activity source needs a category";
+  }
+  return null;
 }
 
 export function loadRegistry(dir = REGISTRY_DIR): SubgraphManifest[] {
@@ -29,10 +36,11 @@ export function loadRegistry(dir = REGISTRY_DIR): SubgraphManifest[] {
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
     const raw = JSON.parse(readFileSync(join(dir, entry.name), "utf8"));
-    if (!isManifest(raw)) {
-      throw new Error(`registry/${entry.name} is not a valid manifest`);
+    const reason = invalidReason(raw);
+    if (reason) {
+      throw new Error(`registry/${entry.name}: ${reason}`);
     }
-    manifests.push(raw);
+    manifests.push(raw as SubgraphManifest);
   }
 
   return manifests.sort((a, b) => a.name.localeCompare(b.name));

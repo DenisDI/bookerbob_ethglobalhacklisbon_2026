@@ -80,7 +80,10 @@ export async function offersHandler(c: Context) {
       context: signals.context
         ? {
             address: signals.context.address,
+            ens: signals.context.ens,
+            since: signals.context.since,
             bands: signals.context.bands,
+            signals: signals.context.signals,
             activeCategories: signals.context.activeCategories,
           }
         : null,

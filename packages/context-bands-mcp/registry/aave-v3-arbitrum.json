@@ -3,6 +3,7 @@
   "schemaType": "messari-lending",
   "subgraphId": "4xyasjQeREe7PxnF6wVdobZvCw5mhoHZq3T7guRpuNPf",
   "network": "arbitrum-one",
+  "role": "activity",
   "category": "lending",
   "countStrategy": "entities",
   "verifiedAt": "2026-07-25",

@@ -3,6 +3,7 @@
   "schemaType": "messari-perps",
   "subgraphId": "DiR5cWwB3pwXXQWWdus7fDLR2mnFRQLiBFsVmHAH9VAs",
   "network": "arbitrum-one",
+  "role": "activity",
   "category": "perps",
   "countStrategy": "counters",
   "verifiedAt": "2026-07-25",

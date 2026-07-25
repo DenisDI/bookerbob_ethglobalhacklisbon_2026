@@ -3,7 +3,12 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { loadRegistry, loadRetired } from "./registry.js";
-import { AddressError, getContextBands, NoPayerError } from "./service.js";
+import {
+  AddressError,
+  getContextBands,
+  NoPayerError,
+  resolveName,
+} from "./service.js";
 
 // Convenience for running inside this monorepo. Standalone users export
 // GRAPH_API_KEY themselves, and shell values win either way.
@@ -28,9 +33,9 @@ server.registerTool(
   "get_context_bands",
   {
     description:
-      "Coarse onchain activity bands (T0-T4) for an EVM address, from live subgraphs on The Graph. Returns bands and active categories only, never raw values. A stale source reports 'unavailable' rather than a guess.",
+      "Underwriting bands for an EVM address or ENS name, from live subgraphs on The Graph. Returns four coarse bands (activity, tenure, breadth, scale), a repayment signal, and the categories the address is active in. Never raw values. A stale source reports 'unavailable' rather than a guess.",
     inputSchema: {
-      address: z.string().describe("EVM address, any casing"),
+      address: z.string().describe("EVM address or ENS name, e.g. vitalik.eth"),
     },
   },
   async ({ address }) => {
@@ -45,6 +50,25 @@ server.registerTool(
       }
       throw err;
     }
+  },
+);
+
+server.registerTool(
+  "resolve_name",
+  {
+    description:
+      "Resolve an ENS name to an address, with the date the name was registered. Useful on its own: a person types words, a contract needs hex.",
+    inputSchema: { name: z.string().describe("ENS name, e.g. vitalik.eth") },
+  },
+  async ({ name }) => {
+    const resolved = await resolveName(name);
+    if (!resolved) {
+      return {
+        isError: true,
+        content: [{ type: "text" as const, text: `${name} does not resolve` }],
+      };
+    }
+    return json({ name: resolved.record.name, ...resolved });
   },
 );
 

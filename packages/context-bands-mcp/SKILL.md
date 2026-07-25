@@ -1,101 +1,144 @@
 ---
 name: context-bands-mcp
 description: >-
-  Coarse onchain activity bands (T0-T4) for an EVM address, computed from live
-  subgraphs on The Graph. Use when you need to gate, rank, or underwrite by how
-  much a wallet has actually done, without reading balances or holdings.
+  Underwriting bands for an EVM address or ENS name, computed from live subgraphs
+  on The Graph: how long it has existed, how much and how broadly it operates, at
+  what size, and whether borrowed money came back. Use when you need to gate,
+  rank, or underwrite by what a wallet has actually done, without reading
+  balances or holdings.
 ---
 
 # context-bands-mcp
 
-Answers one question: **how much has this address actually done onchain, roughly?**
+Answers the questions an underwriter would ask about an address, and returns
+coarse bands instead of numbers.
 
-Output is a band and a list of categories. Never a balance, a count, or a dollar
-figure. That is a deliberate boundary: an agent can decide with a band, and a
-band does not publish someone's portfolio.
+Never a balance, a count, or a dollar figure. That is a deliberate boundary: an
+agent can decide from a band, and a band does not publish someone's portfolio.
 
 ## Tools
 
 ### `get_context_bands(address)`
 
+Takes an address or an ENS name.
+
 ```json
 {
-  "address": "0x62e2ceb6933a0747579f4f9f96d3253a7af0b237",
-  "bands": { "defi_activity": "T4" },
-  "activeCategories": ["dex", "lending"],
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "ens": { "name": "vitalik.eth", "createdAt": 1497775154 },
+  "since": 2017,
+  "bands": { "activity": "T4", "tenure": "T4", "breadth": "T4", "scale": "T4" },
+  "signals": { "repayment": "no_credit_history" },
+  "activeCategories": ["dex"],
   "freshness": [
-    { "subgraph": "aave-v3-ethereum", "blockNumber": 25609675, "ageSeconds": 22, "status": "live" },
-    { "subgraph": "gmx-arbitrum", "blockNumber": 487556442, "ageSeconds": 8, "status": "live" }
+    { "subgraph": "uniswap-v3-ethereum", "blockNumber": 25609792, "ageSeconds": 22, "status": "live" },
+    { "subgraph": "aave-v3-ethereum", "blockNumber": 25609792, "ageSeconds": 22, "status": "live" }
   ],
   "source": "the-graph"
 }
 ```
 
-`address` accepts any casing. An address with no history is `T0` with an empty
-category list, and that is a successful answer, not an error.
+An address with no history is `T0` on every axis with an empty category list, and
+that is a successful answer, not an error.
 
 **`status` values.** `live` counted, `stale` ignored, `error` ignored with a
-reason in `detail`. If every source is unusable the band is `"unavailable"` —
+reason in `detail`. If every source is unusable, every band is `"unavailable"` —
 never `T0`. Treat `unavailable` as "ask again later", never as "inactive".
+
+### `resolve_name(name)`
+
+`vitalik.eth` to an address, with the date the name was registered. Useful on its
+own: people type words, contracts need hex.
 
 ### `get_supported_subgraphs()`
 
-Returns the active registry plus retired entries with the reason each dropped
-out.
+The active registry plus retired entries with the reason each dropped out.
 
-## Bands
+## The four bands
 
-| Band | Meaning |
+They are independent on purpose. A single total would collapse into "did more,
+gets more", which is a scoreboard rather than an assessment, and the interesting
+addresses are the ones whose axes disagree.
+
+| Band | T2 | T3 | T4 | Why this axis |
+|---|---|---|---|---|
+| `activity` | 5 actions in a category | 25 across 2+ categories | 100 in one category | how much was done |
+| `tenure` | 90 days | 1 year | 3 years | time cannot be bought retroactively |
+| `breadth` | 3 venues | 10 venues | 30 venues | one market thirty times ≠ thirty markets once |
+| `scale` | $1k | $25k | $250k | tells $1k from $100k, never prints either |
+
+`T1` means the axis registered at all, `T0` means nothing was found. 100 is also
+the query page size, so above it the server stops distinguishing rather than
+pretending to. `tenure` counts an ENS registration date as well, since a 2017
+name predates most activity.
+
+## The repayment signal
+
+`signals.repayment` is not a band and not a ranking:
+
+| Value | Meaning |
 |---|---|
-| `T0` | address not found in any source |
-| `T1` | appears at least once |
-| `T2` | 5+ actions inside one category |
-| `T3` | 25+ actions across 2+ categories |
-| `T4` | 100+ actions in one category, or a saturated page |
+| `no_credit_history` | never borrowed. Neutral, not negative: most addresses are here |
+| `clean` | borrowed and repaid, no liquidations |
+| `liquidated` | has been liquidated |
 
-100 is also the query page size, so above it the server stops distinguishing
-instead of pretending to.
+It exists because "did borrowed money come back" is the one question that decides
+whether settlement can be deferred, and it is answerable from public data.
 
-**A band is not a person.** The busiest addresses on these subgraphs are
-routers and settlement contracts: the top Aave v3 Ethereum account by position
-count has 87224 positions and zero deposits. Bands describe activity. If you
-need to know a human is involved, get that from a credential.
+**A band is not a person.** The busiest addresses on these subgraphs are routers
+and settlement contracts: the top Aave v3 Ethereum account by position count has
+87224 positions and zero deposits. Bands describe behaviour. If you need to know
+a human is involved, get that from a credential.
 
 ## Sources and schemas
 
-| Source | Schema | Category | Counted from |
+| Source | Schema | Role | Counted from |
 |---|---|---|---|
 | aave-v3-ethereum / arbitrum / base | Messari lending | lending | entity lists |
 | gmx-arbitrum | Messari perpetuals | perps | counters |
 | uniswap-v3-ethereum | Uniswap V3 native | dex | entity lists |
+| ens-mainnet | ENS | naming | names, both directions |
 
 Why two counting strategies: in the Messari Aave v3 deployments every Account
 action counter reads 0, verified against an account holding a real $1463.67
 deposit whose `depositCount` was still 0. The entity lists are correct, so those
-sources are counted from lists. GMX maintains its counters properly, so it is
-read from them. Each manifest declares which applies, and the band engine never
-learns the difference.
+sources are counted from lists. GMX maintains its counters properly and is read
+from them. Each manifest declares which applies, and the band engine never learns
+the difference.
 
 Queries actually issued:
 
 ```graphql
-# Messari lending
+# Messari lending: activity, tenure, size and repayment in one request.
+# liquidates = acted AS a liquidator. liquidations = was liquidated. Not the same.
 query Lending($a: ID!) {
   account(id: $a) {
-    deposits(first: 100) { id }  withdraws(first: 100) { id }
-    borrows(first: 100) { id }   repays(first: 100) { id }
-    liquidates(first: 100) { id } liquidations(first: 100) { id }
+    firstDeposit: deposits(first: 1, orderBy: timestamp, orderDirection: asc) { timestamp }
+    deposits(first: 100, orderBy: timestamp, orderDirection: desc) { amountUSD }
+    borrows(first: 100, orderBy: timestamp, orderDirection: desc) { amountUSD }
+    repays(first: 100, orderBy: timestamp, orderDirection: desc) { amountUSD }
+    liquidations(first: 100) { id }
+    positions(first: 50) { market { id } }
   }
   _meta { block { number timestamp } }
 }
 
-# Uniswap V3 has no Account entity, so the address is reached through the events
+# Uniswap V3 has no Account entity, so the address is reached through its events.
 query Dex($a: Bytes!) {
-  swaps(first: 100, where: { origin: $a }, orderBy: timestamp, orderDirection: desc) { id }
-  positions(first: 100, where: { owner: $a }) { id }
+  first: swaps(first: 1, where: { origin: $a }, orderBy: timestamp, orderDirection: asc) { timestamp }
+  swaps(first: 100, where: { origin: $a }, orderBy: timestamp, orderDirection: desc) {
+    timestamp amountUSD pool { id }
+  }
+  positions(first: 100, where: { owner: $a }) { id pool { id } }
   _meta { block { number timestamp } }
 }
 ```
+
+**ENS names need filtering.** The subgraph returns names whose label preimage it
+does not know as `acompany.[5b27bed6...].eth`. Those are undisplayable, and
+placeholder addresses collect them: `0x1111...1111` carries two dating from 2017,
+which would have handed it three decades of tenure it never earned. Names
+containing a bracket are skipped.
 
 ## Run
 
@@ -132,10 +175,11 @@ known:
   "schemaType": "messari-lending",
   "subgraphId": "<deployment id>",
   "network": "optimism",
+  "role": "activity",
   "category": "lending",
   "countStrategy": "entities"
 }
 ```
 
-A new schema means one file in `src/templates/` returning
-`{ category, actions, saturated, present }`, and nothing else.
+A new schema means one file in `src/templates/` returning a `Reading`, and
+nothing else.

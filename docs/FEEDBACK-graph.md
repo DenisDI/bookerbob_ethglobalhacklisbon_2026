@@ -87,7 +87,38 @@ addresses that appear in events, which includes routers, settlement contracts an
 aggregators. Any product that ranks wallets by them will rank infrastructure
 first. We handle it by keeping personhood on a separate axis entirely.
 
-## 5. x402 route
+## 5. No per-account aggregates, so size is computed client side
+
+`amountUSD` and `timestamp` sit on every event entity, which is enough to derive
+tenure, recency and size. What is missing is any denormalised aggregate on
+`Account`: no lifetime volume, no first-seen, no last-seen. So a consumer that
+wants "how much has this address moved" has to page through events and add them
+up, and the answer is bounded by the page it read. We cap at 100 and report
+saturation honestly, but that means a 10k-swap wallet and a 100-swap wallet look
+identical above the cap.
+
+**Ask:** `firstSeen`, `lastSeen` and a cumulative USD figure on `Account` in the
+standardised schemas. They are cheap to maintain in the mapping and expensive to
+reconstruct in every client. The counters that already exist for this purpose are
+the ones described in section 2, which do not work.
+
+## 6. ENS returns names that cannot be displayed, and they carry dates
+
+`domains(where: { resolvedAddress: $a })` returns entries whose label preimage the
+subgraph does not know, formatted as `acompany.[5b27bed6d8333e...].eth`. They are
+real records, but undisplayable, and they are not evenly distributed:
+placeholder addresses accumulate them. `0x1111111111111111111111111111111111111111`
+carries two, both registered in 2017.
+
+That matters because `createdAt` on such a record looks like tenure. A naive
+"oldest name wins" rule handed a burn-style address three decades of standing it
+never earned. We now skip any name containing a bracket.
+
+**Ask:** a boolean on `Domain` for whether the label is known, or exclude
+unresolved labels from `resolvedAddress` filters by default. The current shape
+makes the wrong answer the easy one.
+
+## 7. x402 route
 
 `testnet.gateway.thegraph.com` does not resolve (NXDOMAIN), so the keyless path
 has no test environment: the only way to try it is real USDC on Base mainnet.
@@ -100,7 +131,10 @@ gated behind moving real money.
 
 ## What we shipped against this
 
-`packages/context-bands-mcp`: manifest registry with a declared counting
-strategy per deployment, a freshness gate that turns a stale source into
-`unavailable` instead of a wrong tier, retired-id records with reasons, offline
-tests over recorded responses, and a second consumer that is not our own app.
+`packages/context-bands-mcp`: a manifest registry that declares a counting
+strategy per deployment because the data quality differs, four independent bands
+(activity, tenure, breadth, scale) plus a repayment signal derived from event
+entities rather than the broken counters, a freshness gate that turns a stale
+source into `unavailable` instead of a wrong tier, retired-id records with
+reasons, ENS resolution both directions with junk labels filtered, offline tests
+over recorded responses, and a second consumer that is not our own app.

@@ -1,11 +1,18 @@
 # context-bands-mcp
 
-An MCP server that answers one question: **how much has this address actually
-done onchain, roughly?**
+An MCP server that answers the questions an underwriter would ask about an
+address: **how long has it existed, how much and how broadly does it operate, at
+what size, and did borrowed money come back?**
 
-It returns a coarse band (`T0`–`T4`) and the categories the address is active in.
-Never a balance, a count, or a dollar figure. Agent-facing docs and the full
-schemas are in [SKILL.md](./SKILL.md).
+It returns four coarse bands (`T0`–`T4`), a repayment signal, and the categories
+the address is active in. Never a balance, a count, or a dollar figure. Takes an
+ENS name as readily as an address. Agent-facing docs and the full schemas are in
+[SKILL.md](./SKILL.md).
+
+The axes are independent on purpose. A single total collapses into "did more,
+gets more", which is a scoreboard; the addresses worth looking at are the ones
+whose axes disagree. The busiest one we sampled has a real repayment record and
+two liquidations behind it.
 
 ```bash
 GRAPH_API_KEY=... npx context-bands-mcp

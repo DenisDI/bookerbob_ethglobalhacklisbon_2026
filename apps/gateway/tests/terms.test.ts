@@ -1,20 +1,40 @@
 // The underwriting matrix, offline. These tests are the guard on the one rule
-// the project cannot break: identity moves risk, never price.
+// the project cannot break: identity moves risk, never price. They also pin the
+// decisions that make this underwriting rather than a scoreboard.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  bandAtLeast,
   debugSignals,
   decideTerms,
   earnsRateLock,
   offerLimit,
-  peakBand,
 } from "../src/terms.js";
-import type { Band, ContextSnapshot } from "../src/types.js";
+import type { Band, BandName, ContextSnapshot, RepaymentSignal } from "../src/types.js";
 
-function ctx(bands: Record<string, Band>): ContextSnapshot {
-  return { address: "0xabc", bands, activeCategories: ["lending"] };
+function ctx(
+  bands: Partial<Record<BandName, Band>>,
+  repayment: RepaymentSignal = "no_credit_history",
+): ContextSnapshot {
+  return {
+    address: "0xabc",
+    ens: null,
+    since: null,
+    bands: {
+      activity: "T0",
+      tenure: "T0",
+      breadth: "T0",
+      scale: "T0",
+      ...bands,
+    },
+    signals: { repayment },
+    activeCategories: ["lending"],
+  };
 }
+
+const ESTABLISHED = { activity: "T2", tenure: "T2" } as const;
+const STRONG = { activity: "T4", tenure: "T3", breadth: "T3", scale: "T3" } as const;
 
 test("no credential lands on the unbacked tier", () => {
   assert.deepEqual(decideTerms({ hasCredential: false, context: null }), {
@@ -22,6 +42,11 @@ test("no credential lands on the unbacked tier", () => {
     inventory: "basic",
     payment: "prepay_100",
   });
+});
+
+test("no credential outranks any amount of context", () => {
+  const terms = decideTerms({ hasCredential: false, context: ctx(STRONG, "clean") });
+  assert.equal(terms.tier, "bot", "context without a person is not underwritable");
 });
 
 test("a credential with no context still earns human terms", () => {
@@ -32,55 +57,90 @@ test("a credential with no context still earns human terms", () => {
   });
 });
 
-test("T2 and T3 earn the rate lock, T4 earns pay at checkout", () => {
-  const t2 = decideTerms({ hasCredential: true, context: ctx({ defi: "T2" }) });
-  const t3 = decideTerms({ hasCredential: true, context: ctx({ defi: "T3" }) });
-  const t4 = decideTerms({ hasCredential: true, context: ctx({ defi: "T4" }) });
-
-  assert.equal(t2.payment, "rate_lock_pay_later");
-  assert.equal(t3.payment, "rate_lock_pay_later");
-  assert.equal(t2.tier, "verified");
-  assert.equal(t4.tier, "elite");
-  assert.equal(t4.payment, "pay_at_checkout");
-});
-
-test("T0 and T1 do not clear the bar for deferred settlement", () => {
-  for (const band of ["T0", "T1"] as const) {
-    const terms = decideTerms({ hasCredential: true, context: ctx({ defi: band }) });
-    assert.equal(terms.tier, "human", `${band} must not reach verified`);
-    assert.equal(terms.payment, "deposit");
-  }
-});
-
-test("a stale source never upgrades and never downgrades", () => {
-  const stale = decideTerms({
+test("a thin file stays on human terms", () => {
+  const young = decideTerms({
     hasCredential: true,
-    context: ctx({ defi: "unavailable" }),
+    context: ctx({ activity: "T4", tenure: "T1" }),
   });
-  assert.equal(stale.tier, "human", "stale must not be read as high activity");
-  assert.equal(stale.payment, "deposit", "stale must not cost human terms");
+  assert.equal(young.tier, "human", "age is what a held price is underwritten on");
 
-  // One live dimension still counts even when another is stale.
-  const mixed = decideTerms({
+  const dormant = decideTerms({
     hasCredential: true,
-    context: ctx({ defi: "unavailable", dex: "T3" }),
+    context: ctx({ activity: "T1", tenure: "T4" }),
   });
-  assert.equal(mixed.tier, "verified");
-
-  assert.equal(peakBand(ctx({ defi: "unavailable" })), -1);
+  assert.equal(dormant.tier, "human", "old but barely used is not established");
 });
 
-test("the highest band across dimensions decides", () => {
+test("tenure plus depth earns a held price", () => {
+  const terms = decideTerms({ hasCredential: true, context: ctx(ESTABLISHED) });
+  assert.equal(terms.tier, "verified");
+  assert.equal(terms.payment, "rate_lock_pay_later");
+});
+
+test("tenure plus breadth also earns a held price", () => {
   const terms = decideTerms({
     hasCredential: true,
-    context: ctx({ defi: "T1", dex: "T4" }),
+    context: ctx({ activity: "T1", tenure: "T2", breadth: "T3" }),
   });
-  assert.equal(terms.tier, "elite");
+  assert.equal(terms.tier, "verified", "breadth substitutes for depth");
 });
 
-test("no credential outranks any amount of context", () => {
-  const terms = decideTerms({ hasCredential: false, context: ctx({ defi: "T4" }) });
-  assert.equal(terms.tier, "bot", "context without a person is not underwritable");
+test("a long, large, clean file settles at checkout", () => {
+  const terms = decideTerms({ hasCredential: true, context: ctx(STRONG, "clean") });
+  assert.equal(terms.tier, "elite");
+  assert.equal(terms.payment, "pay_at_checkout");
+});
+
+test("having been liquidated closes pay at checkout, not the rate lock", () => {
+  const caught = decideTerms({
+    hasCredential: true,
+    context: ctx(STRONG, "liquidated"),
+  });
+
+  assert.equal(caught.tier, "verified", "the price is still held");
+  assert.equal(caught.payment, "rate_lock_pay_later");
+
+  // Everything else identical, so the liquidation is provably the deciding fact.
+  const clean = decideTerms({ hasCredential: true, context: ctx(STRONG, "clean") });
+  assert.equal(clean.payment, "pay_at_checkout");
+});
+
+test("never having borrowed is not held against anyone", () => {
+  const terms = decideTerms({
+    hasCredential: true,
+    context: ctx(STRONG, "no_credit_history"),
+  });
+  assert.equal(terms.tier, "elite", "no credit history is neutral, not negative");
+});
+
+test("size gates checkout on its own", () => {
+  const small = decideTerms({
+    hasCredential: true,
+    context: ctx({ ...STRONG, scale: "T2" }, "clean"),
+  });
+  assert.equal(small.tier, "verified");
+});
+
+test("stale bands never upgrade and never cost human terms", () => {
+  const stale = ctx(
+    {
+      activity: "unavailable",
+      tenure: "unavailable",
+      breadth: "unavailable",
+      scale: "unavailable",
+    },
+    "no_credit_history",
+  );
+  const terms = decideTerms({ hasCredential: true, context: stale });
+
+  assert.equal(terms.tier, "human", "stale must not be read as a rich history");
+  assert.equal(terms.payment, "deposit", "nor as an empty one");
+  assert.equal(bandAtLeast(stale, "tenure", "T1"), false);
+});
+
+test("one live axis still counts when another is stale", () => {
+  const mixed = ctx({ activity: "T2", tenure: "T2", breadth: "unavailable" });
+  assert.equal(decideTerms({ hasCredential: true, context: mixed }).tier, "verified");
 });
 
 test("inventory depth never shrinks as tiers rise", () => {
@@ -116,6 +176,14 @@ test("terms carry no price, percentage or multiplier", () => {
     // prepay_100 is an enum name, not a quantity: what must never appear is a
     // money amount or a rate that could scale a price.
     assert.doesNotMatch(raw, /[$€£]|\d+\.\d|\bx\d/i, "a term must carry no amount");
+  }
+});
+
+test("every debug tier really produces its tier through the engine", () => {
+  for (const tier of ["bot", "human", "verified", "elite"] as const) {
+    const signals = debugSignals(tier);
+    assert.ok(signals);
+    assert.equal(decideTerms(signals).tier, tier, `${tier} must not be a label only`);
   }
 });
 

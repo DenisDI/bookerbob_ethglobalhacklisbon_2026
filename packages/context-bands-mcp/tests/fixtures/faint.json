@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-07-25T12:08:15.485Z",
+  "capturedAt": "2026-07-25T12:32:29.244Z",
   "note": "Real gateway responses. Entity ids are trimmed to keep the file readable; only list lengths matter to the band engine.",
   "address": "0x646c5ba59f30cf73deea9b00e13aead674c6b07a",
   "responses": {
@@ -7,8 +7,8 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 487559814,
-          "timestamp": 1784981286
+          "number": 487565653,
+          "timestamp": 1784982747
         }
       }
     },
@@ -16,29 +16,57 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 49095970,
-          "timestamp": 1784981287
+          "number": 49096699,
+          "timestamp": 1784982745
         }
       }
     },
     "aave-v3-ethereum": {
       "account": {
         "id": "0x646c5ba59f30cf73deea9b00e13aead674c6b07a",
+        "firstDeposit": [
+          {
+            "timestamp": "1784980463"
+          }
+        ],
+        "lastDeposit": [
+          {
+            "timestamp": "1784980463"
+          }
+        ],
+        "firstBorrow": [],
+        "lastBorrow": [],
         "deposits": [
           {
-            "id": "0x3ea68bb36255d7778d8a79fe3a43cc697db76cfd4d33c495ce1420f993cec83ccc00000000000000"
+            "amountUSD": "1463.67052386078821"
           }
         ],
         "withdraws": [],
         "borrows": [],
         "repays": [],
         "liquidates": [],
-        "liquidations": []
+        "liquidations": [],
+        "positions": [
+          {
+            "market": {
+              "id": "0x23878914efe38d27c4d67ab83ed1b93a74d4086a"
+            }
+          }
+        ]
       },
       "_meta": {
         "block": {
-          "number": 25609681,
-          "timestamp": 1784981291
+          "number": 25609800,
+          "timestamp": 1784982719
+        }
+      }
+    },
+    "ens-mainnet": {
+      "domains": [],
+      "_meta": {
+        "block": {
+          "number": 25609802,
+          "timestamp": 1784982743
         }
       }
     },
@@ -46,18 +74,19 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 487559815,
-          "timestamp": 1784981286
+          "number": 487565653,
+          "timestamp": 1784982747
         }
       }
     },
     "uniswap-v3-ethereum": {
+      "first": [],
       "swaps": [],
       "positions": [],
       "_meta": {
         "block": {
-          "number": 25609681,
-          "timestamp": 1784981291
+          "number": 25609801,
+          "timestamp": 1784982731
         }
       }
     }

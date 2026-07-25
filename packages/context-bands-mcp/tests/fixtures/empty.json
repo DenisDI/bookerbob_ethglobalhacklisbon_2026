@@ -1,31 +1,23 @@
 {
-  "capturedAt": "2026-07-25T12:08:16.369Z",
+  "capturedAt": "2026-07-25T12:32:30.060Z",
   "note": "Real gateway responses. Entity ids are trimmed to keep the file readable; only list lengths matter to the band engine.",
-  "address": "0x1111111111111111111111111111111111111111",
+  "address": "0x9a7c4f1e2b8d5063af71c9e34b2d8f60517ac3be",
   "responses": {
     "aave-v3-arbitrum": {
       "account": null,
       "_meta": {
         "block": {
-          "number": 487559815,
-          "timestamp": 1784981286
+          "number": 487565654,
+          "timestamp": 1784982747
         }
       }
     },
     "aave-v3-base": {
-      "account": {
-        "id": "0x1111111111111111111111111111111111111111",
-        "deposits": [],
-        "withdraws": [],
-        "borrows": [],
-        "repays": [],
-        "liquidates": [],
-        "liquidations": []
-      },
+      "account": null,
       "_meta": {
         "block": {
-          "number": 49095972,
-          "timestamp": 1784981291
+          "number": 49096699,
+          "timestamp": 1784982745
         }
       }
     },
@@ -33,8 +25,17 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 25609681,
-          "timestamp": 1784981291
+          "number": 25609800,
+          "timestamp": 1784982719
+        }
+      }
+    },
+    "ens-mainnet": {
+      "domains": [],
+      "_meta": {
+        "block": {
+          "number": 25609802,
+          "timestamp": 1784982743
         }
       }
     },
@@ -42,18 +43,19 @@
       "account": null,
       "_meta": {
         "block": {
-          "number": 487559848,
-          "timestamp": 1784981295
+          "number": 487565658,
+          "timestamp": 1784982748
         }
       }
     },
     "uniswap-v3-ethereum": {
+      "first": [],
       "swaps": [],
       "positions": [],
       "_meta": {
         "block": {
-          "number": 25609681,
-          "timestamp": 1784981291
+          "number": 25609801,
+          "timestamp": 1784982731
         }
       }
     }

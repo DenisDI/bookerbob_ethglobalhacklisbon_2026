@@ -7,7 +7,12 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { Band, ContextSnapshot } from "./types.js";
+import type {
+  Band,
+  BandName,
+  ContextSnapshot,
+  RepaymentSignal,
+} from "./types.js";
 
 /** Five subgraphs, each with one retry. Measured around 2-4s in practice. */
 const LOOKUP_TIMEOUT_MS = 20_000;
@@ -35,7 +40,10 @@ function client(): Promise<Client> {
 
 interface BandsPayload {
   address: string;
-  bands: Record<string, Band>;
+  ens: { name: string; createdAt: number | null } | null;
+  since: number | null;
+  bands: Record<BandName, Band>;
+  signals: { repayment: RepaymentSignal };
   activeCategories: string[];
 }
 
@@ -45,6 +53,7 @@ interface BandsPayload {
  * wallet, so a broken lookup never costs a guest their human terms.
  */
 export async function getContextSnapshot(
+  /** An address or an ENS name; the MCP resolves either. */
   address: string,
 ): Promise<ContextSnapshot | null> {
   try {
@@ -65,7 +74,10 @@ export async function getContextSnapshot(
     const payload = JSON.parse(text) as BandsPayload;
     return {
       address: payload.address,
+      ens: payload.ens ?? null,
+      since: payload.since ?? null,
       bands: payload.bands,
+      signals: payload.signals,
       activeCategories: payload.activeCategories,
     };
   } catch (err) {

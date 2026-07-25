@@ -23,11 +23,25 @@ export interface Terms {
  */
 export type Band = "T0" | "T1" | "T2" | "T3" | "T4" | "unavailable";
 
+/** The four axes the context MCP reports. Deliberately independent. */
+export type BandName = "activity" | "tenure" | "breadth" | "scale";
+
+/**
+ * Whether borrowed money came back. Not a scale and not a verdict on a person:
+ * it is the public record of the consented address, and it speaks directly to
+ * who should carry risk between booking and the stay.
+ */
+export type RepaymentSignal = "no_credit_history" | "clean" | "liquidated";
+
 /** What the context-bands MCP tells us about a consented address. */
 export interface ContextSnapshot {
   address: string | null;
-  /** dimension -> band, e.g. { defiActivity: "T3" } */
-  bands: Record<string, Band>;
+  /** Resolved name, when the address has one. */
+  ens: { name: string; createdAt: number | null } | null;
+  /** Calendar year first seen. Coarse on purpose: sayable, not a raw date. */
+  since: number | null;
+  bands: Record<BandName, Band>;
+  signals: { repayment: RepaymentSignal };
   /** e.g. ["lending", "dex"]. Categories, never raw counts. */
   activeCategories: string[];
 }

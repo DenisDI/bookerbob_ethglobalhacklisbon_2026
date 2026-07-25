@@ -18,10 +18,18 @@ try {
 const OUT = fileURLToPath(new URL("../tests/fixtures", import.meta.url));
 
 const ADDRESSES: Record<string, string> = {
+  // Long lending history with real repayments AND two liquidations behind it.
   heavy: "0x62e2ceb6933a0747579f4f9f96d3253a7af0b237",
+  // Broad trader, never borrowed, carries an ENS name from 2022.
   broad: "0x561c75466c1568c2b581c5538b84039a44d186e7",
+  // First deposit on the day of capture.
   faint: "0x646c5ba59f30cf73deea9b00e13aead674c6b07a",
-  empty: "0x1111111111111111111111111111111111111111",
+  // Never used. Not a vanity address on purpose: 0x1111...1111 turned out to
+  // hold Aave positions on Base and two 2017 ENS records, so it was anything
+  // but empty.
+  empty: "0x9a7c4f1e2b8d5063af71c9e34b2d8f60517ac3be",
+  // vitalik.eth: what a judge will type. Name registered 2017.
+  vitalik: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
 };
 
 const payer = payerFromEnv();
@@ -36,11 +44,14 @@ for (const [label, rawAddress] of Object.entries(ADDRESSES)) {
 
   for (const manifest of registry) {
     const template = TEMPLATES[manifest.schemaType];
+    if (!template) continue;
     responses[manifest.name] = await query<unknown>(
       payer,
       manifest.subgraphId,
-      template.query,
-      template.variables(address),
+      template.kind === "naming" ? template.reverseQuery : template.query,
+      template.kind === "naming"
+        ? template.reverseVariables(address)
+        : template.variables(address),
     );
   }
 

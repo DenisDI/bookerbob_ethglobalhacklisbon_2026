@@ -69,7 +69,11 @@ export function narrateTerms(
     return;
   }
 
-  n.say("a real person is standing behind this request");
+  n.say(
+    context?.ens
+      ? `${context.ens.name} is standing behind this request`
+      : "a real person is standing behind this request",
+  );
   n.say(`that opens the full list: ${shown} places`);
 
   const categories = context?.activeCategories ?? [];
@@ -78,7 +82,7 @@ export function narrateTerms(
     // Scripted, not an apology: the credential alone still carries the guest.
     // Which line is true depends on why there is no usable context, and saying
     // the wrong one on camera would be a small lie.
-    const band = context?.bands.defi_activity;
+    const band = context?.bands.activity;
     if (!context) {
       n.say("no wallet shared here. human terms via the credential alone");
     } else if (band === "unavailable") {
@@ -92,10 +96,26 @@ export function narrateTerms(
     return;
   }
 
+  // The underwriting file, in words. Each line is one axis, so a viewer can see
+  // which fact produced which term instead of watching a number go up.
+  if (context?.since) {
+    n.say(`they have been around since ${context.since}, and they still are`);
+  }
+
   if (categories.length > 0) {
-    n.say(`and they have a track record here: ${categories.join(", ")}`);
-  } else {
-    n.say("and they have a track record worth counting");
+    n.say(`active where it counts: ${categories.join(", ")}`);
+  }
+
+  switch (context?.signals.repayment) {
+    case "clean":
+      n.say("they have borrowed before and paid it back, never caught short");
+      break;
+    case "liquidated":
+      // Not a verdict on the person, just the reason the money moves earlier.
+      n.say("they have been caught short before, so the money moves at booking");
+      break;
+    default:
+      n.say("no borrowing history either way, so nothing to hold against them");
   }
 
   n.say(
