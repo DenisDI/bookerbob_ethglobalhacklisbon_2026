@@ -56,11 +56,18 @@ function requestLine(city: string, address: string, credentialed: boolean): stri
     if (address.trim()) body.address = address.trim();
     return `POST /x402/paid-offers  ${JSON.stringify(body)}`;
   }
+  // Mirrors fetchAgentVerifiedOffers exactly, including the order the params go
+  // on and the fact that there is no credential flag: the backed lane is a signed
+  // agent and the signature is checked server side, not asserted in a query
+  // string. The old line said GET /offers?credential=1, which was the stand-in
+  // path, and it contradicted the identity block three frames below saying
+  // verified by agentkit. A transcript that argues with itself is worse than no
+  // transcript.
   const params = new URLSearchParams();
-  params.set("credential", "1");
   if (address.trim()) params.set("address", address.trim());
   if (city.trim()) params.set("city", city.trim());
-  return `GET /offers?${params}`;
+  const query = params.toString();
+  return query ? `GET /agent/offers?${query}` : "GET /agent/offers";
 }
 
 function identityRows(data: OffersResponse | null, path: Path): Field[] {
