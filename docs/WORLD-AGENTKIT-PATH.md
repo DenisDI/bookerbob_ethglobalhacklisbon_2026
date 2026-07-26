@@ -1,15 +1,22 @@
 # World AgentKit: the real path (for judges)
 
 "Uses AgentKit, verifies a human is behind the agent, working end to end." Here is
-exactly where that is real, not the demo stub.
+exactly where that is real.
 
-## The demo vs the real path
+## Where judges see it
 
-The race tab drives its two lanes with a stand-in flag (`?credential=1`) so the
-comparison replays reliably on stage without a live credential per run. That is the
-show. The real AgentKit verification lives below and is what the claim rests on.
+The race's backed lane calls `GET /agent/offers`: the gateway signs as the registered
+agent and verifies against AgentBook on World Chain. That is the same path as
+`scripts/agent-with-credential.ts`. The chip on screen mirrors the gateway's answer
+(`verified` from AgentBook, or `missing` / labelled stand-in if the agent key is unset).
 
-## The real end-to-end, in three parts
+If `LISBON2026_AGENT_PRIVATE_KEY` is unset, the UI falls back to
+`GET /offers?credential=1` and labels it as a stand-in rather than claiming World. On
+the deployed demo the key is set, so the race hits AgentBook.
+
+Overview Selfie Check is a separate personhood path (browser World ID), not AgentKit.
+
+## End-to-end, in three parts
 
 1. **On-chain registration.** The agent wallet
    `0x1597866E3F9870241EebC1153136fDbf71C3CBF3` is registered in the AgentBook on World
@@ -18,9 +25,10 @@ show. The real AgentKit verification lives below and is what the claim rests on.
    `npx @worldcoin/agentkit-cli status 0x1597866E3F9870241EebC1153136fDbf71C3CBF3`
    returns `registered: true` with a humanId.
 
-2. **The agent presents a signed credential.** `scripts/agent-with-credential.ts` is a
-   real agent: it mints nonce and issuedAt, signs an AgentKit header (eip191 EOA), and
-   calls the gateway. No stub.
+2. **The agent presents a signed credential.** Either the race (`apps/gateway/src/routes/agentOffers.ts`
+   signs server-side for the demo surface) or `scripts/agent-with-credential.ts`
+   (agent signs itself). Both mint nonce and issuedAt, build an AgentKit header
+   (eip191 EOA), and hit `/offers`. No stub decision about the human.
 
 3. **The gateway verifies against the chain.** `apps/gateway/src/world.ts` parses the
    header, validates the SIWE message, freshness and nonce, verifies the signature, then
@@ -37,6 +45,9 @@ gateway:
 ```
 npx tsx scripts/agent-with-credential.ts
 ```
+
+Or open the race on https://lisbonhack.world and run it: the backed lane is
+`GET /agent/offers`.
 
 Expect a request that resolves to the human-backed tier through the on-chain lookup, and
 the same request without the header staying unbacked.
