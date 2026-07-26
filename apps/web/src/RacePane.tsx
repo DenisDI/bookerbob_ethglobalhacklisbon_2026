@@ -12,6 +12,7 @@ import { ContextFile } from "./ContextFile";
 import { NarrationFeed } from "./NarrationFeed";
 import { OfferList, OfferSkeleton } from "./OfferList";
 import { HederaMark, TheGraphMark, WorldMark } from "./PartnerMarks";
+import { AGENT_REGISTRATION_URL } from "./proofLinks";
 import { EmptyRail, SettlementRail } from "./SettlementRail";
 import { SpentCounter } from "./SpentCounter";
 import {
@@ -102,7 +103,14 @@ export function RacePane({
           {accent &&
           data?.credential?.status === "verified" &&
           data.credential.source === "agentkit" ? (
-            <span className="pane__proof reason">verified in AgentBook · World Chain</span>
+            <a
+              className="pane__proof reason"
+              href={AGENT_REGISTRATION_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              verified in AgentBook · World Chain ↗
+            </a>
           ) : null}
           <span className="pane__spacer" />
           <span className="pane__status">

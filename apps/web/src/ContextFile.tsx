@@ -10,17 +10,46 @@
 // empty meter and never zeros dressed up as a reading.
 
 import { TheGraphMark } from "./PartnerMarks";
+import { leadSubgraph, SUBGRAPHS } from "./proofLinks";
 import type { Band, ContextBands, RepaymentSignal } from "./types";
 
 const AXES: Array<{
   key: keyof ContextBands["bands"];
+  /**
+   * What the engine actually reads for this axis, on screen rather than in a
+   * tooltip. A meter labelled HOW MUCH over the word "heavy" tells a viewer
+   * nothing about what was measured or where it came from, and a title attribute
+   * is invisible to anybody who is not hovering, which on a projector is
+   * everybody. Wording follows bands.ts, not what would sound good.
+   */
+  measures: string;
   label: string;
   asks: string;
 }> = [
-  { key: "tenure", label: "HOW LONG", asks: "time cannot be bought retroactively" },
-  { key: "activity", label: "HOW MUCH", asks: "a footprint that repeats" },
-  { key: "breadth", label: "HOW BROADLY", asks: "one venue or thirty" },
-  { key: "scale", label: "WHAT SIZE", asks: "banded, never printed" },
+  {
+    key: "tenure",
+    label: "HOW LONG",
+    asks: "time cannot be bought retroactively",
+    measures: "earliest trace on chain",
+  },
+  {
+    key: "activity",
+    label: "HOW MUCH",
+    asks: "a footprint that repeats",
+    measures: "how often it acts",
+  },
+  {
+    key: "breadth",
+    label: "HOW BROADLY",
+    asks: "one venue or thirty",
+    measures: "how many venues",
+  },
+  {
+    key: "scale",
+    label: "WHAT SIZE",
+    asks: "banded, never printed",
+    measures: "size it moves, bucketed",
+  },
 ];
 
 const STEPS = ["T0", "T1", "T2", "T3", "T4"] as const;
@@ -93,6 +122,7 @@ export function ContextFile({ context }: { context: ContextBands }) {
                   {note(axis.key, band, context.since)}
                 </dd>
               </div>
+              <p className="axis__measures reason">{axis.measures}</p>
               <div className="axis__meter" aria-hidden="true">
                 {[1, 2, 3, 4].map((step) => (
                   <i key={step} className={step <= cells ? "on" : undefined} />
@@ -113,6 +143,35 @@ export function ContextFile({ context }: { context: ContextBands }) {
         <p className="ctx__where reason">
           active in {context.activeCategories.join(", ")}
         </p>
+      ) : null}
+
+      {/* Where this came from, and a page to check it on. Naming the schema
+        * matters for the composability claim: two of the three are read through
+        * the same standardised Messari shape, and Uniswap is not, which is
+        * exactly why the registry carries a schemaType per source. */}
+      <p className="ctx__source reason">
+        read through The Graph:{" "}
+        {Object.entries(SUBGRAPHS).map(([key, sub], i) => (
+          <span key={key}>
+            {i > 0 ? " · " : ""}
+            <a href={sub.url} target="_blank" rel="noreferrer" className="ctx__link">
+              {sub.label}
+            </a>{" "}
+            <span className="ctx__schema">({sub.schema})</span>
+          </span>
+        ))}
+        . coarse bands, raw figures bucketed, never shown.
+      </p>
+
+      {context.activeCategories.length > 0 ? (
+        <a
+          className="ctx__see"
+          href={leadSubgraph(context.activeCategories).url}
+          target="_blank"
+          rel="noreferrer"
+        >
+          see the subgraph ↗
+        </a>
       ) : null}
     </section>
   );

@@ -17,6 +17,7 @@ import type { ReactNode } from "react";
 import { shortAddress } from "./auth";
 import type { CredentialState } from "./credential";
 import { HederaMark, TheGraphMark, WorldMark } from "./PartnerMarks";
+import { AGENT_REGISTRATION_URL } from "./proofLinks";
 import type { PaneState } from "./RacePane";
 import { earnsSchedule } from "./terms-copy";
 
@@ -68,7 +69,16 @@ function whoStep(credential: CredentialState): Part {
 
   switch (credential.status) {
     case "verified":
-      return { ...base, line: "a real person is behind this request", state: "done" };
+      return {
+        ...base,
+        line: "a real person is behind this request",
+        // The claim is checkable, so the page that proves it is one click away
+        // rather than something a viewer has to take on trust. Same affordance
+        // Hedera already uses for its schedule.
+        href: AGENT_REGISTRATION_URL,
+        linkLabel: "verified in AgentBook",
+        state: "done",
+      };
     case "stand_in":
       // Present and it does move the terms, but it is not a proven person, so it
       // gets neither the settled colour nor the in-flight pulse.

@@ -3381,3 +3381,42 @@ body {
     transition: none !important;
   }
 }
+
+/* Proof links: same weight as the HashScan line the finale already uses, because
+ * they are the same kind of claim. Quiet until hovered, and never dressed up as a
+ * button: this is evidence, not a call to action. */
+.axis__measures {
+  margin: 0.15rem 0 0;
+  font-size: 0.68rem;
+  color: var(--color-faint, #565b6b);
+}
+
+.ctx__source {
+  margin: 0.5rem 0 0;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.ctx__schema {
+  color: var(--color-faint, #565b6b);
+}
+
+.ctx__link,
+.ctx__see,
+.pane__proof {
+  color: var(--color-muted, #767c90);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.ctx__link:hover,
+.ctx__see:hover,
+a.pane__proof:hover {
+  color: var(--color-accent, #3b5bff);
+}
+
+.ctx__see {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+}
