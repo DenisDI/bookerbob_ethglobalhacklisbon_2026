@@ -31,7 +31,6 @@ goes through the verification path below.
 
 ### link to the line of code where the tech is used
 
-main:
 https://github.com/DenisDI/ethglobalhacklisbon_2026/blob/71139ce39da8a4adbcfa3d60af20b737c1f92c96/apps/gateway/src/world.ts#L145
 
 that is the AgentBook lookup on World Chain, `agentBook.lookupHuman(signature.address)`,
@@ -46,29 +45,40 @@ https://github.com/DenisDI/ethglobalhacklisbon_2026/blob/71139ce39da8a4adbcfa3d6
 
 ### ease of use: 6 / 10, and feedback
 
-the strength you are underselling is your error strings. `Message too old: 0s
-exceeds 0.3s limit` named a units bug in one second that would otherwise have
-taken an evening, and `all_verifications_failed` comes back with a per credential
-breakdown rather than a single boolean. `lookupHuman` returning null for an
-unregistered wallet is also the right call: it let us treat "no credential" as an
-ordinary product state instead of a failure path.
+the most useful thing we can give you is a bug your own team confirmed at the
+booth, on our build. a World ID with the orb credential completes Selfie Check on
+the web, and your accounts did. a World ID without the orb completes Selfie Check
+in World App and fails on the web. same relying party, same request, same code
+path on our side; the only difference is what the person holds. it surfaces as
+`credential_unavailable`, which the widget renders as "Something went wrong", and
+it cost us an evening of chasing environments, protocol versions and portal
+settings before anyone could have known it was not ours to fix. two things follow
+regardless of the bug itself: the orb-less case is the majority case at any
+hackathon, so the web path should not land it in a generic failure dialog, and an
+integrator needs to tell "this person cannot do it" from "this build cannot do
+it". today those are one string.
 
-the friction is `maxAge`. it is milliseconds, compared internally against
-`DEFAULT_MAX_AGE_MS`, but neither the name nor the type says so, and every
-adjacent auth convention we know counts seconds: SIWE, JWT `exp`, OAuth
-lifetimes. we passed 300 meaning five minutes and got a freshness window of a
-third of a second. every local run passed, because agent and server shared a
+the same ambiguity has a second face. Face credential is listed as coming soon in
+World App, while the developer surface gives it a credential id, a docs page, a
+sandbox page, `constraints: { type: "selfie" }` in the sdk and
+`enable_face_check: true` on our own app in the portal. everything a developer can
+see says build it, and the only honest signal lives in the consumer app. marking
+not yet issuable credentials in the docs and the portal removes that whole class.
+
+the friction we hit before either of those was `maxAge`. it is milliseconds,
+compared internally against `DEFAULT_MAX_AGE_MS`, but neither the name nor the
+type says so, and every adjacent auth convention counts seconds: SIWE, JWT `exp`,
+OAuth lifetimes. we passed 300 meaning five minutes and got a freshness window of
+a third of a second. every local run passed, because agent and server shared a
 machine and the age was 0ms, and everything over a network failed. rename it
-`maxAgeMs`, or refuse values below a second, and the class disappears.
+`maxAgeMs`, or refuse values below a second.
 
-second, smaller but it cost a whole evening: Face credential is listed as coming
-soon in World App, while the developer surface has a credential id, a docs page,
-a sandbox page, `constraints: { type: "selfie" }` in the sdk and
-`enable_face_check: true` on our own app in the portal. requesting it fails as
-`credential_unavailable`, which the widget renders as "Something went wrong". a
-distinct code for "nobody can hold this yet" against "this person does not hold
-it" would have saved all of it, and marking not yet issuable credentials in the
-portal would have saved it sooner.
+the strength you are underselling, and it is why all of the above was findable at
+all: your error strings. `Message too old: 0s exceeds 0.3s limit` named the units
+bug in one second, and `all_verifications_failed` comes back with a per credential
+breakdown rather than a single boolean. `lookupHuman` returning null for an
+unregistered wallet is the right call too: it let us treat "no credential" as an
+ordinary product state instead of a failure path.
 
 ---
 
@@ -92,7 +102,6 @@ bands, and the screen shows bands, so there is nothing to extract.
 
 ### link to the line of code where the tech is used
 
-main:
 https://github.com/DenisDI/ethglobalhacklisbon_2026/blob/71139ce39da8a4adbcfa3d60af20b737c1f92c96/packages/context-bands-mcp/src/graph.ts#L69
 
 that is the query against the decentralized gateway,
@@ -142,7 +151,6 @@ the per query settlement is real and happens on every unbacked run.
 
 ### link to the line of code where the tech is used
 
-main:
 https://github.com/DenisDI/ethglobalhacklisbon_2026/blob/71139ce39da8a4adbcfa3d60af20b737c1f92c96/packages/hedera-schedule/src/client.ts#L120
 
 that is the `ScheduleCreateTransaction` that schedules the checkout day transfer.
