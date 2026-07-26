@@ -94,10 +94,12 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
   // gateway marks the address `typed` rather than owned, and the file below says
   // so on screen. Pairs with `?personhood=stand-in` so the whole ladder is one
   // link on camera.
-  const [urlAddress] = useState(
+  const [typedAddress, setTypedAddress] = useState(
     () => new URLSearchParams(window.location.search).get("address")?.trim() ?? "",
   );
-  const address = wallet.address ?? urlAddress;
+  /** What is in the field, which is not yet what has been asked for. */
+  const [addressDraft, setAddressDraft] = useState(typedAddress);
+  const address = wallet.address ?? typedAddress;
   // Bumped when a step finishes, so the effect re-runs on proof being added even
   // though the token itself lives outside React.
   const run = useRef(0);
@@ -306,18 +308,61 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
                 read as coarse bands, and nothing is taken from it.
               </p>
               {privyConfigured ? (
-                <>
-                  <ConnectWalletButton />
-                  {address ? (
-                    <p className="step__note mono">reading {shortAddress(address)}</p>
-                  ) : null}
-                </>
+                <ConnectWalletButton />
               ) : (
                 <p className="step__down reason">
-                  wallet connect is not configured on this build, so a history
-                  cannot be read here
+                  wallet connect is not configured on this build
                 </p>
               )}
+
+              {/* The second way in, and it is not a fallback. Connecting proves
+                * the wallet is yours; typing one reads a history without asking
+                * anybody to connect anything, which is the difference between a
+                * visitor who can try this and one who closes the tab. The
+                * gateway marks a typed address `typed` rather than owned, and
+                * the reading below says so, so the honesty costs nothing. */}
+              <form
+                className="ov__typed"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setTypedAddress(addressDraft.trim());
+                }}
+              >
+                <label className="ask__said" htmlFor="ov-address">
+                  or read any wallet
+                </label>
+                <input
+                  id="ov-address"
+                  className="ask__city"
+                  value={addressDraft}
+                  onChange={(e) => setAddressDraft(e.target.value)}
+                  placeholder="0x… or a name.eth"
+                  spellCheck={false}
+                  autoComplete="off"
+                  size={22}
+                />
+                <button type="submit" className="door__go">
+                  read it
+                </button>
+              </form>
+
+              <button
+                type="button"
+                className="ov__try"
+                onClick={() => {
+                  setAddressDraft("vitalik.eth");
+                  setTypedAddress("vitalik.eth");
+                }}
+              >
+                try vitalik.eth
+              </button>
+
+              {address ? (
+                <p className="step__note mono">
+                  reading {shortAddress(address)}
+                  {wallet.address ? "" : " · typed, not owned"}
+                </p>
+              ) : null}
             </section>
 
             {/* The bands moved into The Graph's rung, where the sentence that

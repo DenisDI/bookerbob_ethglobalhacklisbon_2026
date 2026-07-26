@@ -1115,6 +1115,47 @@ body {
   width: auto;
 }
 
+/* The second way into a history: type one. Sits on its own line under the
+ * connect button, at the same weight, because for a visitor who will not connect
+ * a wallet this is not a fallback, it is the path. */
+.ov__typed {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.ov__try {
+  align-self: flex-start;
+  padding: 4px 8px;
+  border: 1px solid var(--color-line-strong);
+  background: none;
+  color: var(--color-muted);
+  font: var(--weight-med) var(--size-mono-micro) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  cursor: pointer;
+}
+
+.ov__try:hover {
+  color: var(--color-ink);
+  border-color: var(--color-ash);
+}
+
+/* The simulator is the path a judge without an orb can actually walk, so it is
+ * offered at the weight of a choice rather than as a footnote. Overridden here
+ * rather than in worldid/selfie.css, which asks the design layer to move it. */
+.step .selfie__alt {
+  padding: 8px 12px;
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-ink);
+  font-size: var(--size-ui-sm);
+  text-decoration: none;
+}
+
+.step .selfie__alt:hover {
+  border-color: var(--color-ash);
+}
+
 /* A step that cannot run says so and stops. Never styled as a failure: an
  * unconfigured check and a broken one both leave the reader in the same place,
  * and neither is their fault. */

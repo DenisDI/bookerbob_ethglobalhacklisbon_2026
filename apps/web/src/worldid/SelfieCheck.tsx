@@ -95,6 +95,15 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState("");
   const [failure, setFailure] = useState("");
+  /**
+   * Open the widget as soon as the config it needs has landed.
+   *
+   * Switching environment is a fetch, and setState from it does not land in time
+   * for the same click to open anything. Without this the simulator button only
+   * swapped a label: a judge with no orb pressed it, watched nothing happen, and
+   * had no way to know the next step was to press the other button again.
+   */
+  const [pendingOpen, setPendingOpen] = useState(false);
 
   // A fresh request context every time the step is offered, because the one the
   // gateway signs lives five minutes.
@@ -111,6 +120,12 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
       setPhase({ name: "unconfigured" });
     }
   }, []);
+
+  useEffect(() => {
+    if (phase.name !== "ready" || !pendingOpen) return;
+    setPendingOpen(false);
+    setOpen(true);
+  }, [phase, pendingOpen]);
 
   useEffect(() => {
     if (standInRequested()) {
@@ -223,11 +238,19 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
         <button
           type="button"
           className="selfie__alt"
-          onClick={() => void loadConfig(config.environment === "staging" ? "production" : "staging")}
+          onClick={() => {
+            // Load the other environment and open the flow on the same click.
+            // One press, one thing happening: the environment swap is plumbing
+            // and nobody should have to know it happened.
+            setPendingOpen(true);
+            void loadConfig(
+              config.environment === "staging" ? "production" : "staging",
+            );
+          }}
         >
           {config.environment === "staging"
             ? "orb verified world app? verify on your phone"
-            : "no orb? verify via the simulator"}
+            : "no orb? verify via the world simulator"}
         </button>
       ) : null}
 
