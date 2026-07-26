@@ -1,7 +1,7 @@
 # BookerBob
 
 Who is behind an agent changes the terms it gets.
-
+demo https://drive.google.com/file/d/1_9tsKxgCTJcYj9FREXUT-Cp5XQ2KRBJ6/view?usp=sharing 
 A hotel-booking gateway with three trust flows, same inventory, different risk:
 
 | Flow | Who is asking | Terms |
