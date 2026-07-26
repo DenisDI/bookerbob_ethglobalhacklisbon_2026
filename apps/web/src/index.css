@@ -1136,9 +1136,19 @@ body {
   cursor: pointer;
 }
 
-.ov__try:hover {
+.ov__try:hover:not(:disabled) {
   color: var(--color-ink);
   border-color: var(--color-ash);
+}
+
+.ov__try:disabled,
+.ov__typed:has(:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ov__try:disabled {
+  cursor: not-allowed;
 }
 
 /* Two doors, stacked, each at the weight of a choice. For somebody without an

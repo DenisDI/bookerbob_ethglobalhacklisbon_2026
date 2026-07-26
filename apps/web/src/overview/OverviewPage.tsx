@@ -318,14 +318,22 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
 
               {/* The second way in, and it is not a fallback. Connecting proves
                 * the wallet is yours; typing one reads a history without asking
-                * anybody to connect anything, which is the difference between a
-                * visitor who can try this and one who closes the tab. The
-                * gateway marks a typed address `typed` rather than owned, and
-                * the reading below says so, so the honesty costs nothing. */}
+                * anybody to connect anything. A connected wallet always wins
+                * over the typed field (`address = wallet ?? typed`), so when one
+                * is plugged in we say so out loud — otherwise "read it" looks
+                * broken while the desk quietly keeps reading the connected one. */}
+              {wallet.address ? (
+                <p className="step__note reason">
+                  reading your connected wallet, not the field below. disconnect
+                  to look someone else up.
+                </p>
+              ) : null}
+
               <form
                 className="ov__typed"
                 onSubmit={(e) => {
                   e.preventDefault();
+                  if (wallet.address) return;
                   setTypedAddress(addressDraft.trim());
                 }}
               >
@@ -341,8 +349,13 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
                   spellCheck={false}
                   autoComplete="off"
                   size={22}
+                  disabled={Boolean(wallet.address)}
                 />
-                <button type="submit" className="door__go">
+                <button
+                  type="submit"
+                  className="door__go"
+                  disabled={Boolean(wallet.address)}
+                >
                   read it
                 </button>
               </form>
@@ -350,7 +363,9 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
               <button
                 type="button"
                 className="ov__try"
+                disabled={Boolean(wallet.address)}
                 onClick={() => {
+                  if (wallet.address) return;
                   setAddressDraft("vitalik.eth");
                   setTypedAddress("vitalik.eth");
                 }}
@@ -361,7 +376,9 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
               {address ? (
                 <p className="step__note mono">
                   reading {shortAddress(address)}
-                  {wallet.address ? "" : " · typed, not owned"}
+                  {wallet.address
+                    ? " · connected"
+                    : " · typed, not owned"}
                 </p>
               ) : null}
 
