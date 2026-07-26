@@ -9,6 +9,7 @@
 //   ?tier=bot|human|verified|elite → synthesises SIGNALS; real address overrides context
 
 import type { Context } from "hono";
+import type { Offer, PrebookHold } from "../types.js";
 import { lookupContext } from "../context.js";
 import { demo } from "../demo.config.js";
 import { createInventory, InventoryUnavailableError } from "../inventory/index.js";
@@ -35,6 +36,23 @@ import {
 } from "../terms.js";
 
 const inventory = createInventory();
+
+/** Trim to what this tier sees, keeping the held room in view. */
+export function withHeldRoom(
+  offers: Offer[],
+  hold: PrebookHold | null,
+  limit: number,
+): Offer[] {
+  const shown = offers.slice(0, limit);
+  const heldId = hold?.hotelId;
+  if (!heldId || shown.some((o) => o.hotelId === heldId)) return shown;
+
+  const held = offers.find((o) => o.hotelId === heldId);
+  if (!held) return shown;
+  // Last place rather than first: the list keeps its price order, and the room
+  // that was held is still in it.
+  return [...shown.slice(0, Math.max(0, limit - 1)), held];
+}
 
 function parseCredential(raw: string | undefined): boolean | null {
   if (raw === undefined || raw === "") return null;
@@ -106,7 +124,12 @@ export async function offersHandler(c: Context) {
       topN: limit,
     });
 
-    const offers = result.offers.slice(0, limit);
+    // The card says "the same room, the same rate the unbacked lane was quoted",
+    // and that is only true if the room the desk held is in the list this lane
+    // actually saw. The held room is the cheapest, so it survives any sane trim,
+    // but relying on the sort order to keep a claim honest is how the claim stops
+    // being honest.
+    const offers = withHeldRoom(result.offers, result.hold, limit);
     const hold = earnsRateLock(terms) ? result.hold : null;
 
     // Guest settlement risk → Hedera schedule. Agent only triggered the ask.

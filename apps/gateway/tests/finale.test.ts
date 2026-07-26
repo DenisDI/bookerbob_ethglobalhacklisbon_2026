@@ -50,3 +50,32 @@ test("the held hotel has the metadata the card needs", () => {
   assert.ok(shown.name, "the held hotel needs a name");
   assert.ok(shown.photoUrl, "the held hotel needs a photograph");
 });
+
+// The card's claim, in one line: "the same room, the same rate the unbacked lane
+// was quoted". That is only true if the room the desk held is in the short list
+// the lane actually saw, so the trim is not allowed to drop it.
+test("the held room survives the trim, whatever the tier sees", async () => {
+  const { withHeldRoom } = await import("../src/routes/offers.js");
+  const offers = [
+    { hotelId: "a", name: "A", stars: 3, address: null, perNightUsd: 10, totalUsd: 30, freeCancellationBefore: null, photoUrl: "a.jpg" },
+    { hotelId: "b", name: "B", stars: 3, address: null, perNightUsd: 20, totalUsd: 60, freeCancellationBefore: null, photoUrl: "b.jpg" },
+    { hotelId: "c", name: "C", stars: 3, address: null, perNightUsd: 30, totalUsd: 90, freeCancellationBefore: null, photoUrl: "c.jpg" },
+  ];
+  const hold = { partnerOrderId: "x", hotelId: "c", roomName: null, totalUsd: 90, perNightUsd: 30, freeCancellationBefore: null };
+
+  const shown = withHeldRoom(offers, hold, 2);
+  assert.equal(shown.length, 2, "the tier still sees only what it is owed");
+  assert.ok(shown.some((o) => o.hotelId === "c"), "the held room is in the list");
+
+  // The ordinary case, where it was already there, is left exactly alone.
+  assert.deepEqual(withHeldRoom(offers, { ...hold, hotelId: "a" }, 2), offers.slice(0, 2));
+  assert.deepEqual(withHeldRoom(offers, null, 2), offers.slice(0, 2));
+});
+
+test("a room nobody can name or picture is not shown", () => {
+  const result = fromFixture(QUERY);
+  for (const offer of result.offers) {
+    assert.ok(offer.name, `${offer.hotelId} has no name and would draw as "None"`);
+    assert.ok(offer.photoUrl, `${offer.hotelId} has no photograph and would draw as a grey box`);
+  }
+});

@@ -352,6 +352,7 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
               data.offers[0]
             }
             hold={data.hold}
+            bookedBy="person"
             checkin={data.checkin}
             checkout={data.checkout}
             nights={data.nights}

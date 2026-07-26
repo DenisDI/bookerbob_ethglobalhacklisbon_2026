@@ -51,6 +51,20 @@ export interface RawHotelInfo {
   images?: string[];
 }
 
+/**
+ * Offers a screen can actually render.
+ *
+ * One entry in the Lisbon snapshot came back with no metadata at all, because
+ * get_hotel_info was failing upstream during the capture, and it drew as the word
+ * "None" over an empty grey box. Dropping it is not hiding a hotel: it is
+ * declining to show a room we cannot name or picture. The supplier's own
+ * count_matching is untouched, so the count on screen still says how many
+ * properties had a room free.
+ */
+function renderable(offer: Offer): boolean {
+  return Boolean(offer.name && offer.photoUrl);
+}
+
 export function toOffers(
   raw: RawFindAndPrebook,
   info: Map<string, RawHotelInfo>,
@@ -72,7 +86,7 @@ export function toOffers(
         freeCancellationBefore: h.free_cancellation_before ?? null,
         photoUrl: meta.images?.[0] ?? null,
       },
-    ];
+    ].filter(renderable);
   });
 }
 

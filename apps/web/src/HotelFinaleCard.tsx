@@ -28,6 +28,15 @@ interface Props {
   city: string;
   /** ENS name or address of the consented wallet, when there is one. */
   bookedFor: string | null;
+  /**
+   * Who did the booking on this surface.
+   *
+   * The race is two agents and "agent for vitalik.eth" is the literal truth
+   * there. The overview is a person at a keyboard, and telling them an ai agent
+   * acted on their behalf is a small lie about the one thing the card exists to
+   * report. Same card, same data, the actor named correctly.
+   */
+  bookedBy?: "agent" | "person";
   cached: boolean;
   scheduleUrl?: string | null;
 }
@@ -57,6 +66,7 @@ export function HotelFinaleCard({
   matchingCount,
   city,
   bookedFor,
+  bookedBy = "agent",
   cached,
   scheduleUrl,
 }: Props) {
@@ -114,7 +124,13 @@ export function HotelFinaleCard({
           </div>
           <div>
             <span className="k">BOOKED BY</span>
-            <span className="v">{bookedFor ? `agent for ${bookedFor}` : "an agent"}</span>
+            <span className="v">
+              {bookedBy === "person"
+                ? (bookedFor ?? "you")
+                : bookedFor
+                  ? `agent for ${bookedFor}`
+                  : "an agent"}
+            </span>
           </div>
           <div>
             <span className="k">CARD ON FILE</span>
@@ -173,8 +189,9 @@ export function HotelFinaleCard({
         <div className="finale__quote">
           <span className="finale__quote-num mono">01</span>
           <span>
-            an ai agent just locked a real hotel room on its own. no card on file, no
-            money moved yet.
+            {bookedBy === "person"
+              ? "a real hotel room, locked at this rate. no card on file, no money moved yet."
+              : "an ai agent just locked a real hotel room on its own. no card on file, no money moved yet."}
           </span>
         </div>
       </div>
