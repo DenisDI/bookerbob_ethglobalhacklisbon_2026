@@ -1,14 +1,19 @@
-// Local five-star inventory per demo city. The city select only picks the city;
-// room lists sample randomly from this pool so Lisbon/Munich/Paris/Madrid each
-// feel distinct without another supplier round trip.
+// Local five-star inventory per demo city.
+//
+// NOT WHAT THE DEMO SHOWS. Rooms on screen come from the supplier snapshot in
+// fixtures/, through the gateway, because a list of hotels nobody quoted is a
+// list of invented hotels: the prices here are made up and the photographs are
+// stock. This pool stays for the day the booker is reachable again and the other
+// cities can be captured for real; until then the selector offers the one city
+// we actually have a supplier response for.
 
 import type { Offer } from "./types";
 
 export const CITIES = [
   { value: "lisbon", label: "Lisbon" },
-  { value: "munich", label: "Munich" },
-  { value: "paris", label: "Paris" },
-  { value: "madrid", label: "Madrid" },
+  // Munich, Paris and Madrid are captured the moment the booker answers again.
+  // Offering a city with no supplier response behind it would mean showing rooms
+  // that were never quoted, which is the one thing this surface must not do.
 ] as const;
 
 export type CityId = (typeof CITIES)[number]["value"];
@@ -35,7 +40,7 @@ function five(
 }
 
 /** Fifteen distinct five-star properties per city. */
-const BY_CITY: Record<CityId, Offer[]> = {
+const BY_CITY: Record<string, Offer[]> = {
   lisbon: [
     five("lisbon_four_seasons_roritz", "Four Seasons Hotel Ritz Lisbon", "Rua Rodrigo da Fonseca 88, Lisbon", 420, "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=640&q=80"),
     five("lisbon_pestana_palace", "Pestana Palace Lisboa", "Rua Jau 54, Lisbon", 380, "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=640&q=80"),
@@ -112,8 +117,8 @@ export function cityLabel(city: string): string {
 }
 
 export function hotelsForCity(city: string): Offer[] {
-  const key = city.trim().toLowerCase() as CityId;
-  return BY_CITY[key] ?? BY_CITY.lisbon;
+  const key = city.trim().toLowerCase();
+  return BY_CITY[key] ?? BY_CITY.lisbon ?? [];
 }
 
 /** Shuffle the city's pool and take `count` rooms (default 5). */

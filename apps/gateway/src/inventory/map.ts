@@ -98,6 +98,10 @@ export function toHold(raw: RawFindAndPrebook): PrebookHold | null {
   if (!p?.partner_order_id) return null;
   return {
     partnerOrderId: p.partner_order_id,
+    // The response prebooks the hotel in its `hotel` block. Carrying the id lets
+    // the finale show the room that was held instead of the first one listed,
+    // which is the same thing only by accident of ordering.
+    hotelId: raw.hotel?.hotel_id ?? null,
     roomName: p.room_name ?? null,
     totalUsd: p.amount_usd ?? 0,
     perNightUsd: p.per_night_usd ?? 0,

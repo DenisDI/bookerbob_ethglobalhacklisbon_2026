@@ -125,28 +125,11 @@ export function App() {
   /** Privy-authenticated wallet only — null when disconnected. */
   const [myWallet, setMyWallet] = useState<string | null>(null);
   const [city, setCity] = useState<string>(DEFAULT_CITY);
-  // Same draw both lanes share; refreshed whenever the city select changes so
-  // the lists do not stay stuck on the previous city's rooms until re-run.
-  const cityHotels = useMemo(() => pickHotels(city, 5), [city]);
-  useEffect(() => {
-    const patch = (set: React.Dispatch<React.SetStateAction<PaneState>>) => {
-      set((prev) => {
-        if (!prev.data) return prev;
-        const limit = prev.data.terms.inventory === "basic" ? 3 : 5;
-        return {
-          ...prev,
-          data: {
-            ...prev.data,
-            city,
-            offers: cityHotels.slice(0, limit),
-            matchingCount: cityHotels.length,
-          },
-        };
-      });
-    };
-    patch(setBot);
-    patch(setBacked);
-  }, [city, cityHotels]);
+  // The rooms on screen are the supplier's, from the snapshot the gateway serves.
+  // They used to be redrawn from a local pool whenever the city changed, which
+  // meant the list and the room the desk actually held were two different sets of
+  // hotels, at two different prices, with the finale card claiming they were the
+  // same quote. One source now, and it is the one that can be checked.
   // Read from the URL on first paint so a machine-view link opens on it.
   const [view, setView] = useState<View>(() => readView(window.location.search));
   // Product race uses stand-in until World wires verified.
@@ -217,9 +200,6 @@ export function App() {
         // than on a worse one.
       }
       const baseline = ledgerBaseline.current ?? 0;
-      // Prefer the live cityHotels draw so a mid-race city change and this
-      // settle land on the same five rooms.
-      const catalogOffers = cityHotels;
 
       const settle = async (
         set: React.Dispatch<React.SetStateAction<PaneState>>,
@@ -261,12 +241,12 @@ export function App() {
                 city: city.trim() || undefined,
                 accessToken: opts.accessToken,
               });
+          // The desk decides how much of its inventory a lane sees, and the
+          // rooms are the supplier's own. Trimming here rather than replacing
+          // means the room the desk held is in the list the lane was shown, at
+          // the price it was held for.
           const limit = data.terms.inventory === "basic" ? 3 : 5;
-          const merged = {
-            ...data,
-            offers: catalogOffers.slice(0, limit),
-            matchingCount: catalogOffers.length,
-          };
+          const merged = { ...data, offers: data.offers.slice(0, limit) };
           set((prev) => {
             const paid =
               !opts.credential &&
@@ -309,7 +289,7 @@ export function App() {
         }),
       ]);
     },
-    [address, city, cityHotels, credential],
+    [address, city, credential],
   );
 
   useEffect(() => writeView(view), [view]);
@@ -512,7 +492,11 @@ export function App() {
             <span className="reason">a real hold, a real scheduled settlement</span>
           </div>
           <HotelFinaleCard
-            offer={backed.data.offers[0]}
+            offer={
+              backed.data.offers.find(
+                (o) => o.hotelId === backed.data?.hold?.hotelId,
+              ) ?? backed.data.offers[0]
+            }
             hold={backed.data.hold}
             checkin={backed.data.checkin}
             checkout={backed.data.checkout}

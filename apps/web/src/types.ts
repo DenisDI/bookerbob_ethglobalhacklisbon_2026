@@ -31,6 +31,8 @@ export interface Offer {
 
 export interface PrebookHold {
   partnerOrderId: string;
+  /** Which hotel the supplier held, so the finale shows that room and not the first. */
+  hotelId?: string | null;
   roomName: string | null;
   totalUsd: number;
   perNightUsd: number;

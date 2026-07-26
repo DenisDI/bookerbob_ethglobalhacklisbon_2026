@@ -158,7 +158,9 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
   }, []);
 
   // Fresh shuffle whenever the city changes — five from a pool of fifteen ★★★★★.
-  const cityHotels = useMemo(() => pickHotels(city, 5), [city]);
+  // The strip shows what the desk actually quoted, from the supplier snapshot,
+  // rather than a local pool: a room nobody quoted has no price to show.
+  const cityHotels = data?.offers ?? [];
   const contextRead = Boolean(data?.context);
 
   // One recommendation at a time, following the biggest jump still available.
@@ -345,7 +347,10 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
             </span>
           </div>
           <HotelFinaleCard
-            offer={data.offers[0]}
+            offer={
+              data.offers.find((o) => o.hotelId === data.hold?.hotelId) ??
+              data.offers[0]
+            }
             hold={data.hold}
             checkin={data.checkin}
             checkout={data.checkout}

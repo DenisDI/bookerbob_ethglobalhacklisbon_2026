@@ -76,6 +76,12 @@ export interface RateOption {
 /** Prebook hold: the rate lock. Short-lived (minutes) upstream. */
 export interface PrebookHold {
   partnerOrderId: string;
+  /**
+   * The hotel the supplier actually held, so a screen can show that room rather
+   * than whichever offer happens to sort first. Taken from the response's own
+   * `hotel` block, never guessed.
+   */
+  hotelId: string | null;
   roomName: string | null;
   totalUsd: number;
   perNightUsd: number;
