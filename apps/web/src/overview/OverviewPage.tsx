@@ -33,6 +33,7 @@ import {
   shortAddress,
   useConsentedWallet,
 } from "../auth";
+import { ContextFile } from "../ContextFile";
 import {
   CITIES,
   DEFAULT_CITY,
@@ -363,6 +364,13 @@ export function OverviewPage({ onOpenDemo }: { onOpenDemo: () => void }) {
                   {wallet.address ? "" : " · typed, not owned"}
                 </p>
               ) : null}
+
+              {/* The reading lands under the thing that started it. It used to
+                * appear in The Graph's rung at the top of the page while the
+                * field that triggered it was down here, so people typed an
+                * address, saw nothing move, and asked whether it had read at
+                * all. Input and answer belong within a glance of each other. */}
+              {data?.context ? <ContextFile context={data.context} /> : null}
             </section>
 
             {/* The bands moved into The Graph's rung, where the sentence that

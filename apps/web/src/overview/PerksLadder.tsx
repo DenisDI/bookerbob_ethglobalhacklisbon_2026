@@ -177,18 +177,26 @@ function buildRungs(props: Props): Rung[] {
             anyone could shop for. an underwriting signal, and the reading is the
             same one the agents get in the demo.
           </p>
-          {/* The same component the race lane uses, on purpose. The Graph's
-            * output should look identical wherever it appears, and a partner
-            * whose contribution is a picture deserves to show the picture rather
-            * than have it paraphrased. */}
-          <div className="rung__card">
-            {context ? null : (
+          {/* This rung explains what a history read is. The reader's own read
+            * lives under the wallet step, next to the field that asks for it, so
+            * this never becomes a second live copy of the same card: two
+            * identical cards on one page and only one of them yours is a way to
+            * lose track of which is which. Before anything has been read, the
+            * example is the explanation. Afterwards it steps aside and points at
+            * the real one. */}
+          {context ? (
+            <p className="rung__text rung__text--quiet">
+              your own reading is further down, under the wallet step that asked
+              for it.
+            </p>
+          ) : (
+            <div className="rung__card">
               <p className="rung__example label">
-                an example reading, until a wallet of your own is connected
+                an example reading, until a history of your own is read
               </p>
-            )}
-            <ContextFile context={context ?? EXAMPLE_BANDS} />
-          </div>
+              <ContextFile context={EXAMPLE_BANDS} />
+            </div>
+          )}
         </>
       ),
     },

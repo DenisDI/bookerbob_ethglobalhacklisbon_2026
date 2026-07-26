@@ -1141,6 +1141,39 @@ body {
   border-color: var(--color-ash);
 }
 
+/* Two doors, stacked, each at the weight of a choice. For somebody without an
+ * orb the simulator is not a footnote, it is the path. Overridden here rather
+ * than in worldid/selfie.css, which asks the design layer to move it. */
+.step .selfie__ways {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.step .selfie__hint {
+  max-width: 58ch;
+  color: var(--color-faint);
+}
+
+/* Below the two real paths and quieter than both: a shortcut for somebody in a
+ * hurry, named as a stand-in so nothing reads it as a World check. */
+.step .selfie__standin {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-faint);
+  font: var(--weight-reg) var(--size-ui-sm) / 1.3 var(--font-ui);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.step .selfie__standin:hover {
+  color: var(--color-muted);
+}
+
 /* The simulator is the path a judge without an orb can actually walk, so it is
  * offered at the weight of a choice rather than as a footnote. Overridden here
  * rather than in worldid/selfie.css, which asks the design layer to move it. */

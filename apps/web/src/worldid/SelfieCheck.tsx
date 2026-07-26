@@ -14,6 +14,9 @@ import { useCallback, useEffect, useState } from "react";
 import { setWorldIdToken, worldIdExpiresAt } from "./session";
 import "./selfie.css";
 
+/** Where a judge at a desk approves the session when the QR is no use to them. */
+const SIMULATOR_URL = "https://simulator.worldcoin.org";
+
 const GATEWAY =
   (import.meta.env.VITE_LISBON2026_GATEWAY_URL as string | undefined)?.trim() ||
   (import.meta.env.DEV ? "http://localhost:3000" : "");
@@ -120,6 +123,15 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
       setPhase({ name: "unconfigured" });
     }
   }, []);
+
+  /** Load the environment this door needs, then open the flow it belongs to. */
+  const openWith = useCallback(
+    (environment: string) => {
+      setPendingOpen(true);
+      void loadConfig(environment);
+    },
+    [loadConfig],
+  );
 
   useEffect(() => {
     if (phase.name !== "ready" || !pendingOpen) return;
@@ -234,24 +246,54 @@ export function SelfieCheck({ onVerified }: { onVerified?: () => void }) {
         * "Coming soon" in the production World App, so calling it anything other
         * than a simulator would be a lie. The phone path stays for anybody whose
         * World ID is orb verified. */}
+      {/* Two doors, each with a fixed label and a fixed job. They used to be one
+        * button that rewrote its own caption on every press, so pressing "no
+        * orb?" turned it into "orb verified?" and read as a different offer
+        * appearing. Nothing here changes what anything else says. */}
       {config ? (
-        <button
-          type="button"
-          className="selfie__alt"
-          onClick={() => {
-            // Load the other environment and open the flow on the same click.
-            // One press, one thing happening: the environment swap is plumbing
-            // and nobody should have to know it happened.
-            setPendingOpen(true);
-            void loadConfig(
-              config.environment === "staging" ? "production" : "staging",
-            );
-          }}
-        >
-          {config.environment === "staging"
-            ? "orb verified world app? verify on your phone"
-            : "no orb? verify via the world simulator"}
-        </button>
+        <div className="selfie__ways">
+          <button
+            type="button"
+            className="selfie__alt"
+            onClick={() => openWith("production")}
+          >
+            have an orb? verify with your World App
+          </button>
+
+          <button
+            type="button"
+            className="selfie__alt"
+            onClick={() => openWith("staging")}
+          >
+            no orb? verify via the World simulator
+          </button>
+
+          {/* The modal shows a QR and says to scan it, which at a desk reads as
+            * "you need a phone". You do not: the simulator approves in a browser
+            * tab, and this says so before the QR can mislead anyone. */}
+          <p className="selfie__hint reason">
+            the simulator approves in a browser tab, no phone and no orb needed.
+            if the code does not pick it up, open{" "}
+            <a href={SIMULATOR_URL} target="_blank" rel="noreferrer">
+              simulator.worldcoin.org
+            </a>{" "}
+            and approve the session there.
+          </p>
+
+          {/* Quieter than the two real paths, and named for what it is. Somebody
+            * in a hurry gets past the step; nothing downstream is allowed to
+            * read it as a World check. */}
+          <button
+            type="button"
+            className="selfie__standin"
+            onClick={() => {
+              setPhase({ name: "stand_in" });
+              onVerified?.();
+            }}
+          >
+            in a hurry? use a demo stand-in instead
+          </button>
+        </div>
       ) : null}
 
       {phase.name === "failed" ? (
