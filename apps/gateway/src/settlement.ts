@@ -60,12 +60,23 @@ export async function scheduleForHold(input: {
     bySchedule.set(record.scheduleId, record);
     return record;
   } catch (err) {
-    console.error(
-      "hedera: ScheduleCreate failed",
-      err instanceof HederaScheduleError ? err.code : err,
-    );
+    const code =
+      err instanceof HederaScheduleError ? err.code : (err as Error).message;
+    console.error("hedera: ScheduleCreate failed", code);
+    // Kept for /health. A settlement that silently does not happen looks exactly
+    // like a tier that did not earn one, and the only difference lives in a log
+    // on a machine this account cannot read. Same lesson as the stand-in
+    // verifier and the unreachable RPC: make the invisible failure visible.
+    lastFailure = { code: String(code), at: new Date().toISOString() };
     return null;
   }
+}
+
+let lastFailure: { code: string; at: string } | null = null;
+
+/** Operator information: what stopped the last schedule, if anything did. */
+export function lastScheduleFailure(): { code: string; at: string } | null {
+  return lastFailure;
 }
 
 export async function settleSchedule(

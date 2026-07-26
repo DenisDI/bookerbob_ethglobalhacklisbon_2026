@@ -17,6 +17,7 @@ import {
   worldIdVerifyHandler,
 } from "./routes/world-id.js";
 import { publicOrigin } from "./public-url.js";
+import { lastScheduleFailure } from "./settlement.js";
 import { credentialMiddleware, verifierFromEnv } from "./world.js";
 import { worldChainStatus, worldRpcUrl } from "./world-chain.js";
 import { worldIdReady } from "./world-id.js";
@@ -98,6 +99,10 @@ app.get("/health", (c) =>
     // Same lesson as credentialVerifier: an integration that is quietly not
     // configured must be visible from outside, not only in a log nobody reads.
     worldId: worldIdReady() ? env.worldEnvironment : "unconfigured",
+    // Null when nothing has failed. A schedule that quietly never happens reads
+    // on screen as "not scheduled yet", which is indistinguishable from a tier
+    // that did not earn one.
+    hederaLastError: lastScheduleFailure(),
     worldChain: worldChainStatus(),
     worldRpc: worldRpcUrl(),
     x402: {
