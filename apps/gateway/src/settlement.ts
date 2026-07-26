@@ -60,8 +60,12 @@ export async function scheduleForHold(input: {
     bySchedule.set(record.scheduleId, record);
     return record;
   } catch (err) {
+    // The code alone says "create_failed" and nothing about why. The message
+    // carries Hedera's own status, which is the part worth reading.
     const code =
-      err instanceof HederaScheduleError ? err.code : (err as Error).message;
+      err instanceof HederaScheduleError
+        ? `${err.code}: ${err.message}`
+        : (err as Error).message;
     console.error("hedera: ScheduleCreate failed", code);
     // Kept for /health. A settlement that silently does not happen looks exactly
     // like a tier that did not earn one, and the only difference lives in a log

@@ -127,6 +127,28 @@ export async function createSettlementSchedule(input: {
     };
   } catch (err) {
     if (err instanceof HederaScheduleError) throw err;
+
+    // The same hold scheduled twice is not an error, it is the same schedule.
+    //
+    // The memo carries the partner order id, so a second attempt for one hold
+    // builds a byte-identical scheduled transaction and Hedera answers
+    // IDENTICAL_SCHEDULE_ALREADY_CREATED with the existing schedule in the
+    // receipt. That is exactly what we want back. It bit us because the cached
+    // snapshot has one fixed order id: the first demo run created the schedule
+    // and every run after it looked like Hedera was broken.
+    const existing = (err as { receipt?: { scheduleId?: { toString(): string } } })
+      .receipt?.scheduleId;
+    if (existing) {
+      const scheduleId = existing.toString();
+      return {
+        scheduleId,
+        scheduleUrl: scheduleUrl(scheduleId),
+        executedTransactionId: null,
+        executedTransactionUrl: null,
+        memo,
+      };
+    }
+
     throw new HederaScheduleError(
       `ScheduleCreate failed: ${(err as Error).message}`,
       "create_failed",
