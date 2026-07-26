@@ -90,10 +90,25 @@ function operatorClient(): { client: Client; env: HederaEnv } {
 export async function createSettlementSchedule(input: {
   partnerOrderId: string;
   amountHbar?: number;
+  /**
+   * Set when the network has already seen this exact schedule.
+   *
+   * A scheduled transaction is identified by its contents, and ours are built
+   * from the hold, so two runs against the same hold are byte identical and
+   * Hedera answers IDENTICAL_SCHEDULE_ALREADY_CREATED. That is correct of it and
+   * useless to us: the cached snapshot carries one order id, so the first demo
+   * run created the schedule and every run afterwards looked like Hedera was
+   * broken. A distinct memo makes this run's settlement its own schedule, which
+   * is what it is.
+   */
+  attempt?: string;
 }): Promise<SettlementSchedule> {
   const { client, env } = operatorClient();
   const amount = input.amountHbar ?? 0.01;
-  const memo = `bookerbob:${input.partnerOrderId}`.slice(0, 100);
+  const memo = `bookerbob:${input.partnerOrderId}${input.attempt ? `:${input.attempt}` : ""}`.slice(
+    0,
+    100,
+  );
   const operatorId = AccountId.fromString(env.accountId);
   const payeeId = AccountId.fromString(env.payeeAccountId);
 
@@ -136,8 +151,21 @@ export async function createSettlementSchedule(input: {
     // receipt. That is exactly what we want back. It bit us because the cached
     // snapshot has one fixed order id: the first demo run created the schedule
     // and every run after it looked like Hedera was broken.
+    const identical = /IDENTICAL_SCHEDULE_ALREADY_CREATED/.test((err as Error).message);
     const existing = (err as { receipt?: { scheduleId?: { toString(): string } } })
       .receipt?.scheduleId;
+
+    // The receipt names the existing schedule when the network chooses to send
+    // it. Measured on testnet: it does not always, and then the only way to end
+    // up with a schedule for this run is to make one that is not identical.
+    if (identical && !existing && !input.attempt) {
+      client.close();
+      return createSettlementSchedule({
+        ...input,
+        attempt: Date.now().toString(36),
+      });
+    }
+
     if (existing) {
       const scheduleId = existing.toString();
       return {
